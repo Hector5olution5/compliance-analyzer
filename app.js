@@ -584,11 +584,32 @@ function setupApiKeyModal() {
 }
 
 // ── Generate Button ───────────────────────────────────────────────────────────
+const COST_BASE = 0.091;    // ficha + PS + juguete + etiquetado base
+const COST_PER_MARKET = 0.027; // Sonnet por mercado
+
+function getSelectedMarkets() {
+  return [...document.querySelectorAll('.market-checkbox:checked')].map(cb => cb.value);
+}
+
+function updateMarketCostHint() {
+  const n = getSelectedMarkets().length;
+  const total = (COST_BASE + n * COST_PER_MARKET).toFixed(2);
+  const hint = document.getElementById('market-cost-hint');
+  if (hint) hint.textContent = n === 0
+    ? 'Selecciona al menos un mercado'
+    : `Costo estimado: ~$${total} USD · ${n} mercado${n > 1 ? 's' : ''}`;
+  const btn = document.getElementById('btn-generate');
+  if (btn) btn.disabled = n === 0;
+}
+
 function setupButtons() {
   document.getElementById('btn-generate').addEventListener('click', startGeneration);
   document.getElementById('btn-new').addEventListener('click', resetForm);
   document.getElementById('btn-history').addEventListener('click', openHistory);
   document.getElementById('btn-download-zip').addEventListener('click', downloadZip);
+  document.querySelectorAll('.market-checkbox').forEach(cb =>
+    cb.addEventListener('change', updateMarketCostHint)
+  );
 }
 
 async function startGeneration() {
@@ -598,6 +619,9 @@ async function startGeneration() {
   if (!nombre) { alert('Por favor ingresa el nombre comercial del producto.'); goToTab(1); return; }
   if (!categoria) { alert('Por favor selecciona la categoría del producto.'); goToTab(1); return; }
   if (components.length === 0) { alert('Agrega al menos un componente.'); goToTab(2); return; }
+
+  const selectedMarkets = getSelectedMarkets();
+  if (selectedMarkets.length === 0) { alert('Selecciona al menos un mercado para generar.'); return; }
 
   const formData = {
     nombre, categoria,
@@ -615,7 +639,7 @@ async function startGeneration() {
     version: document.getElementById('f-version').value.trim() || '1.0',
     fecha: new Date().toISOString().split('T')[0],
     componentes: components,
-    mercados: FIXED_MARKETS,
+    mercados: selectedMarkets,
   };
 
   document.getElementById('form-section').classList.add('hidden');
@@ -624,9 +648,9 @@ async function startGeneration() {
   generatedDocs = {};
 
   try {
-    const total = FIXED_MARKETS.length;
-    for (let i = 0; i < FIXED_MARKETS.length; i++) {
-      const key = FIXED_MARKETS[i];
+    const total = selectedMarkets.length;
+    for (let i = 0; i < selectedMarkets.length; i++) {
+      const key = selectedMarkets[i];
       updateProgress(i, total, key);
       const result = await generateForMarket(formData, key);
       generatedDocs[key] = result;
@@ -635,7 +659,7 @@ async function startGeneration() {
     await new Promise(r => setTimeout(r, 400));
     showProgress(false);
     renderResults(formData);
-    saveToHistory(formData, FIXED_MARKETS);
+    saveToHistory(formData, selectedMarkets);
   } catch (err) {
     showProgress(false);
     document.getElementById('form-section').classList.remove('hidden');

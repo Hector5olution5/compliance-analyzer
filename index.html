@@ -321,6 +321,24 @@
         <button id="btn-next" class="btn-primary">Siguiente →</button>
       </div>
       <div id="generate-section" class="hidden">
+        <div class="market-selector">
+          <p class="market-selector-label">Selecciona los mercados a generar:</p>
+          <div class="market-selector-options">
+            <label class="market-checkbox-label">
+              <input type="checkbox" class="market-checkbox" value="Internacional" checked>
+              <span class="market-checkbox-flag">🌐</span> Internacional
+            </label>
+            <label class="market-checkbox-label">
+              <input type="checkbox" class="market-checkbox" value="LATAM" checked>
+              <span class="market-checkbox-flag">🌎</span> LATAM
+            </label>
+            <label class="market-checkbox-label">
+              <input type="checkbox" class="market-checkbox" value="CAM" checked>
+              <span class="market-checkbox-flag">🌎</span> Centroamérica
+            </label>
+          </div>
+          <p id="market-cost-hint" class="market-cost-hint">Costo estimado: ~$0.17 USD</p>
+        </div>
         <button id="btn-generate" class="btn-generate">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           Generar Expedientes
