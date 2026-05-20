@@ -199,7 +199,9 @@ document.getElementById('f-ps').addEventListener('change', async (e) => {
   area.className = 'ps-upload-area loading';
   status.innerHTML = '<span style="color:#185FA5">⏳ Identificando materiales con IA...</span>';
   try {
-    const result = await parsePSWithClaude(file);
+    const result = await parsePSWithClaude(file, () => {
+      status.innerHTML = '<span style="color:#185FA5">⏳ PDF grande — extrayendo texto (puede tardar un momento)...</span>';
+    });
     if (!result.componentes || result.componentes.length === 0) {
       status.innerHTML = '<span style="color:#856404">⚠ No se encontraron materiales en el documento.</span>';
       area.className = 'ps-upload-area';
@@ -222,7 +224,7 @@ document.getElementById('f-ps').addEventListener('change', async (e) => {
   }
 });
 
-async function parsePSWithClaude(file) {
+async function parsePSWithClaude(file, onFallback) {
   const materiales = ['ABS', 'PP', 'PS', 'PVC', 'PET', 'HDPE', 'LDPE', 'Silicona', 'Acero inoxidable', 'Aluminio', 'Metal', 'Vidrio', 'Cartón', 'Papel', 'Madera', 'Nylon', 'Policarbonato', 'Otro'];
 
   const prompt = `Analiza este documento de especificaciones de materiales (PS / BOM / ficha de materiales) y extrae todos los componentes y sus materiales.
@@ -246,13 +248,40 @@ Reglas:
 - Si no puedes determinar el contacto, usa "Sin contacto"
 - Incluye TODOS los materiales o partes mencionados, aunque sean accesorios`;
 
-  const raw = await callClaudeWithDoc(file, prompt, {
-    system: 'Eres un especialista en materiales de construcción de productos (BOM/PS). Responde ÚNICAMENTE con JSON válido, sin texto adicional ni markdown.',
-    maxTokens: 1000
-  });
+  const system = 'Eres un especialista en materiales de construcción de productos (BOM/PS). Responde ÚNICAMENTE con JSON válido, sin texto adicional ni markdown.';
+
+  const MAX_DIRECT = 32 * 1024 * 1024; // 32 MB — Claude API document block limit
+  let raw;
+
+  if (file.size <= MAX_DIRECT) {
+    raw = await callClaudeWithDoc(file, prompt, { system, maxTokens: 1000 });
+  } else {
+    // File too large for document block → extract text with PDF.js and send as text
+    if (onFallback) onFallback();
+    const text = await extractPdfTextForPS(file);
+    if (!text.trim()) throw new Error('El PDF no contiene texto extraíble. Intenta con un PDF más pequeño o ingresa los componentes manualmente.');
+    raw = await callClaude(`${prompt}\n\nDOCUMENTO:\n${text}`, { system, maxTokens: 1000 });
+  }
+
   const match = raw.match(/\{[\s\S]*\}/);
   if (!match) throw new Error('No JSON');
   return JSON.parse(match[0]);
+}
+
+async function extractPdfTextForPS(file) {
+  if (typeof pdfjsLib === 'undefined') throw new Error('PDF.js no disponible');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let fullText = '';
+  const maxPages = Math.min(pdf.numPages, 30);
+  for (let i = 1; i <= maxPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    fullText += content.items.map(item => item.str).join(' ') + '\n';
+    if (fullText.length > 28000) break;
+  }
+  return fullText;
 }
 
 // ── Components Table ─────────────────────────────────────────────────────────
