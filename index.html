@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compliance Analyzer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ── Welcome Screen ───────────────────────────────────────────────────── -->
+<div id="welcome-screen">
+  <div class="wlc-bg"></div>
+  <div class="wlc-content">
+
+    <div class="wlc-logo">
+      <svg width="56" height="56" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="8" fill="white" fill-opacity=".12"/>
+        <path d="M8 10h16M8 16h10M8 22h13" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="24" cy="22" r="4" fill="#4CAF50" stroke="white" stroke-width="1.5"/>
+        <path d="M22 22l1.5 1.5 2.5-2.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <div class="wlc-badge">Herramienta interna · Confidencial</div>
+    <h1 class="wlc-title">Compliance Analyzer</h1>
+    <p class="wlc-tagline">Generación automatizada de expedientes técnicos para productos<br>promocionales en contacto con alimentos</p>
+
+    <div class="wlc-markets">
+      <div class="wlc-market">
+        <span class="wlc-market-flag">🌐</span>
+        <div>
+          <strong>Internacional</strong>
+          <span>Unión Europea · USA · Australia</span>
+        </div>
+      </div>
+      <div class="wlc-market">
+        <span class="wlc-market-flag">🌎</span>
+        <div>
+          <strong>LATAM</strong>
+          <span>Brasil · Colombia · Argentina · Perú</span>
+        </div>
+      </div>
+      <div class="wlc-market">
+        <span class="wlc-market-flag">🌎</span>
+        <div>
+          <strong>Centroamérica</strong>
+          <span>Guatemala · El Salvador · Honduras · Nicaragua · Costa Rica · Panamá</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="wlc-features">
+      <div class="wlc-feature">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        IA generativa (Claude · Anthropic)
+      </div>
+      <div class="wlc-feature">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Descarga en Word (.docx)
+      </div>
+      <div class="wlc-feature">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Generación en minutos
+      </div>
+    </div>
+
+    <button id="btn-welcome-start" class="wlc-btn">
+      Iniciar
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+
+    <p class="wlc-footer">3 expedientes técnicos · Normativa MOCA · Análisis de riesgos · Etiquetado</p>
+  </div>
+</div>
+
+<div id="file-protocol-banner" style="display:none;background:#FFF3CD;border-bottom:1px solid #FFEAA7;padding:10px 24px;font-size:13px;color:#856404;text-align:center;">
+  ⚠ Estás abriendo la app como archivo local — las funciones de IA no funcionarán así.
+  Usa la versión web: <a href="https://quality-compliance-tool.netlify.app" target="_blank" style="color:#185FA5;font-weight:600;">quality-compliance-tool.netlify.app</a>
+</div>
+
+<header id="app-header">
+  <div class="header-brand">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="8" fill="#185FA5"/>
+      <path d="M8 10h16M8 16h10M8 22h13" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="24" cy="22" r="4" fill="#4CAF50" stroke="white" stroke-width="1.5"/>
+      <path d="M22 22l1.5 1.5 2.5-2.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h1>Compliance Analyzer</h1>
+    <span class="header-badge">v3.0</span>
+  </div>
+  <div class="header-actions">
+    <button onclick="openWelcome()" class="btn-icon" title="Pantalla de inicio">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </button>
+    <button id="btn-history" class="btn-icon" title="Historial">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Historial
+    </button>
+<button id="btn-settings" class="btn-icon" title="Configuración API">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M19.07 19.07l-1.41-1.41M5.34 5.34l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- API Key Modal -->
+<div id="modal-apikey" class="modal hidden">
+  <div class="modal-box">
+    <h3>Claude API Key</h3>
+    <p class="modal-desc">Tu API key de Anthropic se guarda localmente en el navegador.</p>
+    <input id="input-apikey" type="password" placeholder="sk-ant-...">
+    <div class="modal-actions">
+      <button id="btn-save-key" class="btn-primary">Guardar</button>
+      <button id="btn-cancel-key" class="btn-secondary">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <!-- Form Card -->
+  <section id="form-section" class="card">
+    <!-- Tab Navigation -->
+    <nav id="tab-nav">
+      <button class="tab-btn active" data-tab="1">
+        <span class="tab-num">1</span><span class="tab-label">Producto</span>
+      </button>
+      <button class="tab-btn" data-tab="2">
+        <span class="tab-num">2</span><span class="tab-label">Componentes</span>
+      </button>
+      <button class="tab-btn" data-tab="3">
+        <span class="tab-num">3</span><span class="tab-label">Características</span>
+      </button>
+      <button class="tab-btn" data-tab="4">
+        <span class="tab-num">4</span><span class="tab-label">Empresa</span>
+      </button>
+    </nav>
+
+    <!-- Tab 1: Producto -->
+    <div id="tab-1" class="tab-content active">
+      <div class="form-grid">
+        <div class="field">
+          <label for="f-nombre">Nombre comercial <span class="req">*</span></label>
+          <input id="f-nombre" type="text" placeholder="Ej: Battle Cat 3D Container">
+          <p class="field-hint">Nombre con el que se comercializa el producto, tal como aparece en el catálogo o empaque.</p>
+        </div>
+        <div class="field">
+          <label for="f-categoria">Categoría del producto <span class="req">*</span></label>
+          <select id="f-categoria">
+            <option value="">Seleccionar...</option>
+            <option>Contenedor de alimentos</option>
+            <option>Vaso / Taza</option>
+            <option>Plato / Bowl</option>
+            <option>Utensilio de cocina</option>
+            <option>Envase de alimentos</option>
+            <option>Juguete con función alimentaria</option>
+            <option>Accesorio de cocina</option>
+            <option>Set de utensilios</option>
+          </select>
+          <p class="field-hint">Elige la categoría que mejor describe el uso principal del producto.</p>
+        </div>
+        <div class="field full">
+          <label for="f-descripcion">Descripción general <span class="hint">(opcional — la IA la genera si la dejas vacía)</span></label>
+          <textarea id="f-descripcion" rows="3" placeholder="Describe el producto: materiales, forma, capacidad, diseño..."></textarea>
+        </div>
+      </div>
+      <div class="upload-area" id="upload-area">
+        <input type="file" id="f-pdf" accept=".pdf" hidden>
+        <label for="f-pdf" class="upload-label">
+          <span class="upload-icon">📄</span>
+          <div>
+            <strong>Subir ficha técnica PDF</strong>
+            <span class="upload-hint">Opcional — autocompleta campos automáticamente</span>
+          </div>
+        </label>
+        <div id="pdf-status"></div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Componentes -->
+    <div id="tab-2" class="tab-content hidden">
+      <p class="tab-desc">Agrega todos los componentes del producto y su material principal. Los componentes con <strong>contacto directo</strong> determinan qué normativa MOCA aplica — incluye cada parte por separado (cuerpo, tapa, junta, decoración).</p>
+
+      <!-- PS Upload -->
+      <div class="ps-upload-area" id="ps-upload-area">
+        <input type="file" id="f-ps" accept=".pdf" hidden>
+        <label for="f-ps" class="ps-upload-label">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          <div>
+            <strong>Subir PS / Ficha de materiales</strong>
+            <span>PDF con especificaciones de materiales — la IA extrae y completa la tabla</span>
+          </div>
+        </label>
+        <div id="ps-status"></div>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="components-table">
+          <thead>
+            <tr>
+              <th>Componente</th>
+              <th>Material</th>
+              <th>Contacto con alimento</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="components-body"></tbody>
+        </table>
+      </div>
+      <button id="btn-add-component" class="btn-secondary mt-12">+ Agregar componente</button>
+      <p class="comp-hint">
+        <strong>Material:</strong> especifica el polímero, metal o material exacto.<br>
+        Ej: Polipropileno (PP) · ABS · Acero inoxidable 304 · Vidrio borosilicato · Silicona alimentaria · Aluminio 1100 · Melamine<br>
+        <strong>Contacto:</strong> "Directo" si toca el alimento, "Indirecto" si hay barrera (barniz, recubrimiento), "Sin contacto" para partes exteriores.
+      </p>
+    </div>
+
+    <!-- Tab 3: Características -->
+    <div id="tab-3" class="tab-content hidden">
+      <p class="tab-desc">Marca todas las características que apliquen al producto. Cada selección activa normativas y ensayos específicos en el expediente — es mejor marcar de más que de menos.</p>
+
+      <!-- Toy Analysis Banner -->
+      <div id="toy-analysis-banner" class="toy-banner hidden">
+        <div class="toy-banner-header">
+          <span id="toy-banner-icon"></span>
+          <strong id="toy-banner-title"></strong>
+          <span id="toy-banner-confidence"></span>
+        </div>
+        <p id="toy-banner-reason"></p>
+        <ul id="toy-banner-normas"></ul>
+      </div>
+      <button id="btn-analyze-toy" class="btn-analyze-toy">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Analizar si aplica normativa de juguete
+      </button>
+
+      <div id="characteristics-grid" class="characteristics-grid"></div>
+      <div class="form-grid mt-16">
+        <div class="field">
+          <label for="f-edad">Edad mínima recomendada</label>
+          <select id="f-edad">
+            <option value="">No aplica</option>
+            <option value="0+">0+ (Todos los públicos)</option>
+            <option value="3+">3+ años</option>
+            <option value="6+">6+ años</option>
+            <option value="12+">12+ años</option>
+            <option value="18+">18+ (Solo adultos)</option>
+          </select>
+          <p class="field-hint">Obligatoria si el producto incluye restricción de edad en el empaque o si está dirigido a niños — activa normativas adicionales.</p>
+        </div>
+        <div class="field">
+          <label for="f-capacidad">Capacidad / volumen</label>
+          <input id="f-capacidad" type="text" placeholder="Ej: 500 ml, 16 oz, 85 oz">
+          <p class="field-hint">Incluye las unidades. Si tiene múltiples tamaños, escribe el del expediente actual.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 4: Empresa -->
+    <div id="tab-4" class="tab-content hidden">
+      <div class="form-grid">
+        <div class="field">
+          <label for="f-empresa">Empresa</label>
+          <input id="f-empresa" type="text" placeholder="Ej: Acme Promotional S.A. de C.V.">
+          <p class="field-hint">Nombre legal o comercial del fabricante o importador responsable del producto.</p>
+        </div>
+        <div class="field">
+          <label for="f-responsable">Responsable técnico</label>
+          <input id="f-responsable" type="text" placeholder="Ej: María García López">
+          <p class="field-hint">Persona que firma y avala la documentación técnica ante autoridades regulatorias.</p>
+        </div>
+        <div class="field">
+          <label for="f-cargo">Cargo</label>
+          <input id="f-cargo" type="text" placeholder="Ej: Director de Calidad y Regulatorio">
+          <p class="field-hint">Cargo oficial — aparece como firmante en el expediente técnico.</p>
+        </div>
+        <div class="field">
+          <label for="f-contacto">Email / Contacto</label>
+          <input id="f-contacto" type="text" placeholder="calidad@empresa.com">
+          <p class="field-hint">Email o teléfono de contacto técnico para consultas regulatorias.</p>
+        </div>
+        <div class="field">
+          <label for="f-canal">Canal de distribución</label>
+          <input id="f-canal" type="text" placeholder="Ej: Retail, E-commerce, Cines, Promocional B2B">
+          <p class="field-hint">Canal por el que el producto llega al consumidor final.</p>
+        </div>
+        <div class="field">
+          <label for="f-publico">Público objetivo</label>
+          <input id="f-publico" type="text" placeholder="Ej: Niños 3-10 años, Adultos en general">
+          <p class="field-hint">Perfil del consumidor final — edad, contexto de uso, nivel de exposición.</p>
+        </div>
+        <div class="field">
+          <label for="f-referencia">Referencia interna</label>
+          <input id="f-referencia" type="text" placeholder="Ej: SKU-2024-BC3D, REF-001">
+          <p class="field-hint">Código SKU, número de parte o referencia interna de tu empresa para este producto.</p>
+        </div>
+        <div class="field">
+          <label for="f-version">Versión del documento</label>
+          <input id="f-version" type="text" value="1.0">
+          <p class="field-hint">Incrementa la versión cada vez que actualices el expediente (1.0, 1.1, 2.0…).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Navigation -->
+    <!-- Validation error banner -->
+    <div id="validation-banner" class="validation-banner hidden">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="validation-msg"></span>
+    </div>
+
+    <div id="form-footer">
+      <div id="form-nav">
+        <button id="btn-prev" class="btn-secondary" disabled>← Anterior</button>
+        <div id="step-dots">
+          <span class="dot active" data-step="1"></span>
+          <span class="dot" data-step="2"></span>
+          <span class="dot" data-step="3"></span>
+          <span class="dot" data-step="4"></span>
+        </div>
+        <button id="btn-next" class="btn-primary">Siguiente →</button>
+      </div>
+      <div id="generate-section" class="hidden">
+        <button id="btn-generate" class="btn-generate">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Generar Expedientes
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Progress -->
+  <section id="progress-section" class="card hidden">
+    <div class="progress-header">
+      <svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+      <span id="progress-text">Iniciando...</span>
+    </div>
+    <div class="progress-bar"><div id="progress-fill"></div></div>
+    <div id="progress-details"></div>
+  </section>
+
+  <!-- Results -->
+  <section id="results-section" class="hidden">
+    <div class="results-header">
+      <h2 id="results-title">Expedientes generados</h2>
+      <div class="results-header-actions">
+        <button id="btn-download-zip" class="btn-primary hidden">⬇ Descargar todos (ZIP)</button>
+        <button id="btn-new" class="btn-secondary">+ Nuevo expediente</button>
+      </div>
+    </div>
+    <div id="results-market-tabs" class="results-tabs"></div>
+    <div id="results-content"></div>
+    <div id="label-inline-content" class="hidden label-inline-wrap">
+      <div id="label-ctx-box"></div>
+      <div class="label-upload-zone" id="label-upload-zone">
+        <input type="file" id="label-file-input" accept=".pdf,.png,.jpg,.jpeg,.webp" style="display:none">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
+        <p class="label-upload-text">Arrastra la etiqueta aquí<br><span>PDF · PNG · JPG · WEBP</span></p>
+        <p id="label-file-name" class="label-file-name hidden"></p>
+      </div>
+      <div class="label-selector-wrap">
+        <label class="label-selector-label">País / región de distribución</label>
+        <select id="label-country-select" onchange="updateLabelRunButton()">
+          <option value="">— Selecciona país o región —</option>
+          <optgroup label="Grupos">
+            <option value="group:Internacional">Internacional 🌐 — UE · USA · Australia</option>
+            <option value="group:LATAM">LATAM 🌎 — Brasil · Colombia · Argentina · Perú</option>
+            <option value="group:CAM">Centroamérica 🌎 — 6 países</option>
+          </optgroup>
+          <optgroup label="Internacional">
+            <option value="UE">🇪🇺 Unión Europea</option>
+            <option value="USA">🇺🇸 Estados Unidos</option>
+            <option value="Australia">🇦🇺 Australia</option>
+          </optgroup>
+          <optgroup label="LATAM">
+            <option value="Brasil">🇧🇷 Brasil</option>
+            <option value="Colombia">🇨🇴 Colombia</option>
+            <option value="Argentina">🇦🇷 Argentina</option>
+            <option value="Peru">🇵🇪 Perú</option>
+          </optgroup>
+          <optgroup label="Centroamérica">
+            <option value="Guatemala">🇬🇹 Guatemala</option>
+            <option value="El Salvador">🇸🇻 El Salvador</option>
+            <option value="Honduras">🇭🇳 Honduras</option>
+            <option value="Nicaragua">🇳🇮 Nicaragua</option>
+            <option value="Costa Rica">🇨🇷 Costa Rica</option>
+            <option value="Panama">🇵🇦 Panamá</option>
+          </optgroup>
+        </select>
+      </div>
+      <button id="btn-run-label" class="btn-primary" style="width:100%;margin-top:12px" onclick="runLabelAnalysis()" disabled>
+        Analizar etiquetado →
+      </button>
+      <div id="label-status" class="label-status hidden"></div>
+      <div id="label-results" class="label-results hidden"></div>
+    </div>
+  </section>
+</main>
+
+<!-- History Drawer -->
+<div id="history-overlay" class="hidden" onclick="closeHistory()"></div>
+<aside id="history-drawer">
+  <div class="drawer-header">
+    <h2>Historial</h2>
+    <button id="btn-close-history" onclick="closeHistory()">✕</button>
+  </div>
+  <div id="history-list"><p class="empty-state">No hay expedientes generados aún.</p></div>
+</aside>
+
+<!-- Label Check Panel -->
+
+<!-- PDF.js para extracción de texto de fichas técnicas (requiere internet) -->
+<script src="env.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- Librerías locales — no requieren internet -->
+<script src="lib/docx.min.js"></script>
+<script src="lib/FileSaver.min.js"></script>
+<script src="lib/jszip.min.js"></script>
+<script src="compliance-data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
