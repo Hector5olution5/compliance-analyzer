@@ -31,7 +31,7 @@ function apiErrorMsg(err) {
   const msg = err.message || String(err);
   if (msg.includes('Failed to fetch')) {
     return window.location.protocol === 'file:'
-      ? 'Abre la app en <a href="https://quality-compliance-tool.netlify.app" target="_blank" style="color:#185FA5;font-weight:600">quality-compliance-tool.netlify.app</a> para usar las funciones de IA.'
+      ? 'Abre la app en <a href="https://hector5olution5.github.io/compliance-analyzer/" target="_blank" style="color:#185FA5;font-weight:600">hector5olution5.github.io/compliance-analyzer</a> para usar las funciones de IA.'
       : 'Error de red — verifica tu conexión a internet.';
   }
   return msg;
