@@ -693,12 +693,14 @@ async function generateForMarket(formData, mercadoKey) {
   const aiData = await callClaudeForMarket(formData, cfg, L);
   const html = buildHTMLPreview(formData, mercadoKey, cfg, L, aiData);
   let blob = null;
+  let docxError = null;
   try {
     blob = await buildDocx(formData, mercadoKey, cfg, L, aiData);
   } catch (e) {
     console.warn('Word generation failed:', e.message);
+    docxError = e.message;
   }
-  return { blob, html, aiData };
+  return { blob, html, aiData, docxError };
 }
 
 // ── Claude API ────────────────────────────────────────────────────────────────
@@ -1631,9 +1633,19 @@ ${(aiData.acciones_recomendadas || []).map(a => {
 }
 
 // ── Word Document (docx.js) ───────────────────────────────────────────────────
+function loadDocxFromCDN() {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/docx@8.2.4/build/index.umd.js';
+    s.onload = () => typeof docx !== 'undefined' ? resolve() : reject(new Error('docx no definido tras CDN'));
+    s.onerror = () => reject(new Error('No se pudo cargar docx desde CDN'));
+    document.head.appendChild(s);
+  });
+}
+
 async function buildDocx(formData, mercadoKey, cfg, L, aiData) {
   if (typeof docx === 'undefined') {
-    throw new Error('La librería para generar Word no está disponible. Verifica tu conexión a internet y recarga la página.');
+    await loadDocxFromCDN();
   }
   const { Document, Paragraph, TextRun, Table, TableRow, TableCell,
           AlignmentType, WidthType, ShadingType, BorderStyle, Packer } = docx;
@@ -1788,9 +1800,10 @@ function showResultTab(key) {
       </div>
     </div>` : '';
 
+  const { docxError } = generatedDocs[key];
   const wordBtn = blob
     ? `<button class="btn-primary" onclick="downloadDoc('${key}')">⬇ Descargar Word (.docx)</button>`
-    : `<span style="font-size:12px;color:#E53E3E">⚠ Word no disponible (sin conexión)</span>`;
+    : `<span style="font-size:12px;color:#E53E3E" title="${docxError || ''}">⚠ Word no disponible — recarga la página e intenta de nuevo</span>`;
   document.getElementById('results-content').innerHTML = `
     <div class="expediente-card">
       ${statusBar}
