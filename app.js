@@ -610,6 +610,7 @@ function setupButtons() {
   document.querySelectorAll('.market-checkbox').forEach(cb =>
     cb.addEventListener('change', updateMarketCostHint)
   );
+  updateMarketCostHint();
 }
 
 async function startGeneration() {
