@@ -867,8 +867,8 @@ function getRisks(formData, L) {
   if (c.includes('multicolor') || directo.length > 0) {
     risks.push({
       riesgo: t(
-        '[EN 71-3:2019+A1:2021 Cat. III / ASTM F963-23 Sec. 4.18 / CPSIA] Migration of heavy metals in accessible parts — Sb, As, Ba, Cd, Cr, Pb, Hg, Se',
-        '[EN 71-3:2019+A1:2021 Cat. III / ASTM F963-23 §4.18 / Codex] Migración de elementos pesados en partes accesibles — Sb, As, Ba, Cd, Cr, Pb, Hg, Se',
+        '[EN 71-3:2019+A1:2021 Cat. III / ASTM F963-23 Sec. 4.3.5 / CPSIA] Migration of heavy metals in accessible parts — Sb, As, Ba, Cd, Cr, Pb, Hg, Se',
+        '[EN 71-3:2019+A1:2021 Cat. III / ASTM F963-23 §4.3.5 / Codex] Migración de elementos pesados en partes accesibles — Sb, As, Ba, Cd, Cr, Pb, Hg, Se',
         '[EN 71-3:2019+A1:2021 / ABNT NBR NM 300-3 / INMETRO 563/2016] Migração de elementos pesados nas partes acessíveis — Sb, As, Ba, Cd, Cr, Pb, Hg, Se'),
       nivel_inicial: med,
       medida_control: t(
