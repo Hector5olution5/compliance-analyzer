@@ -536,6 +536,76 @@ const MARKETS = {
     normas_seg: { mecanico: '🇧🇷 ABNT NBR NM 300-1/INMETRO 563 | 🇨🇴 NTC 4894-1 | 🇦🇷 IRAM-ISO 8124-1 | 🇵🇪 NTP-ISO 8124-1', inflamabilidad: '🇧🇷 ABNT NBR 11136 | 🇦🇷 IRAM-ISO 8124-2 | 🇨🇴🇵🇪 ISO 8124-2', elementos: '🇧🇷 ABNT NBR NM 300-3/INMETRO 563 | 🇨🇴 NTC 4894-3 | 🇦🇷 IRAM-ISO 8124-3 | 🇵🇪 NTP-ISO 8124-3', bordes: 'ISO 8124-1 / normas nacionales equivalentes' },
   },
 
+  Mexico: {
+    nombre: 'México', idioma: 'es', flag: '🇲🇽',
+    subtitulo: 'México — COFEPRIS · SE · ANCE · NOM',
+    moca_por_material: {
+      abs: 'COFEPRIS — Lista positiva MOCA referenciando FDA 21 CFR 177 / EU Reg. 10/2011 | NOM-051-SCFI/SSA1-2010 (referencia etiquetado) | ABS en contacto con alimentos',
+      pp: 'COFEPRIS — PP en contacto con alimentos | FDA 21 CFR 177.1520 (referencia aceptada) | EU Reg. 10/2011 como referencia técnica',
+      silicona: 'COFEPRIS — Silicona grado alimenticio | FDA 21 CFR 177.2600 (referencia) | EU Reg. 10/2011',
+      acero: 'COFEPRIS — Acero inoxidable en contacto con alimentos (AISI 304/316) | FDA 21 CFR 177 (referencia)',
+    },
+    moca_base: [
+      '🇲🇽 México: COFEPRIS — Comisión Federal para la Protección contra Riesgos Sanitarios',
+      'Acuerdo por el que se determinan los aditivos y coadyuvantes en alimentos, bebidas y suplementos alimenticios (SE/COFEPRIS)',
+      'NOM-051-SCFI/SSA1-2010 — Especificaciones generales de etiquetado para alimentos y bebidas no alcohólicas',
+      'FDA 21 CFR 177 — Aceptada como referencia técnica por COFEPRIS para materiales plásticos MOCA',
+      'EU Reg. (CE) 10/2011 — Referencia técnica internacional aceptada',
+    ],
+    juguetes: [
+      '🇲🇽 NOM-015-SCFI-2007 — Juguetes: requisitos de seguridad y métodos de prueba (equivalente ISO 8124)',
+      'ISO 8124-1 (seguridad mecánica y física), ISO 8124-2 (inflamabilidad), ISO 8124-3 (metales pesados en partes accesibles)',
+      'Certificación obligatoria ante laboratorio acreditado por la EMA (Entidad Mexicana de Acreditación)',
+    ],
+    electrica: [
+      '🇲🇽 NOM-003-SCFI-2014 — Productos eléctricos: especificaciones de seguridad',
+      'NOM-019-ANCE-2016 — Seguridad de aparatos electrodomésticos y similares',
+      'Certificación ANCE (Asociación de Normalización y Certificación) — obligatoria para productos eléctricos',
+      'NOM-001-SEDE-2012 — Instalaciones eléctricas (referencia para requisitos eléctricos)',
+    ],
+    quimica_base: [
+      '🇲🇽 NOM-018-STPS-2015 — Sistema armonizado para la identificación y comunicación de peligros por sustancias químicas peligrosas',
+      'NOM-010-STPS-2014 — Agentes químicos contaminantes del ambiente laboral',
+      'COFEPRIS — Restricciones a sustancias peligrosas en productos de consumo',
+      'REACH (CE) 1907/2006 — Referencia técnica para SVHC (sustancias extremadamente preocupantes)',
+    ],
+    quimica_elec: [
+      '🇲🇽 NOM-161-SEMARNAT-2011 — Residuos de manejo especial (pilas y baterías)',
+    ],
+    etiquetado_base: [
+      'Símbolo de material en contacto con alimentos (tenedor + copa) en todas las partes con contacto directo',
+      'Etiqueta en español — obligatorio (NOM-050-SCFI-2004)',
+      'Nombre comercial del producto',
+      'Nombre y domicilio del fabricante o importador en México + RFC',
+      'País de origen ("Hecho en ___" — obligatorio NOM-050-SCFI-2004 §5.1)',
+      'Número de lote o partida de producción',
+      'Instrucciones de uso y advertencias de seguridad en español',
+      '🧸 Juguetes: advertencias de edad y seguridad — NOM-015-SCFI-2007 §8',
+      '⚡ Eléctricos: marca ANCE o NOM-003-SCFI-2014 visible en producto y empaque',
+    ],
+    doc: '🇲🇽 Declaración de Conformidad ante la SE / COFEPRIS | Dictamen de laboratorio acreditado EMA | Registro COFEPRIS si aplica',
+    retencion: '5 años (práctica recomendada — NOM-050-SCFI-2004 y regulación sanitaria COFEPRIS)',
+    ensayos_moca: {
+      abs: [
+        { ensayo: 'Migración global en simulantes alimentarios', norma: '🇲🇽 FDA 21 CFR 177 / EU Reg. 10/2011 (referencia COFEPRIS) — Límite 10 mg/dm²', frecuencia: 'Por lote / cambio de proveedor' },
+        { ensayo: 'Migración específica sustancias ABS', norma: 'FDA 21 CFR 177 / EU Reg. 10/2011 Anexo I — Aceptado por COFEPRIS', frecuencia: 'Por formulación' },
+        { ensayo: 'Metales pesados en partes accesibles (Sb, As, Ba, Cd, Cr, Pb, Hg, Se)', norma: '🇲🇽 NOM-015-SCFI-2007 / ISO 8124-3', frecuencia: 'Por formulación de pigmentos' },
+      ],
+      pp: [
+        { ensayo: 'Migración global PP en simulantes', norma: '🇲🇽 FDA 21 CFR 177.1520 / EU Reg. 10/2011 (COFEPRIS acepta como referencia)', frecuencia: 'Por lote' },
+      ],
+      silicona: [
+        { ensayo: 'Migración silicona grado alimenticio en simulantes', norma: '🇲🇽 FDA 21 CFR 177.2600 / EU Reg. 10/2011 referencia COFEPRIS', frecuencia: 'Por proveedor / formulación' },
+      ],
+    },
+    normas_seg: {
+      mecanico: '🇲🇽 NOM-015-SCFI-2007 §4 (seguridad mecánica y física) / ISO 8124-1',
+      inflamabilidad: '🇲🇽 NOM-015-SCFI-2007 §5 (inflamabilidad) / ISO 8124-2',
+      elementos: '🇲🇽 NOM-015-SCFI-2007 §6 (elementos químicos / metales pesados) / ISO 8124-3',
+      bordes: 'NOM-015-SCFI-2007 §4.4 / ISO 8124-1',
+    },
+  },
+
   CAM: {
     nombre: 'Centroamérica', idioma: 'es', flag: '🌎',
     subtitulo: 'Guatemala · El Salvador · Honduras · Nicaragua · Costa Rica · Panamá',
@@ -779,6 +849,7 @@ const DOCS_CHECKLIST = {
 const LABEL_GROUPS = {
   Internacional: { label: 'Internacional 🌐', countries: ['UE','USA','Australia'] },
   LATAM:         { label: 'LATAM 🌎',         countries: ['Brasil','Colombia','Argentina','Peru'] },
+  Mexico:        { label: 'México 🇲🇽',        countries: ['Mexico'] },
   CAM:           { label: 'Centroamérica 🌎',  countries: ['Guatemala','El Salvador','Honduras','Nicaragua','Costa Rica','Panama'] },
 };
 
@@ -881,6 +952,24 @@ const LABEL_REQUIREMENTS = {
     { id:'button_battery_warn',label:'Advertencia batería botón',                            ref:'INDECOPI / OEFA',                        cond:'button_battery'},
     { id:'noise_warning',     label:'Advertencia daño auditivo',                              ref:'NTP-ISO 8124 §4.5 / INDECOPI',          cond:'noise'         },
     { id:'string_warning',    label:'Advertencia estrangulamiento por cuerdas',               ref:'NTP-ISO 8124 §4.16 / INDECOPI',         cond:'strings'       },
+  ]},
+  Mexico: { flag:'🇲🇽', nombre:'México', reqs:[
+    { id:'country_origin',     label:'País de origen ("Hecho en ___")',                      ref:'NOM-050-SCFI-2004 §5.1',                  cond:'always'        },
+    { id:'importer',           label:'Importador/distribuidor en México (nombre + domicilio + RFC)', ref:'NOM-050-SCFI-2004 §5.2',           cond:'always'        },
+    { id:'language',           label:'Instrucciones y advertencias en español',              ref:'NOM-050-SCFI-2004 §5',                    cond:'always'        },
+    { id:'batch',              label:'Número de lote',                                       ref:'NOM-050-SCFI-2004 §5',                    cond:'always'        },
+    { id:'cofepris',           label:'Registro COFEPRIS (contacto con alimentos)',           ref:'COFEPRIS / Acuerdo SE-SSA',                cond:'food'          },
+    { id:'nom_toys',           label:'Cumplimiento NOM-015-SCFI-2007 (juguetes)',            ref:'NOM-015-SCFI-2007',                       cond:'toy'           },
+    { id:'age_warning',        label:'Advertencia de edad mínima',                           ref:'NOM-015-SCFI-2007 §8',                    cond:'children'      },
+    { id:'choking',            label:'Advertencia de asfixia (piezas pequeñas)',            ref:'NOM-015-SCFI-2007 §8.2',                  cond:'children'      },
+    { id:'ance_mark',          label:'Marca ANCE o certificación NOM-003-SCFI-2014',        ref:'NOM-003-SCFI-2014 / ANCE',                cond:'elec'          },
+    { id:'battery_disposal',   label:'Instrucción disposición de pilas/baterías',           ref:'NOM-161-SEMARNAT-2011',                   cond:'battery'       },
+    { id:'button_battery_warn',label:'Advertencia batería botón (riesgo de ingestión)',     ref:'NOM-015-SCFI-2007 / COFEPRIS',            cond:'button_battery'},
+    { id:'melamine_temp_limit',label:'Límite de temperatura y restricciones uso melamina',  ref:'COFEPRIS / FDA guidance',                 cond:'melamine'      },
+    { id:'steam_warning',      label:'Advertencia quemaduras por vapor',                    ref:'NOM-050-SCFI-2004 / PROFECO',             cond:'steam'         },
+    { id:'noise_warning',      label:'Advertencia daño auditivo (>80 dB)',                  ref:'NOM-015-SCFI-2007 §4.5',                  cond:'noise'         },
+    { id:'string_warning',     label:'Advertencia estrangulamiento por cuerdas',             ref:'NOM-015-SCFI-2007 §4.16',                cond:'strings'       },
+    { id:'barcode',            label:'Código de barras EAN',                                 ref:'GS1 México',                              cond:'always'        },
   ]},
   Guatemala:     { flag:'🇬🇹', nombre:'Guatemala',    reqs: null },
   'El Salvador': { flag:'🇸🇻', nombre:'El Salvador',  reqs: null },
