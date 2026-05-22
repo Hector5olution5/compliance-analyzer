@@ -2090,7 +2090,10 @@ function renderLabelCtxBox() {
 }
 function closeLabelPanel() {}
 
+let labelCheckSetup = false;
 function setupLabelCheck() {
+  if (labelCheckSetup) return;
+  labelCheckSetup = true;
   const zone = document.getElementById('label-upload-zone');
   const input = document.getElementById('label-file-input');
   if (!zone || !input) return;
