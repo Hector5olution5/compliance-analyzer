@@ -318,6 +318,11 @@ function syncComponents() {
   }).filter(c => c.componente || c.material);
 }
 
+function renderComponents() {
+  document.getElementById('components-body').innerHTML = '';
+  components.forEach(c => addComponentRow(c.componente || '', c.material || '', c.contacto_alimento || 'Sin contacto'));
+}
+
 document.getElementById('btn-add-component').addEventListener('click', () => addComponentRow());
 
 // ── PDF Text Extraction ───────────────────────────────────────────────────────
@@ -347,10 +352,12 @@ document.getElementById('f-pdf').addEventListener('change', async (e) => {
 
     // ── Tab 2: Componentes ──
     if (f.componentes && Array.isArray(f.componentes) && f.componentes.length > 0 && components.length === 0) {
+      document.getElementById('components-body').innerHTML = '';
       for (const c of f.componentes) {
-        components.push({ nombre: c.nombre || '', material: c.material || '', contacto: c.contacto === 'Directo' ? 'Directo' : 'Sin contacto' });
+        const contacto = CONTACT_OPTS.includes(c.contacto) ? c.contacto : 'Sin contacto';
+        addComponentRow(c.nombre || '', c.material || '', contacto);
       }
-      renderComponents();
+      syncComponents();
       filled++;
     }
 
