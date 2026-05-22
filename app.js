@@ -1696,6 +1696,8 @@ async function buildDocx(formData, mercadoKey, cfg, L, aiData) {
 
   const threeColTable = (h1, h2, h3, rows) => new Table({ rows: [new TableRow({ children: [hdrCell(h1, 34), hdrCell(h2, 33), hdrCell(h3, 33)], tableHeader: true }), ...rows.map(([a, b, c], i) => new TableRow({ children: [dataCell(a, i % 2 ? 'F8F9FA' : null), dataCell(b, i % 2 ? 'F8F9FA' : null), dataCell(c, i % 2 ? 'F8F9FA' : null)] }))], width: tableWidth });
 
+  const fourColTable = (h1, h2, h3, h4, rows) => new Table({ rows: [new TableRow({ children: [hdrCell(h1, 15), hdrCell(h2, 20), hdrCell(h3, 30), hdrCell(h4, 35)], tableHeader: true }), ...rows.map(([a, b, c, d], i) => new TableRow({ children: [dataCell(a, i % 2 ? 'F8F9FA' : null, 15), dataCell(b, i % 2 ? 'F8F9FA' : null, 20), dataCell(c, i % 2 ? 'F8F9FA' : null, 30), dataCell(d, i % 2 ? 'F8F9FA' : null, 35)] }))], width: tableWidth });
+
   const nivelBg = n => (n.includes('ALT') || n === 'HIGH') ? RED_BG : (n.includes('MED') || n === 'MEDIUM') ? AMB_BG : GRN_BG;
   const contactFn = c => cfg.idioma === 'en' ? (c === 'Directo' ? 'Direct' : c === 'Indirecto' ? 'Indirect' : 'No contact') : cfg.idioma === 'pt' ? (c === 'Directo' ? 'Direto' : c === 'Indirecto' ? 'Indireto' : 'Sem contato') : c;
 
@@ -1750,7 +1752,7 @@ async function buildDocx(formData, mercadoKey, cfg, L, aiData) {
     new Table({rows:[new TableRow({children:[hdrCell(L.prioridad,12),hdrCell(L.accion,40),hdrCell(L.responsable,24),hdrCell(L.plazo,24)],tableHeader:true}),...(aiData.acciones_recomendadas||[]).map((a,i)=>{const bg=a.prioridad?.includes('ALT')||a.prioridad==='HIGH'?RED_BG:a.prioridad?.includes('MED')||a.prioridad==='MEDIUM'?AMB_BG:GRN_BG;return new TableRow({children:[new TableCell({children:[new Paragraph({children:[new TextRun({text:a.prioridad,font:'Calibri',size:20,bold:true})],spacing:{before:60,after:60}})],shading:{type:ShadingType.SOLID,color:bg},borders}),dataCell(a.accion,i%2?'F8F9FA':null,40),dataCell(a.responsable,i%2?'F8F9FA':null,24),dataCell(a.plazo,i%2?'F8F9FA':null,24)]})})],width:tableWidth}),
     // Section 10
     sec(10, L.s10),
-    threeColTable(L.version,L.fecha,L.autor,[[version,fecha,formData.responsable||pd]]),
+    fourColTable(L.version,L.fecha,L.autor,L.cambios,[[version,fecha,formData.responsable||pd,cfg.idioma==='en'?'Initial version':cfg.idioma==='pt'?'Versão inicial':'Versión inicial']]),
     // Legal note
     new Paragraph({children:[new TextRun({text:legalNote,font:'Calibri',size:16,italics:true,color:GRAY})],spacing:{before:200,after:80},border:{left:{style:BorderStyle.SINGLE,size:4,color:BLUE}},indent:{left:200}}),
     // Section 11
