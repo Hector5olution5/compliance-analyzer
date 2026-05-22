@@ -1845,7 +1845,7 @@ async function downloadZip() {
   const zip = new JSZip();
   const ts = new Date().toISOString().split('T')[0];
   for (const [key, { blob }] of Object.entries(generatedDocs)) {
-    zip.file(`ExpedienteTecnico_${key}_${ts}.docx`, blob);
+    if (blob) zip.file(`ExpedienteTecnico_${key}_${ts}.docx`, blob);
   }
   const zipBlob = await zip.generateAsync({ type: 'blob' });
   saveAs(zipBlob, `Expedientes_${ts}.zip`);
