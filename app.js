@@ -1196,7 +1196,7 @@ function getContextualWarnings(formData, cfg, L, aiData) {
 
   // ── Niños / juguete ──
   if (has('ninos') || has('juguete')) {
-    const edad = formData.edad_minima;
+    const edad = formData.edad;
     if (has('partes_pequenas')) add(
       `CHOKING HAZARD — Small parts.${edad ? ` Not suitable for children under ${edad}.` : ' Not suitable for children under 3 years.'}`,
       `PELIGRO DE ASFIXIA — Contiene piezas pequeñas.${edad ? ` No apto para menores de ${edad}.` : ' No apto para menores de 3 años.'}`,
