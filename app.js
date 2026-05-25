@@ -400,20 +400,6 @@ document.getElementById('f-pdf').addEventListener('change', async (e) => {
   }
 });
 
-async function extractPdfTextWithPdfJs(file) {
-  if (typeof pdfjsLib === 'undefined') throw new Error('PDF.js no disponible');
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  let fullText = '';
-  const maxPages = Math.min(pdf.numPages, 8);
-  for (let i = 1; i <= maxPages; i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    fullText += content.items.map(item => item.str).join(' ') + '\n';
-  }
-  return fullText;
-}
 
 async function parsePdfFieldsWithClaude(file) {
   const categorias = ['Contenedor de alimentos','Vaso / Taza','Plato / Bowl','Utensilio de cocina','Envase de alimentos','Juguete con función alimentaria','Accesorio de cocina','Set de utensilios'];
@@ -796,7 +782,7 @@ async function callClaudeForMarket(formData, cfg, L) {
     ? 'Você é um especialista em conformidade para produtos promocionais em contato com alimentos. Escreva TODOS os valores de texto em Português do Brasil. Gere apenas JSON válido, sem markdown, sem texto extra.'
     : 'Eres un experto en cumplimiento normativo para productos promocionales en contacto con alimentos. Escribe TODOS los valores de texto en español. Genera solo JSON válido, sin markdown, sin texto extra.';
 
-  const prompt = `${t('Market','Market','Mercado')}: ${cfg.nombre}. ${t('Response language: English.','Response language: English.','Idioma de respuesta: Português do Brasil.')}
+  const prompt = `${t('Mercado','Market','Mercado')}: ${cfg.nombre}. ${t('Idioma de respuesta: Español.','Response language: English.','Idioma de resposta: Português do Brasil.')}
 
 ${t('PRODUCT','PRODUCT','PRODUTO')}: ${formData.nombre} | ${translateCategory(formData.categoria, cfg.idioma)}
 ${formData.descripcion ? t('PROVIDED DESCRIPTION: ','PROVIDED DESCRIPTION: ','DESCRIÇÃO FORNECIDA: ') + formData.descripcion : ''}
@@ -816,7 +802,8 @@ ${t('IMPORTANT for advertencias_adicionales: generate 1-3 warnings SPECIFIC to t
     let clean = text;
     if (clean.includes('```')) { const parts = clean.split('```'); clean = parts[1] || parts[0]; if (clean.startsWith('json')) clean = clean.slice(4); }
     return JSON.parse(clean.trim());
-  } catch {
+  } catch (err) {
+    console.warn('[callClaudeForMarket] AI call failed, using fallback data:', err);
     return {
       descripcion_general: formData.descripcion || `${formData.nombre} — ${formData.categoria}`,
       uso_previsto: cfg.idioma === 'en' ? 'Intended for food storage and serving.' : cfg.idioma === 'pt' ? 'Destinado ao armazenamento e serviço de alimentos.' : 'Destinado al almacenamiento y servicio de alimentos.',
@@ -1686,11 +1673,12 @@ async function buildDocx(formData, mercadoKey, cfg, L, aiData) {
 
   const hdrCell = (text, widthPct) => new TableCell({ children: [new Paragraph({ children: [new TextRun({ text, font: 'Calibri', size: 18, color: WHITE, bold: true })], spacing: { before: 60, after: 60 } })], shading: { type: ShadingType.SOLID, color: HDR_BG }, width: { size: widthPct, type: WidthType.PERCENTAGE }, borders });
 
-  const dataCell = (text, bg, widthPct) => {
-    const cell = new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: String(text || ''), font: 'Calibri', size: 20, color: '333333' })], spacing: { before: 60, after: 60 } })], width: widthPct ? { size: widthPct, type: WidthType.PERCENTAGE } : undefined, borders });
-    if (bg) cell.options = cell.options || {};
-    return bg ? new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: String(text || ''), font: 'Calibri', size: 20, color: '333333' })], spacing: { before: 60, after: 60 } })], shading: { type: ShadingType.SOLID, color: bg }, width: widthPct ? { size: widthPct, type: WidthType.PERCENTAGE } : undefined, borders }) : new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: String(text || ''), font: 'Calibri', size: 20, color: '333333' })], spacing: { before: 60, after: 60 } })], width: widthPct ? { size: widthPct, type: WidthType.PERCENTAGE } : undefined, borders });
-  };
+  const dataCell = (text, bg, widthPct) => new TableCell({
+    children: [new Paragraph({ children: [new TextRun({ text: String(text || ''), font: 'Calibri', size: 20, color: '333333' })], spacing: { before: 60, after: 60 } })],
+    ...(bg ? { shading: { type: ShadingType.SOLID, color: bg } } : {}),
+    ...(widthPct ? { width: { size: widthPct, type: WidthType.PERCENTAGE } } : {}),
+    borders,
+  });
 
   const twoColTable = (hdr1, hdr2, rows) => new Table({ rows: [new TableRow({ children: [hdrCell(hdr1, 35), hdrCell(hdr2, 65)], tableHeader: true }), ...rows.map(([a, b], i) => new TableRow({ children: [dataCell(a, i % 2 ? 'F8F9FA' : null, 35), dataCell(b, i % 2 ? 'F8F9FA' : null, 65)] }))], width: tableWidth });
 
@@ -1946,11 +1934,11 @@ function deleteHistoryItem(index) {
 
 function seedDemoHistory() {
   const demos = [
-    { nombre: 'Battle Cat 3D Container', categoria: 'Contenedor de alimentos', mercados: FIXED_MARKETS, fecha: '12/05/2026', ts: Date.now() - 86400000 * 3, status: 'en_revision', nota: 'Pendiente validar migración ABS con proveedor.' },
+    { nombre: 'Battle Cat 3D Container', categoria: 'Contenedor de alimentos', mercados: ['Internacional', 'LATAM', 'Mexico', 'CAM'], fecha: '12/05/2026', ts: Date.now() - 86400000 * 3, status: 'en_revision', nota: 'Pendiente validar migración ABS con proveedor.' },
     { nombre: 'Happy Meal Tray Set', categoria: 'Set de utensilios', mercados: FIXED_MARKETS, fecha: '02/05/2026', ts: Date.now() - 86400000 * 13, status: 'aprobado', nota: '' },
-    { nombre: 'Dino Bowl Kids', categoria: 'Plato / Bowl', mercados: FIXED_MARKETS, fecha: '28/04/2026', ts: Date.now() - 86400000 * 17, status: 'borrador', nota: 'Falta confirmar edad mínima con equipo de diseño.' },
+    { nombre: 'Dino Bowl Kids', categoria: 'Plato / Bowl', mercados: ['Internacional', 'LATAM', 'Mexico', 'CAM'], fecha: '28/04/2026', ts: Date.now() - 86400000 * 17, status: 'borrador', nota: 'Falta confirmar edad mínima con equipo de diseño.' },
     { nombre: 'Thermo Cup Pro 500ml', categoria: 'Vaso / Taza', mercados: FIXED_MARKETS, fecha: '10/04/2026', ts: Date.now() - 86400000 * 35, status: 'aprobado', nota: '' },
-    { nombre: 'Kids Lunchbox Adventure', categoria: 'Contenedor de alimentos', mercados: FIXED_MARKETS, fecha: '20/03/2026', ts: Date.now() - 86400000 * 56, status: 'borrador', nota: '' },
+    { nombre: 'Kids Lunchbox Adventure', categoria: 'Contenedor de alimentos', mercados: ['Internacional', 'LATAM', 'Mexico', 'CAM'], fecha: '20/03/2026', ts: Date.now() - 86400000 * 56, status: 'borrador', nota: '' },
   ];
   localStorage.setItem(HIST_KEY, JSON.stringify(demos));
   renderHistory();
@@ -2086,8 +2074,6 @@ function resetForm() {
 // ── Label Check Panel ─────────────────────────────────────────────────────────
 let labelPdfText = '';
 
-function openLabelPanel() {}
-
 function renderLabelCtxBox() {
   const box = document.getElementById('label-ctx-box');
   if (!box) return;
@@ -2127,7 +2113,6 @@ function renderLabelCtxBox() {
     <div class="label-ctx-note">Solo se verificarán los requisitos aplicables a este producto.</div>
   </div>`;
 }
-function closeLabelPanel() {}
 
 let labelCheckSetup = false;
 function setupLabelCheck() {
