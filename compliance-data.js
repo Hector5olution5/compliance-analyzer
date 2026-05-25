@@ -22,7 +22,7 @@ const MARKETS = {
       hdpe: 'Regulation (EU) 10/2011 — HDPE (high-density polyethylene) in food contact | Annex I monomer limits',
       ldpe: 'Regulation (EU) 10/2011 — LDPE (low-density polyethylene) in food contact | Annex I monomer limits',
       pvc: 'Regulation (EU) 10/2011 — PVC in food contact — VCM limit < 0.01 mg/kg food | REACH for phthalates restriction',
-      policarbonato: 'Regulation (EU) 2011/10 + Commission Reg. (EU) 2018/213 — BPA migration limit 0.05 mg/kg food — restriction in children\'s articles',
+      policarbonato: 'Regulation (EU) 10/2011 + Commission Reg. (EU) 2018/213 — BPA migration limit 0.05 mg/kg food — restriction in children\'s articles',
     },
     moca_base: [
       'Regulation (EC) 1935/2004 — General framework for materials in contact with food',
@@ -355,45 +355,6 @@ const MARKETS = {
       pp: [{ ensayo: 'Migración global PP', norma: 'NTP 399.165', frecuencia: 'Por lote' }],
     },
     normas_seg: { mecanico: 'NTP-ISO 8124-1', inflamabilidad: 'NTP-ISO 8124-2', elementos: 'NTP-ISO 8124-3', bordes: 'NTP-ISO 8124-1' },
-  },
-
-  Centroamerica: {
-    nombre: 'Centroamerica', idioma: 'es', flag: '🌎',
-    moca_por_material: {
-      abs: 'RTCA 67.01.33:06 — Materiales plásticos en contacto con alimentos — ABS',
-      pp: 'RTCA 67.01.33:06 — PP en contacto con alimentos',
-      silicona: 'RTCA 67.01.33:06 — Materiales siliconados en contacto con alimentos',
-    },
-    moca_base: [
-      'RTCA 67.01.33:06 — Reglamento Técnico Centroamericano — Materiales en contacto con alimentos',
-      'Codex Alimentarius — Normas de referencia base para MOCA',
-      'EU Reg. 10/2011 — Referencia técnica aceptada regionalmente',
-    ],
-    juguetes: [
-      'RTCA 65.01.53:08 — Reglamento Técnico Centroamericano — Seguridad de juguetes',
-      'ISO 8124 (partes 1, 2, 3) — Referencia técnica',
-    ],
-    electrica: ['Normativas nacionales de cada país de Centroamérica', 'IEC 62368-1 — Referencia técnica internacional'],
-    quimica_base: ['RTCA 67.04.54:10 — Límites de contaminantes en alimentos', 'REACH (CE) 1907/2006 — Referencia técnica para SVHC'],
-    quimica_elec: [],
-    etiquetado_base: [
-      'Símbolo de material en contacto con alimentos (tenedor + copa) en todas las partes con contacto directo',
-      'Etiqueta en español — obligatorio en todos los países de Centroamérica',
-      'Nombre del producto y del fabricante o importador local',
-      'País de origen',
-      'Instrucciones de uso y advertencias de seguridad',
-      'Registro sanitario nacional según el país de distribución',
-    ],
-    doc: 'Declaración de Conformidad del fabricante con RTCAs aplicables',
-    retencion: '5 años (práctica recomendada regional)',
-    ensayos_moca: {
-      abs: [
-        { ensayo: 'Migración global en simulantes (metodología RTCA / Codex)', norma: 'RTCA 67.01.33:06 / Codex Alimentarius — Límite referencia EU 10 mg/dm²', frecuencia: 'Por lote / cambio de proveedor' },
-        { ensayo: 'Migración específica sustancias ABS', norma: 'RTCA 67.01.33:06 / EU Reg. 10/2011 Anexo I como referencia', frecuencia: 'Por formulación' },
-      ],
-      pp: [{ ensayo: 'Migración global PP', norma: 'RTCA 67.01.33:06', frecuencia: 'Por lote' }],
-    },
-    normas_seg: { mecanico: 'RTCA 65.01.53:08 / ISO 8124-1', inflamabilidad: 'RTCA 65.01.53:08 / EN 71-2', elementos: 'RTCA 65.01.53:08 / EN 71-3', bordes: 'RTCA 65.01.53:08 / ISO 8124-1' },
   },
 
   // ── Consolidated expediente markets ─────────────────────────────────────────

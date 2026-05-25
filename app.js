@@ -475,7 +475,7 @@ async function runToyAnalysis() {
   const descripcion = document.getElementById('f-descripcion').value.trim() || '';
   const edad = document.getElementById('f-edad').value || '';
   const caracteristicas = getCharacteristics();
-  const compList = components.map(c => `${c.nombre} (${c.material})`).join(', ') || '';
+  const compList = components.map(c => `${c.componente} (${c.material})`).join(', ') || '';
 
   try {
     const result = await callToyAnalysisClaude({ nombre, categoria, descripcion, edad, caracteristicas, compList });
