@@ -608,7 +608,7 @@ async function startGeneration() {
   const categoria = document.getElementById('f-categoria').value;
   if (!nombre) { alert('Por favor ingresa el nombre comercial del producto.'); goToTab(1); return; }
   if (!categoria) { alert('Por favor selecciona la categoría del producto.'); goToTab(1); return; }
-  if (components.length === 0) { alert('Agrega al menos un componente.'); goToTab(2); return; }
+  if (components.filter(c => c.componente).length === 0) { alert('Agrega al menos un componente.'); goToTab(2); return; }
 
   const selectedMarkets = getSelectedMarkets();
   if (selectedMarkets.length === 0) { alert('Selecciona al menos un mercado para generar.'); return; }
@@ -1828,13 +1828,22 @@ function printPreview() {
 }
 
 async function downloadZip() {
-  const zip = new JSZip();
-  const ts = new Date().toISOString().split('T')[0];
-  for (const [key, { blob }] of Object.entries(generatedDocs)) {
-    if (blob) zip.file(`ExpedienteTecnico_${key}_${ts}.docx`, blob);
+  const btn = document.getElementById('btn-download-zip');
+  const origText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '⏳ Generando ZIP…';
+  try {
+    const zip = new JSZip();
+    const ts = new Date().toISOString().split('T')[0];
+    for (const [key, { blob }] of Object.entries(generatedDocs)) {
+      if (blob) zip.file(`ExpedienteTecnico_${key}_${ts}.docx`, blob);
+    }
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    saveAs(zipBlob, `Expedientes_${ts}.zip`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = origText;
   }
-  const zipBlob = await zip.generateAsync({ type: 'blob' });
-  saveAs(zipBlob, `Expedientes_${ts}.zip`);
 }
 
 // ── History ───────────────────────────────────────────────────────────────────
@@ -2391,7 +2400,10 @@ Return ONLY valid JSON (no markdown):
 ${jsonSchema}`;
   }
 
-  const labelSystemMsg = 'Eres un experto en etiquetado y cumplimiento de productos. Responde ÚNICAMENTE con JSON válido. El campo "evidence" debe contener la cita textual del documento o una descripción breve en español. Sin markdown, sin texto extra.';
+  const isEnGroup = groupKey === 'Internacional';
+  const labelSystemMsg = isEnGroup
+    ? 'You are a product labeling and compliance expert. Respond ONLY with valid JSON. The "evidence" field must contain an exact quote from the document or a brief description of where the element was found. No markdown, no extra text.'
+    : 'Eres un experto en etiquetado y cumplimiento de productos. Responde ÚNICAMENTE con JSON válido. El campo "evidence" debe contener la cita textual del documento o una descripción breve. Sin markdown, sin texto extra.';
 
   try {
     const raw = isPdfFile
