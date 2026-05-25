@@ -181,10 +181,6 @@ function renderCharacteristics() {
   });
 }
 
-function toggleChar(el, checked) {
-  el.classList.toggle('selected', checked);
-}
-
 function getCharacteristics() {
   return [...document.querySelectorAll('.char-option.selected')]
     .map(el => el.querySelector('input').value);
@@ -351,7 +347,7 @@ document.getElementById('f-pdf').addEventListener('change', async (e) => {
     }
 
     // ── Tab 2: Componentes ──
-    if (f.componentes && Array.isArray(f.componentes) && f.componentes.length > 0 && components.length === 0) {
+    if (f.componentes && Array.isArray(f.componentes) && f.componentes.length > 0 && components.filter(c => c.componente).length === 0) {
       document.getElementById('components-body').innerHTML = '';
       for (const c of f.componentes) {
         const contacto = CONTACT_OPTS.includes(c.contacto) ? c.contacto : 'Sin contacto';
@@ -412,7 +408,7 @@ Claves del JSON (usa null si no encuentras el valor):
 - "categoria": EXACTAMENTE una de estas: ${categorias.join(' | ')}
 - "descripcion": descripción breve del producto (máx 350 chars)
 - "capacidad": capacidad/volumen como string (ej: "500 ml", "16 oz") o null
-- "componentes": array de {nombre, material, contacto} donde contacto = "Directo" o "Sin contacto"
+- "componentes": array de {nombre, material, contacto} donde contacto = "Directo", "Indirecto" o "Sin contacto"
 - "caracteristicas": array con los IDs aplicables de esta lista: ${charIds.join(', ')}
   - disenio_3d = tiene figura o diseño 3D
   - bordes_filosos = tiene bordes o puntas filosas
@@ -1259,7 +1255,7 @@ function getContextualWarnings(formData, cfg, L, aiData) {
     'Contém componentes de vidro. Manusear com cuidado para evitar quebras. Manter fora do alcance de crianças.'
   );
 
-  if (hasMat('ceramic', 'ceramic', 'cerámica', 'ceramica', 'porcelana', 'porcelain')) add(
+  if (hasMat('ceramic', 'cerámica', 'ceramica', 'porcelana', 'porcelain')) add(
     'Ceramic/porcelain product. Do not use in microwave if product has metallic decoration. Handle with care to avoid chipping.',
     'Producto cerámico/porcelana. No usar en microondas si el producto tiene decoración metálica. Manipular con cuidado para evitar astillado.',
     'Produto cerâmico/porcelana. Não usar em micro-ondas se o produto tiver decoração metálica. Manusear com cuidado para evitar lascamento.'
@@ -1863,9 +1859,9 @@ function saveToHistory(formData, markets) {
   try {
     localStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(0, 10)));
   } catch (e) {
-    // localStorage full: save without previews
+    // localStorage full: retry without previews
     hist[0].previews = {};
-    localStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(0, 10)));
+    try { localStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(0, 10))); } catch (_) {}
   }
   renderHistory();
 }
@@ -2243,8 +2239,9 @@ async function runLabelAnalysis() {
 function buildLabelContext() {
   const nombre    = document.getElementById('f-nombre')?.value || '';
   const categoria = document.getElementById('f-categoria')?.value || '';
-  const chars     = typeof getCharacteristics === 'function' ? getCharacteristics() : [];
-  const comps     = typeof syncComponents === 'function' ? (() => { syncComponents(); return components; })() : [];
+  const chars     = getCharacteristics();
+  syncComponents();
+  const comps     = components;
   const hasChar   = id => chars.includes(id);
   const hasMat    = kw => comps.some(c => c.material?.toLowerCase().includes(kw.toLowerCase()));
   return {
