@@ -2040,10 +2040,47 @@ function closeHistory() {
 
 // ── Reset Form ────────────────────────────────────────────────────────────────
 function resetForm() {
+  // ── Tab 1 ──
+  ['f-nombre','f-descripcion'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const cat = document.getElementById('f-categoria'); if (cat) cat.value = '';
+  document.getElementById('pdf-status').innerHTML = '';
+  document.getElementById('upload-area').className = 'upload-area';
+
+  // ── Tab 2 ──
+  document.getElementById('components-body').innerHTML = '';
+  components = [];
+  addComponentRow();
+  document.getElementById('ps-status').innerHTML = '';
+  document.getElementById('ps-upload-area').className = 'ps-upload-area';
+
+  // ── Tab 3 ──
+  document.querySelectorAll('.char-option input').forEach(cb => { cb.checked = false; cb.closest('.char-option').classList.remove('selected'); });
+  ['f-edad','f-capacidad'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const banner = document.getElementById('toy-analysis-banner');
+  if (banner) banner.className = 'toy-banner hidden';
+  const toyBtn = document.getElementById('btn-analyze-toy');
+  if (toyBtn) toyBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Analizar si aplica normativa de juguete';
+
+  // ── Tab 4 ──
+  ['f-empresa','f-responsable','f-cargo','f-contacto','f-canal','f-publico','f-referencia'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const ver = document.getElementById('f-version'); if (ver) ver.value = '1.0';
+
+  // ── Label panel ──
+  labelPdfText = '';
+  labelFile = null;
+  labelFileReady = false;
+  const fn = document.getElementById('label-file-name'); if (fn) { fn.textContent = ''; fn.classList.add('hidden'); }
+  const ls = document.getElementById('label-status'); if (ls) { ls.classList.add('hidden'); ls.textContent = ''; }
+  const lr = document.getElementById('label-results'); if (lr) { lr.classList.add('hidden'); lr.innerHTML = ''; }
+  const lcs = document.getElementById('label-country-select'); if (lcs) lcs.value = '';
+  updateLabelRunButton();
+
+  // ── State ──
+  generatedDocs = {};
+  currentHistoryIndex = null;
   document.getElementById('results-section').classList.add('hidden');
   document.getElementById('form-section').classList.remove('hidden');
-  generatedDocs = {};
-  goToTab(1);
+  goToTab(1, true);
 }
 
 // ── Label Check Panel ─────────────────────────────────────────────────────────
