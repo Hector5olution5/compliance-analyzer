@@ -1487,7 +1487,7 @@ function buildHTMLPreview(formData, mercadoKey, cfg, L, aiData) {
   const legalNote = cfg.idioma === 'en'
     ? `LEGAL NOTE: This technical file must be retained for ${cfg.retencion} and be available to market surveillance authorities upon request. All tests must be carried out by ISO 17025 accredited laboratories.`
     : cfg.idioma === 'pt'
-    ? `NOTA LEGAL: Este dossiê técnico deve ser conservado por ${cfg.retencion} e estar disponível para as autoridades de vigilancia de mercado quando solicitado. Os ensaios devem ser realizados por laboratórios acreditados ISO 17025.`
+    ? `NOTA LEGAL: Este dossiê técnico deve ser conservado por ${cfg.retencion} e estar disponível para as autoridades de vigilância de mercado quando solicitado. Os ensaios devem ser realizados por laboratórios acreditados ISO 17025.`
     : `NOTA LEGAL: Este expediente técnico debe conservarse durante ${cfg.retencion} y estar disponible para las autoridades de vigilancia de mercado cuando sea requerido. Los ensayos deben ser realizados por laboratorios acreditados ISO 17025.`;
 
   const pd = L.por_definir;
@@ -1690,7 +1690,7 @@ async function buildDocx(formData, mercadoKey, cfg, L, aiData) {
   const legalNote = cfg.idioma === 'en'
     ? `LEGAL NOTE: This technical file must be retained for ${cfg.retencion} and be available to market surveillance authorities upon request. All tests must be carried out by ISO 17025 accredited laboratories.`
     : cfg.idioma === 'pt'
-    ? `NOTA LEGAL: Este dossiê técnico deve ser conservado por ${cfg.retencion} e estar disponível para as autoridades de vigilancia de mercado quando solicitado. Os ensaios devem ser realizados por laboratórios acreditados ISO 17025.`
+    ? `NOTA LEGAL: Este dossiê técnico deve ser conservado por ${cfg.retencion} e estar disponível para as autoridades de vigilância de mercado quando solicitado. Os ensaios devem ser realizados por laboratórios acreditados ISO 17025.`
     : `NOTA LEGAL: Este expediente técnico debe conservarse durante ${cfg.retencion} y estar disponible para las autoridades de vigilancia de mercado. Los ensayos deben ser realizados por laboratorios acreditados ISO 17025.`;
 
   const children = [
@@ -1751,7 +1751,8 @@ async function buildDocx(formData, mercadoKey, cfg, L, aiData) {
 // ── Render Results ────────────────────────────────────────────────────────────
 function renderResults(formData) {
   document.getElementById('results-section').classList.remove('hidden');
-  document.getElementById('results-title').textContent = `${formData.nombre} — ${Object.keys(generatedDocs).length} ${Object.keys(generatedDocs).length === 1 ? 'expediente' : 'expedientes'} generados`;
+  const _n = Object.keys(generatedDocs).length;
+  document.getElementById('results-title').textContent = `${formData.nombre} — ${_n} ${_n === 1 ? 'expediente generado' : 'expedientes generados'}`;
   const keys = Object.keys(generatedDocs);
   const tabsEl = document.getElementById('results-market-tabs');
   tabsEl.innerHTML =
