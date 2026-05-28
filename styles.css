@@ -1295,7 +1295,7 @@ textarea { resize: vertical; }
   font-size: 12px; color: #ff8080;
   margin-bottom: 14px; min-height: 17px;
 }
-.pin-error.hidden { visibility: hidden; }
+.pin-error-hidden { visibility: hidden; }
 
 @keyframes pin-shake {
   0%,100% { transform: translateX(0); }

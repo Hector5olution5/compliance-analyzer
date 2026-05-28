@@ -31,6 +31,15 @@ function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 async function hashPin(pin) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('ca_salt_' + pin));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -107,7 +116,7 @@ function renderLoginUserList(users) {
     const initials = u.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
     return `<button class="login-user-card" onclick="selectLoginUser('${u.id}')">
       <span class="login-user-avatar" style="background:${ROLE_COLORS[u.role]}">${initials}</span>
-      <span class="login-user-name">${u.name}</span>
+      <span class="login-user-name">${escapeHtml(u.name)}</span>
       <span class="login-user-role">${ROLE_LABELS[u.role]}</span>
     </button>`;
   }).join('');
@@ -123,17 +132,18 @@ function selectLoginUser(userId) {
   document.getElementById('login-pin-user-info').innerHTML = `
     <span class="login-pin-avatar" style="background:${ROLE_COLORS[user.role]}">${initials}</span>
     <div>
-      <p class="login-pin-name">${user.name}</p>
+      <p class="login-pin-name">${escapeHtml(user.name)}</p>
       <p class="login-pin-role">${ROLE_LABELS[user.role]}</p>
     </div>`;
   updatePinDots();
-  document.getElementById('pin-error').classList.add('hidden');
+  document.getElementById('pin-error').classList.add('pin-error-hidden');
   showLoginStep('pin');
 }
 
 function showLoginUserStep() {
   _loginSelectedUser = null;
   _loginPinBuffer = '';
+  renderLoginUserList(getUsers());
   showLoginStep('users');
 }
 
@@ -144,6 +154,7 @@ function updatePinDots() {
 }
 
 async function handlePinKey(key) {
+  if (!_loginSelectedUser) return;
   if (key === 'back') {
     _loginPinBuffer = _loginPinBuffer.slice(0, -1);
   } else if (key === 'clear') {
@@ -161,7 +172,7 @@ async function handlePinKey(key) {
       finishLogin(_loginSelectedUser);
     } else {
       const errEl = document.getElementById('pin-error');
-      errEl.classList.remove('hidden');
+      errEl.classList.remove('pin-error-hidden');
       const dots = document.getElementById('pin-dots');
       dots.classList.add('pin-shake');
       setTimeout(() => dots.classList.remove('pin-shake'), 400);
@@ -183,7 +194,6 @@ function finishLogin(user) {
 }
 
 function logout() {
-  if (!confirm('¿Cerrar sesión?')) return;
   clearSession();
   location.reload();
 }
@@ -200,7 +210,7 @@ function applyRoleRestrictions(role) {
   const btnSettings = document.getElementById('btn-settings');
   if (btnSettings) btnSettings.style.display = isAdmin ? '' : 'none';
 
-  // Viewers: dim form and disable interaction
+  // Viewers: dim form and disable interaction + no label analysis
   if (isViewer) {
     const formSec = document.getElementById('form-section');
     if (formSec) { formSec.style.opacity = '0.55'; formSec.style.pointerEvents = 'none'; }
@@ -208,6 +218,12 @@ function applyRoleRestrictions(role) {
     if (psArea) psArea.style.display = 'none';
     const upArea = document.getElementById('upload-area');
     if (upArea) upArea.style.display = 'none';
+    const labelZone = document.getElementById('label-upload-zone');
+    if (labelZone) labelZone.style.display = 'none';
+    const btnRunLabel = document.getElementById('btn-run-label');
+    if (btnRunLabel) btnRunLabel.style.display = 'none';
+    const labelSel = document.querySelector('.label-selector-wrap');
+    if (labelSel) labelSel.style.display = 'none';
   }
 }
 
@@ -219,7 +235,7 @@ function renderUserBadge(user) {
   badge.innerHTML = `
     <span class="user-badge-avatar" style="background:${ROLE_COLORS[user.role]}">${initials}</span>
     <span class="user-badge-info">
-      <span class="user-badge-name">${user.name}</span>
+      <span class="user-badge-name">${escapeHtml(user.name)}</span>
       <span class="user-badge-role">${ROLE_LABELS[user.role]}</span>
     </span>
     <button class="user-badge-logout" onclick="logout()" title="Cerrar sesión">
@@ -240,11 +256,11 @@ function setupFirstUserForm() {
     const confirm = document.getElementById('setup-pin-confirm').value;
     const errEl   = document.getElementById('setup-error');
 
-    if (!name)               { errEl.textContent = 'Ingresa tu nombre.'; errEl.classList.remove('hidden'); return; }
-    if (!/^\d{4}$/.test(pin)) { errEl.textContent = 'El PIN debe tener exactamente 4 dígitos.'; errEl.classList.remove('hidden'); return; }
-    if (pin !== confirm)     { errEl.textContent = 'Los PINs no coinciden.'; errEl.classList.remove('hidden'); return; }
+    if (!name)               { errEl.textContent = 'Ingresa tu nombre.'; errEl.classList.remove('pin-error-hidden'); return; }
+    if (!/^\d{4}$/.test(pin)) { errEl.textContent = 'El PIN debe tener exactamente 4 dígitos.'; errEl.classList.remove('pin-error-hidden'); return; }
+    if (pin !== confirm)     { errEl.textContent = 'Los PINs no coinciden.'; errEl.classList.remove('pin-error-hidden'); return; }
 
-    errEl.classList.add('hidden');
+    errEl.classList.add('pin-error-hidden');
     const user = await createUser(name, 'admin', pin);
     finishLogin(user);
   });
@@ -260,12 +276,13 @@ function renderUsersPanel() {
   const list = document.getElementById('users-list');
   if (!list) return;
 
+  const adminCount = users.filter(u => u.role === 'admin').length;
   list.innerHTML = users.map(u => {
     const initials = u.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-    const isLastAdmin = u.role === 'admin' && users.filter(x => x.role === 'admin').length === 1;
+    const isLastAdmin = u.role === 'admin' && adminCount === 1;
     return `<div class="user-row" id="user-row-${u.id}">
       <span class="user-row-avatar" style="background:${ROLE_COLORS[u.role]}">${initials}</span>
-      <span class="user-row-name">${u.name}</span>
+      <span class="user-row-name">${escapeHtml(u.name)}</span>
       <span class="user-row-role-badge" style="background:${ROLE_COLORS[u.role]}22;color:${ROLE_COLORS[u.role]}">${ROLE_LABELS[u.role]}</span>
       <div class="user-row-actions">
         <button class="btn-icon-sm" onclick="editUserInline('${u.id}')" title="Editar">
@@ -284,7 +301,7 @@ function editUserInline(userId) {
   if (!user) return;
   const row = document.getElementById(`user-row-${userId}`);
   row.innerHTML = `<div class="user-edit-form" style="width:100%">
-    <input id="edit-name-${userId}" value="${user.name}" placeholder="Nombre">
+    <input id="edit-name-${userId}" value="${escapeHtml(user.name)}" placeholder="Nombre">
     <select id="edit-role-${userId}">
       <option value="admin" ${user.role==='admin'?'selected':''}>Administrador</option>
       <option value="analyst" ${user.role==='analyst'?'selected':''}>Analista</option>
@@ -373,7 +390,9 @@ function setupSettingsModal() {
 }
 
 function openSettingsModal() {
+  if (getActiveRole() !== 'admin') return;
   document.getElementById('input-apikey').value = localStorage.getItem('claude_api_key') || '';
+  cancelAddUser();
   switchSettingsTab('apikey');
   renderUsersPanel();
   document.getElementById('modal-settings').classList.remove('hidden');
@@ -410,7 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (user) {
       document.getElementById('welcome-screen').classList.add('hidden');
       applyRoleRestrictions(session.role);
-      renderUserBadge(session);
+      renderUserBadge(user);
       if (session.role === 'admin' && !getApiKey()) {
         setTimeout(openSettingsModal, 800);
       }
