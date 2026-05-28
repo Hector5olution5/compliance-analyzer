@@ -4,8 +4,385 @@ let components = [];
 let generatedDocs = {};
 let activeResultTab = null;
 const TOTAL_TABS = 4;
-let currentHistoryIndex = null;   // which history entry is currently displayed
-const HIST_KEY = 'ca_history_v3'; // separate key from v2 to avoid conflicts
+let currentHistoryIndex = null;
+const HIST_KEY = 'ca_history_v3';
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+const USERS_KEY = 'ca_users_v1';
+const SESSION_KEY = 'ca_session';
+const ROLE_LABELS = { admin: 'Administrador', analyst: 'Analista', viewer: 'Visor' };
+const ROLE_COLORS = { admin: '#185FA5', analyst: '#2E7D32', viewer: '#9CA3AF' };
+
+let _loginSelectedUser = null;
+let _loginPinBuffer = '';
+
+function getUsers() {
+  try { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); } catch { return []; }
+}
+function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+
+function getSession() {
+  try { return JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch { return null; }
+}
+function saveSession(s) { sessionStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
+function clearSession() { sessionStorage.removeItem(SESSION_KEY); }
+
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+async function hashPin(pin) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('ca_salt_' + pin));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function createUser(name, role, pin) {
+  const users = getUsers();
+  const user = { id: generateId(), name: name.trim(), role, pin_hash: await hashPin(pin), created_at: Date.now() };
+  users.push(user);
+  saveUsers(users);
+  return user;
+}
+
+async function updateUser(id, fields, newPin) {
+  const users = getUsers();
+  const idx = users.findIndex(u => u.id === id);
+  if (idx === -1) return null;
+  Object.assign(users[idx], fields);
+  if (newPin) users[idx].pin_hash = await hashPin(newPin);
+  saveUsers(users);
+  return users[idx];
+}
+
+function deleteUser(id) {
+  const users = getUsers();
+  const target = users.find(u => u.id === id);
+  if (!target) return false;
+  if (target.role === 'admin' && users.filter(u => u.role === 'admin').length === 1) {
+    alert('No puedes eliminar al único administrador.'); return false;
+  }
+  saveUsers(users.filter(u => u.id !== id));
+  return true;
+}
+
+async function verifyPin(userId, pin) {
+  const user = getUsers().find(u => u.id === userId);
+  if (!user) return false;
+  return user.pin_hash === await hashPin(pin);
+}
+
+function getActiveRole() { return getSession()?.role || null; }
+
+// ── Login UI ─────────────────────────────────────────────────────────────────
+
+function showLoginScreen() {
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('welcome-screen').classList.add('hidden');
+  document.getElementById('app-header').style.visibility = 'hidden';
+  document.querySelector('main').style.visibility = 'hidden';
+
+  const users = getUsers();
+  if (users.length === 0) {
+    showLoginStep('setup');
+  } else {
+    showLoginStep('users');
+    renderLoginUserList(users);
+  }
+}
+
+function hideLoginScreen() {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('app-header').style.visibility = '';
+  document.querySelector('main').style.visibility = '';
+}
+
+function showLoginStep(step) {
+  ['users', 'pin', 'setup'].forEach(s =>
+    document.getElementById(`login-step-${s}`).classList.toggle('hidden', s !== step)
+  );
+}
+
+function renderLoginUserList(users) {
+  document.getElementById('login-users-grid').innerHTML = users.map(u => {
+    const initials = u.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    return `<button class="login-user-card" onclick="selectLoginUser('${u.id}')">
+      <span class="login-user-avatar" style="background:${ROLE_COLORS[u.role]}">${initials}</span>
+      <span class="login-user-name">${u.name}</span>
+      <span class="login-user-role">${ROLE_LABELS[u.role]}</span>
+    </button>`;
+  }).join('');
+}
+
+function selectLoginUser(userId) {
+  const user = getUsers().find(u => u.id === userId);
+  if (!user) return;
+  _loginSelectedUser = user;
+  _loginPinBuffer = '';
+
+  const initials = user.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  document.getElementById('login-pin-user-info').innerHTML = `
+    <span class="login-pin-avatar" style="background:${ROLE_COLORS[user.role]}">${initials}</span>
+    <div>
+      <p class="login-pin-name">${user.name}</p>
+      <p class="login-pin-role">${ROLE_LABELS[user.role]}</p>
+    </div>`;
+  updatePinDots();
+  document.getElementById('pin-error').classList.add('hidden');
+  showLoginStep('pin');
+}
+
+function showLoginUserStep() {
+  _loginSelectedUser = null;
+  _loginPinBuffer = '';
+  showLoginStep('users');
+}
+
+function updatePinDots() {
+  document.querySelectorAll('#pin-dots .pin-dot').forEach((dot, i) =>
+    dot.classList.toggle('pin-dot-filled', i < _loginPinBuffer.length)
+  );
+}
+
+async function handlePinKey(key) {
+  if (key === 'back') {
+    _loginPinBuffer = _loginPinBuffer.slice(0, -1);
+  } else if (key === 'clear') {
+    _loginPinBuffer = '';
+  } else if (_loginPinBuffer.length < 4) {
+    _loginPinBuffer += key;
+  }
+  updatePinDots();
+
+  if (_loginPinBuffer.length === 4) {
+    const ok = await verifyPin(_loginSelectedUser.id, _loginPinBuffer);
+    _loginPinBuffer = '';
+    updatePinDots();
+    if (ok) {
+      finishLogin(_loginSelectedUser);
+    } else {
+      const errEl = document.getElementById('pin-error');
+      errEl.classList.remove('hidden');
+      const dots = document.getElementById('pin-dots');
+      dots.classList.add('pin-shake');
+      setTimeout(() => dots.classList.remove('pin-shake'), 400);
+    }
+  }
+}
+
+function finishLogin(user) {
+  saveSession({ userId: user.id, name: user.name, role: user.role, loggedAt: Date.now() });
+  hideLoginScreen();
+  applyRoleRestrictions(user.role);
+  renderUserBadge(user);
+  if (user.role === 'admin' && !getApiKey()) {
+    setTimeout(openSettingsModal, 700);
+  }
+  if (user.role === 'viewer') {
+    setTimeout(openHistory, 300);
+  }
+}
+
+function logout() {
+  if (!confirm('¿Cerrar sesión?')) return;
+  clearSession();
+  location.reload();
+}
+
+function applyRoleRestrictions(role) {
+  const isViewer = role === 'viewer';
+  const isAdmin  = role === 'admin';
+
+  // Viewers can't generate
+  const genSec = document.getElementById('generate-section');
+  if (genSec && isViewer) genSec.style.display = 'none';
+
+  // Non-admins: hide settings button
+  const btnSettings = document.getElementById('btn-settings');
+  if (btnSettings) btnSettings.style.display = isAdmin ? '' : 'none';
+
+  // Viewers: dim form and disable interaction
+  if (isViewer) {
+    const formSec = document.getElementById('form-section');
+    if (formSec) { formSec.style.opacity = '0.55'; formSec.style.pointerEvents = 'none'; }
+    const psArea = document.getElementById('ps-upload-area');
+    if (psArea) psArea.style.display = 'none';
+    const upArea = document.getElementById('upload-area');
+    if (upArea) upArea.style.display = 'none';
+  }
+}
+
+function renderUserBadge(user) {
+  const badge = document.getElementById('user-badge');
+  if (!badge) return;
+  const initials = user.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  badge.classList.remove('hidden');
+  badge.innerHTML = `
+    <span class="user-badge-avatar" style="background:${ROLE_COLORS[user.role]}">${initials}</span>
+    <span class="user-badge-info">
+      <span class="user-badge-name">${user.name}</span>
+      <span class="user-badge-role">${ROLE_LABELS[user.role]}</span>
+    </span>
+    <button class="user-badge-logout" onclick="logout()" title="Cerrar sesión">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </button>`;
+}
+
+// ── First-time Setup ──────────────────────────────────────────────────────────
+
+function setupFirstUserForm() {
+  document.getElementById('btn-create-admin').addEventListener('click', async () => {
+    const name    = document.getElementById('setup-name').value.trim();
+    const pin     = document.getElementById('setup-pin').value;
+    const confirm = document.getElementById('setup-pin-confirm').value;
+    const errEl   = document.getElementById('setup-error');
+
+    if (!name)               { errEl.textContent = 'Ingresa tu nombre.'; errEl.classList.remove('hidden'); return; }
+    if (!/^\d{4}$/.test(pin)) { errEl.textContent = 'El PIN debe tener exactamente 4 dígitos.'; errEl.classList.remove('hidden'); return; }
+    if (pin !== confirm)     { errEl.textContent = 'Los PINs no coinciden.'; errEl.classList.remove('hidden'); return; }
+
+    errEl.classList.add('hidden');
+    const user = await createUser(name, 'admin', pin);
+    finishLogin(user);
+  });
+}
+
+// ── User Management ───────────────────────────────────────────────────────────
+
+function renderUsersPanel() {
+  const users = getUsers();
+  const countEl = document.getElementById('users-count');
+  if (countEl) countEl.textContent = `${users.length} usuario${users.length !== 1 ? 's' : ''}`;
+
+  const list = document.getElementById('users-list');
+  if (!list) return;
+
+  list.innerHTML = users.map(u => {
+    const initials = u.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const isLastAdmin = u.role === 'admin' && users.filter(x => x.role === 'admin').length === 1;
+    return `<div class="user-row" id="user-row-${u.id}">
+      <span class="user-row-avatar" style="background:${ROLE_COLORS[u.role]}">${initials}</span>
+      <span class="user-row-name">${u.name}</span>
+      <span class="user-row-role-badge" style="background:${ROLE_COLORS[u.role]}22;color:${ROLE_COLORS[u.role]}">${ROLE_LABELS[u.role]}</span>
+      <div class="user-row-actions">
+        <button class="btn-icon-sm" onclick="editUserInline('${u.id}')" title="Editar">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        ${!isLastAdmin ? `<button class="btn-icon-sm btn-icon-danger" onclick="confirmDeleteUser('${u.id}')" title="Eliminar">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        </button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function editUserInline(userId) {
+  const user = getUsers().find(u => u.id === userId);
+  if (!user) return;
+  const row = document.getElementById(`user-row-${userId}`);
+  row.innerHTML = `<div class="user-edit-form" style="width:100%">
+    <input id="edit-name-${userId}" value="${user.name}" placeholder="Nombre">
+    <select id="edit-role-${userId}">
+      <option value="admin" ${user.role==='admin'?'selected':''}>Administrador</option>
+      <option value="analyst" ${user.role==='analyst'?'selected':''}>Analista</option>
+      <option value="viewer" ${user.role==='viewer'?'selected':''}>Visor</option>
+    </select>
+    <input id="edit-pin-${userId}" type="password" maxlength="4" inputmode="numeric" placeholder="Nuevo PIN (dejar vacío = sin cambio)">
+    <div class="user-edit-actions">
+      <button class="btn-primary btn-sm" onclick="saveUserEdit('${userId}')">Guardar</button>
+      <button class="btn-secondary btn-sm" onclick="renderUsersPanel()">Cancelar</button>
+    </div>
+  </div>`;
+}
+
+async function saveUserEdit(userId) {
+  const name = document.getElementById(`edit-name-${userId}`).value.trim();
+  const role = document.getElementById(`edit-role-${userId}`).value;
+  const pin  = document.getElementById(`edit-pin-${userId}`).value;
+
+  if (!name) { alert('Ingresa un nombre.'); return; }
+  if (pin && !/^\d{4}$/.test(pin)) { alert('El PIN debe tener 4 dígitos.'); return; }
+
+  const users = getUsers();
+  if (role !== 'admin') {
+    const admins = users.filter(u => u.role === 'admin');
+    if (admins.length === 1 && admins[0].id === userId) {
+      alert('No puedes cambiar el rol del único administrador.'); return;
+    }
+  }
+
+  await updateUser(userId, { name, role }, pin || null);
+  renderUsersPanel();
+}
+
+function confirmDeleteUser(userId) {
+  const user = getUsers().find(u => u.id === userId);
+  if (!user) return;
+  if (!confirm(`¿Eliminar a ${user.name}? Esta acción no se puede deshacer.`)) return;
+  deleteUser(userId);
+  renderUsersPanel();
+}
+
+function showAddUserForm() {
+  document.getElementById('user-add-form').classList.remove('hidden');
+  document.getElementById('btn-add-user').style.display = 'none';
+  ['new-user-name','new-user-pin','new-user-pin-confirm'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('new-user-role').value = 'analyst';
+  document.getElementById('new-user-error').classList.add('hidden');
+}
+
+async function saveNewUser() {
+  const name    = document.getElementById('new-user-name').value.trim();
+  const role    = document.getElementById('new-user-role').value;
+  const pin     = document.getElementById('new-user-pin').value;
+  const confirm = document.getElementById('new-user-pin-confirm').value;
+  const errEl   = document.getElementById('new-user-error');
+
+  if (!name)               { errEl.textContent = 'Ingresa el nombre.'; errEl.classList.remove('hidden'); return; }
+  if (!/^\d{4}$/.test(pin)) { errEl.textContent = 'El PIN debe tener 4 dígitos.'; errEl.classList.remove('hidden'); return; }
+  if (pin !== confirm)     { errEl.textContent = 'Los PINs no coinciden.'; errEl.classList.remove('hidden'); return; }
+
+  await createUser(name, role, pin);
+  cancelAddUser();
+  renderUsersPanel();
+}
+
+function cancelAddUser() {
+  document.getElementById('user-add-form').classList.add('hidden');
+  document.getElementById('btn-add-user').style.display = '';
+}
+
+// ── Settings Modal ────────────────────────────────────────────────────────────
+
+function setupSettingsModal() {
+  document.getElementById('btn-settings').addEventListener('click', openSettingsModal);
+  document.getElementById('btn-save-key').addEventListener('click', () => {
+    const val = document.getElementById('input-apikey').value.trim();
+    if (val) localStorage.setItem('claude_api_key', val);
+    document.getElementById('modal-settings').classList.add('hidden');
+  });
+  document.getElementById('btn-cancel-key').addEventListener('click', () => {
+    document.getElementById('modal-settings').classList.add('hidden');
+  });
+  document.querySelectorAll('.settings-tab').forEach(tab =>
+    tab.addEventListener('click', () => switchSettingsTab(tab.dataset.stab))
+  );
+}
+
+function openSettingsModal() {
+  document.getElementById('input-apikey').value = localStorage.getItem('claude_api_key') || '';
+  switchSettingsTab('apikey');
+  renderUsersPanel();
+  document.getElementById('modal-settings').classList.remove('hidden');
+}
+
+function switchSettingsTab(tab) {
+  document.querySelectorAll('.settings-tab').forEach(t => t.classList.toggle('active', t.dataset.stab === tab));
+  document.querySelectorAll('.stab-content').forEach(p => p.classList.toggle('hidden', p.dataset.stab !== tab));
+}
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -17,13 +394,35 @@ document.addEventListener('DOMContentLoaded', () => {
   setupTabNav();
   setupFormNav();
   setupButtons();
-  setupApiKeyModal();
+  setupSettingsModal();
   setupToyAnalysis();
   setupWelcome();
   renderHistory();
   setupLabelCheck();
-  if (!getApiKey()) {
-    setTimeout(() => document.getElementById('modal-apikey').classList.remove('hidden'), 800);
+  setupFirstUserForm();
+  document.querySelectorAll('.pin-key').forEach(btn =>
+    btn.addEventListener('click', () => handlePinKey(btn.dataset.key))
+  );
+
+  const session = getSession();
+  if (session) {
+    const user = getUsers().find(u => u.id === session.userId);
+    if (user) {
+      document.getElementById('welcome-screen').classList.add('hidden');
+      applyRoleRestrictions(session.role);
+      renderUserBadge(session);
+      if (session.role === 'admin' && !getApiKey()) {
+        setTimeout(openSettingsModal, 800);
+      }
+      if (session.role === 'viewer') {
+        setTimeout(openHistory, 300);
+      }
+    } else {
+      clearSession();
+      showLoginScreen();
+    }
+  } else {
+    showLoginScreen();
   }
 });
 
@@ -553,23 +952,6 @@ function showToyBanner(result) {
   reason.textContent = result.razonamiento || '';
   normas.innerHTML = (result.normas_aplicables || []).map(n => `<li>${n}</li>`).join('');
   banner.classList.remove('hidden');
-}
-
-// ── API Key Modal ─────────────────────────────────────────────────────────────
-function setupApiKeyModal() {
-  document.getElementById('btn-settings').addEventListener('click', () => {
-    const saved = localStorage.getItem('claude_api_key') || '';
-    document.getElementById('input-apikey').value = saved;
-    document.getElementById('modal-apikey').classList.remove('hidden');
-  });
-  document.getElementById('btn-save-key').addEventListener('click', () => {
-    const val = document.getElementById('input-apikey').value.trim();
-    if (val) localStorage.setItem('claude_api_key', val);
-    document.getElementById('modal-apikey').classList.add('hidden');
-  });
-  document.getElementById('btn-cancel-key').addEventListener('click', () => {
-    document.getElementById('modal-apikey').classList.add('hidden');
-  });
 }
 
 // ── Generate Button ───────────────────────────────────────────────────────────
