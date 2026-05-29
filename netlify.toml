@@ -1,3 +1,0 @@
-[build]
-  command = "printf 'const DEFAULT_API_KEY=\"%s\";\\n' \"$CLAUDE_API_KEY\" > env.js"
-  publish = "."
