@@ -47,6 +47,40 @@ function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
+// ── Firebase ──────────────────────────────────────────────────────────────────
+let db = null;
+try {
+  if (typeof FIREBASE_CONFIG !== 'undefined') {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+  }
+} catch (err) {
+  console.warn('Firebase init failed, using localStorage only:', err.message);
+}
+
+async function syncUsersFromFirestore() {
+  if (!db) return getUsers();
+  try {
+    const snap = await db.collection('users').get();
+    const users = snap.docs.map(d => d.data());
+    saveUsers(users);
+    return users;
+  } catch (err) {
+    console.warn('Firestore read failed:', err.message);
+    return getUsers();
+  }
+}
+
+async function fsSetUser(user) {
+  if (!db) return;
+  try { await db.collection('users').doc(user.id).set(user); } catch (err) { console.warn('Firestore write failed:', err.message); }
+}
+
+async function fsDeleteUser(id) {
+  if (!db) return;
+  try { await db.collection('users').doc(id).delete(); } catch (err) { console.warn('Firestore delete failed:', err.message); }
+}
+
 function escapeHtml(str) {
   return String(str)
     .replace(/&/g, '&amp;')
@@ -66,6 +100,7 @@ async function createUser(name, role, pin) {
   const user = { id: generateId(), name: name.trim(), role, pin_hash: await hashPin(pin), created_at: Date.now() };
   users.push(user);
   saveUsers(users);
+  await fsSetUser(user);
   return user;
 }
 
@@ -76,6 +111,7 @@ async function updateUser(id, fields, newPin) {
   Object.assign(users[idx], fields);
   if (newPin) users[idx].pin_hash = await hashPin(newPin);
   saveUsers(users);
+  await fsSetUser(users[idx]);
   return users[idx];
 }
 
@@ -87,6 +123,7 @@ function deleteUser(id) {
     alert('No puedes eliminar al único administrador.'); return false;
   }
   saveUsers(users.filter(u => u.id !== id));
+  fsDeleteUser(id);
   return true;
 }
 
@@ -276,7 +313,7 @@ function exportUsers() {
   });
 }
 
-function doImportUsers() {
+async function doImportUsers() {
   const raw = document.getElementById('import-code-input').value.trim();
   const errEl = document.getElementById('import-error');
 
@@ -308,6 +345,18 @@ function doImportUsers() {
   if (existing.length > 0 && !confirm(`Esto reemplazará los ${existing.length} usuario(s) actuales con ${valid.length} importados. ¿Continuar?`)) return;
 
   saveUsers(valid);
+
+  // Sync imported users to Firestore (replace all)
+  if (db) {
+    try {
+      const snap = await db.collection('users').get();
+      const batch = db.batch();
+      snap.docs.forEach(d => batch.delete(d.ref));
+      valid.forEach(u => batch.set(db.collection('users').doc(u.id), u));
+      await batch.commit();
+    } catch (err) { console.warn('Import Firestore sync failed:', err.message); }
+  }
+
   document.getElementById('import-code-input').value = '';
   errEl.classList.add('pin-error-hidden');
   renderLoginUserList(valid);
@@ -470,10 +519,11 @@ function openSettingsModal() {
 function switchSettingsTab(tab) {
   document.querySelectorAll('.settings-tab').forEach(t => t.classList.toggle('active', t.dataset.stab === tab));
   document.querySelectorAll('.stab-content').forEach(p => p.classList.toggle('hidden', p.dataset.stab !== tab));
+  if (tab === 'users') syncUsersFromFirestore().then(() => renderUsersPanel());
 }
 
 // ── Init ─────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   if (window.location.protocol === 'file:') {
     document.getElementById('file-protocol-banner').style.display = 'block';
   }
@@ -491,6 +541,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.pin-key').forEach(btn =>
     btn.addEventListener('click', () => handlePinKey(btn.dataset.key))
   );
+
+  // Sync users from Firestore before showing login or app
+  await syncUsersFromFirestore();
 
   const session = getSession();
   if (session) {
