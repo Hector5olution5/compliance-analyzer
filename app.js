@@ -1067,7 +1067,7 @@ Reglas:
 
   const system = 'Eres un especialista en materiales de construcción de productos (BOM/PS). Responde ÚNICAMENTE con JSON válido, sin texto adicional ni markdown.';
 
-  const MAX_DIRECT = 32 * 1024 * 1024; // 32 MB — Claude API document block limit
+  const MAX_DIRECT = 3 * 1024 * 1024; // 3 MB — Vercel proxy limit (~4.5 MB with base64 overhead)
   let raw;
 
   if (file.size <= MAX_DIRECT) {
@@ -1252,10 +1252,16 @@ Claves del JSON (usa null si no encuentras el valor):
 - "publico_objetivo": público al que va dirigido
 - "referencia_interna": código o referencia interna del producto`;
 
-  const raw = await callClaudeWithDoc(file, prompt, {
-    system: 'Eres un extractor de datos de fichas técnicas. Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, sin markdown.',
-    maxTokens: 1200
-  });
+  const MAX_DIRECT_FIELDS = 3 * 1024 * 1024; // 3 MB — Vercel proxy limit
+  const system = 'Eres un extractor de datos de fichas técnicas. Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, sin markdown.';
+  let raw;
+  if (file.size <= MAX_DIRECT_FIELDS) {
+    raw = await callClaudeWithDoc(file, prompt, { system, maxTokens: 1200 });
+  } else {
+    const text = await extractPdfTextForPS(file);
+    if (!text.trim()) throw new Error('El PDF no contiene texto extraíble. Intenta con un PDF más pequeño.');
+    raw = await callClaude(`${prompt}\n\nDOCUMENTO:\n${text}`, { system, maxTokens: 1200 });
+  }
   const jsonMatch = raw.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('No JSON in response');
   return JSON.parse(jsonMatch[0]);
