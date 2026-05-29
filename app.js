@@ -284,6 +284,11 @@ function renderUserBadge(user) {
       <span class="user-badge-name">${escapeHtml(user.name)}</span>
       <span class="user-badge-role">${ROLE_LABELS[user.role]}</span>
     </span>
+    <button class="user-badge-pin" onclick="openChangePinModal()" title="Cambiar PIN">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </button>
     <button class="user-badge-logout" onclick="logout()" title="Cerrar sesión">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -358,6 +363,51 @@ async function doImportUsers() {
   errEl.classList.add('pin-error-hidden');
   renderLoginUserList(valid);
   showLoginStep('users');
+}
+
+// ── Change PIN ────────────────────────────────────────────────────────────────
+
+function openChangePinModal() {
+  ['pin-current','pin-new','pin-new-confirm'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pin-change-error').classList.add('hidden');
+  document.getElementById('modal-change-pin').classList.remove('hidden');
+  document.getElementById('pin-current').focus();
+}
+
+function closeChangePinModal() {
+  document.getElementById('modal-change-pin').classList.add('hidden');
+}
+
+async function saveChangedPin() {
+  const current = document.getElementById('pin-current').value;
+  const newPin  = document.getElementById('pin-new').value;
+  const confirm = document.getElementById('pin-new-confirm').value;
+  const errEl   = document.getElementById('pin-change-error');
+  const btn     = document.getElementById('btn-save-pin');
+
+  if (!/^\d{4}$/.test(current)) { errEl.textContent = 'Ingresa tu PIN actual.'; errEl.classList.remove('hidden'); return; }
+  if (!/^\d{4}$/.test(newPin))  { errEl.textContent = 'El nuevo PIN debe tener 4 dígitos.'; errEl.classList.remove('hidden'); return; }
+  if (newPin !== confirm)       { errEl.textContent = 'Los PINs nuevos no coinciden.'; errEl.classList.remove('hidden'); return; }
+  if (current === newPin)       { errEl.textContent = 'El nuevo PIN debe ser diferente al actual.'; errEl.classList.remove('hidden'); return; }
+
+  const session = getSession();
+  if (!session) return;
+
+  const ok = await verifyPin(session.userId, current);
+  if (!ok) { errEl.textContent = 'PIN actual incorrecto.'; errEl.classList.remove('hidden'); return; }
+
+  btn.textContent = 'Guardando…'; btn.disabled = true;
+  await updateUser(session.userId, {}, newPin);
+  closeChangePinModal();
+  btn.textContent = 'Guardar'; btn.disabled = false;
+
+  // Brief success toast
+  const badge = document.getElementById('user-badge');
+  const toast = document.createElement('span');
+  toast.textContent = 'PIN actualizado ✓';
+  toast.style.cssText = 'position:fixed;top:70px;right:20px;background:#2E7D32;color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 2px 12px rgba(0,0,0,.2)';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2500);
 }
 
 // ── First-time Setup ──────────────────────────────────────────────────────────

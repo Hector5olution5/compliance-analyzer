@@ -192,6 +192,22 @@
   </div>
 </header>
 
+<!-- Change PIN Modal -->
+<div id="modal-change-pin" class="modal hidden">
+  <div class="modal-box" style="width:320px">
+    <h3>Cambiar PIN</h3>
+    <p class="modal-desc">Ingresa tu PIN actual y el nuevo PIN de 4 dígitos.</p>
+    <input id="pin-current" type="password" maxlength="4" inputmode="numeric" placeholder="PIN actual">
+    <input id="pin-new" type="password" maxlength="4" inputmode="numeric" placeholder="Nuevo PIN" style="margin-top:8px">
+    <input id="pin-new-confirm" type="password" maxlength="4" inputmode="numeric" placeholder="Confirmar nuevo PIN" style="margin-top:8px">
+    <p id="pin-change-error" class="form-error hidden"></p>
+    <div class="modal-actions">
+      <button id="btn-save-pin" class="btn-primary" onclick="saveChangedPin()">Guardar</button>
+      <button class="btn-secondary" onclick="closeChangePinModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Settings Modal -->
 <div id="modal-settings" class="modal hidden">
   <div class="modal-box modal-settings-box">
