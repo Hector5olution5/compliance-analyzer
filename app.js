@@ -106,7 +106,7 @@ function hideLoginScreen() {
 }
 
 function showLoginStep(step) {
-  ['users', 'pin', 'setup'].forEach(s =>
+  ['users', 'pin', 'setup', 'import'].forEach(s =>
     document.getElementById(`login-step-${s}`).classList.toggle('hidden', s !== step)
   );
 }
@@ -247,9 +247,67 @@ function renderUserBadge(user) {
     </button>`;
 }
 
+// ── Export / Import ───────────────────────────────────────────────────────────
+
+function exportUsers() {
+  const users = getUsers();
+  if (users.length === 0) { alert('No hay usuarios para exportar.'); return; }
+  const code = 'CAU:' + btoa(encodeURIComponent(JSON.stringify(users)));
+  const btn = document.getElementById('btn-export-users');
+
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = '✓ Copiado';
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = '↑ Exportar'; btn.disabled = false; }, 2500);
+  }).catch(() => {
+    prompt('Copia este código y compártelo:', code);
+  });
+}
+
+function doImportUsers() {
+  const raw = document.getElementById('import-code-input').value.trim();
+  const errEl = document.getElementById('import-error');
+
+  if (!raw.startsWith('CAU:')) {
+    errEl.textContent = 'Código inválido — debe comenzar con CAU:';
+    errEl.classList.remove('pin-error-hidden'); return;
+  }
+
+  let users;
+  try {
+    users = JSON.parse(decodeURIComponent(atob(raw.slice(4))));
+  } catch {
+    errEl.textContent = 'Error al leer el código — verifica que esté completo y sin espacios extra.';
+    errEl.classList.remove('pin-error-hidden'); return;
+  }
+
+  if (!Array.isArray(users) || users.length === 0) {
+    errEl.textContent = 'El código no contiene usuarios válidos.';
+    errEl.classList.remove('pin-error-hidden'); return;
+  }
+
+  const valid = users.filter(u => u.id && u.name && u.role && u.pin_hash);
+  if (valid.length === 0) {
+    errEl.textContent = 'El código no contiene usuarios válidos.';
+    errEl.classList.remove('pin-error-hidden'); return;
+  }
+
+  const existing = getUsers();
+  if (existing.length > 0 && !confirm(`Esto reemplazará los ${existing.length} usuario(s) actuales con ${valid.length} importados. ¿Continuar?`)) return;
+
+  saveUsers(valid);
+  document.getElementById('import-code-input').value = '';
+  errEl.classList.add('pin-error-hidden');
+  renderLoginUserList(valid);
+  showLoginStep('users');
+}
+
 // ── First-time Setup ──────────────────────────────────────────────────────────
 
 function setupFirstUserForm() {
+  document.getElementById('btn-import-back').addEventListener('click', () =>
+    showLoginStep(getUsers().length > 0 ? 'users' : 'setup')
+  );
   document.getElementById('btn-create-admin').addEventListener('click', async () => {
     const name    = document.getElementById('setup-name').value.trim();
     const pin     = document.getElementById('setup-pin').value;

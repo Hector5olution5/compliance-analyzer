@@ -27,6 +27,7 @@
     <div id="login-step-users">
       <h2 class="login-step-title">Selecciona tu perfil</h2>
       <div id="login-users-grid"></div>
+      <button class="login-import-link" onclick="showLoginStep('import')">¿Tienes un código de configuración? Importar →</button>
     </div>
 
     <!-- Step: PIN entry -->
@@ -70,6 +71,20 @@
         Crear administrador
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
+      <button class="login-import-link" onclick="showLoginStep('import')">¿Ya tienes un código? Importar configuración →</button>
+    </div>
+
+    <!-- Step: import code -->
+    <div id="login-step-import" class="hidden">
+      <h2 class="login-step-title">Importar configuración</h2>
+      <p class="login-setup-hint">Pega el código que te compartió el administrador.</p>
+      <textarea id="import-code-input" class="login-input login-import-textarea" rows="3" placeholder="CAU:eyJ1c2Vycy..." autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
+      <p id="import-error" class="pin-error pin-error-hidden"></p>
+      <button class="wlc-btn" onclick="doImportUsers()">
+        Importar usuarios
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+      <button class="login-back" id="btn-import-back">← Volver</button>
     </div>
 
   </div>
@@ -207,7 +222,10 @@
     <div class="stab-content hidden" data-stab="users">
       <div class="users-panel-header">
         <span class="users-count" id="users-count"></span>
-        <button id="btn-add-user" class="btn-primary btn-sm" onclick="showAddUserForm()">+ Agregar</button>
+        <div style="display:flex;gap:8px">
+          <button id="btn-export-users" class="btn-secondary btn-sm" onclick="exportUsers()">↑ Exportar</button>
+          <button id="btn-add-user" class="btn-primary btn-sm" onclick="showAddUserForm()">+ Agregar</button>
+        </div>
       </div>
 
       <!-- Add user form -->

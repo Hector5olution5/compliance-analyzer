@@ -1462,3 +1462,22 @@ textarea { resize: vertical; }
   padding: 7px 10px; font-size: 13px; margin-bottom: 0;
 }
 .user-edit-actions { display: flex; gap: 8px; }
+
+/* ── Export / Import ── */
+.login-import-link {
+  background: none; border: none;
+  color: rgba(255,255,255,.4);
+  font-size: 12px; cursor: pointer;
+  font-family: var(--font);
+  transition: color .2s; padding: 8px 4px;
+  margin-top: 14px; display: block; width: 100%;
+  text-align: center;
+}
+.login-import-link:hover { color: rgba(255,255,255,.8); }
+.login-import-textarea {
+  resize: none;
+  font-size: 12px;
+  font-family: monospace;
+  letter-spacing: .02em;
+  min-height: 72px;
+}
