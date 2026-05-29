@@ -81,6 +81,259 @@ async function fsDeleteUser(id) {
   try { await db.collection('users').doc(id).delete(); } catch (err) { console.warn('Firestore delete failed:', err.message); }
 }
 
+// ── Firestore — expedientes (guardado permanente cross-device) ────────────────
+
+async function saveExpedienteToFirestore(histIndex, markets) {
+  if (!db) return;
+  const session = getSession();
+  if (!session) return;
+
+  let hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+  const hEntry = hist[histIndex];
+  if (!hEntry) return;
+
+  const expId = hEntry.expId || generateId();
+
+  // Persist expId in localStorage
+  if (!hEntry.expId) {
+    hist[histIndex].expId = expId;
+    try { localStorage.setItem(HIST_KEY, JSON.stringify(hist)); } catch (_) {}
+  }
+
+  const e = hist[histIndex] || hEntry;
+  try {
+    const fd = e.formData ? { ...e.formData } : {};
+    delete fd.previews;
+    await db.collection('expedientes').doc(expId).set({
+      id: expId, userId: session.userId,
+      nombre: e.nombre || '', categoria: e.categoria || '',
+      mercados: markets, fecha: e.fecha || '',
+      ts: e.ts || Date.now(), status: e.status || 'borrador',
+      nota: e.nota || '', formData: fd,
+    });
+  } catch (err) { console.warn('Firestore expediente write failed:', err.message); }
+
+  renderHistory();
+}
+
+async function syncExpedientesFromCloud() {
+  if (!db) return [];
+  const session = getSession();
+  if (!session) return [];
+  try {
+    const snap = await db.collection('expedientes')
+      .where('userId', '==', session.userId)
+      .orderBy('ts', 'desc').limit(30).get();
+    return snap.docs.map(d => d.data());
+  } catch (e) {
+    console.warn('Firestore expedientes read failed:', e.message);
+    return [];
+  }
+}
+
+async function mergeCloudHistory() {
+  const cloud = await syncExpedientesFromCloud();
+  if (!cloud.length) return;
+
+  const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+  const localIds = new Set(hist.map(h => h.expId).filter(Boolean));
+  let changed = false;
+
+  for (const c of cloud) {
+    if (localIds.has(c.id)) continue;
+    hist.push({
+      nombre: c.nombre, categoria: c.categoria,
+      mercados: c.mercados, fecha: c.fecha, ts: c.ts,
+      status: c.status || 'borrador', nota: c.nota || '',
+      expId: c.id, formData: c.formData || {}, previews: {},
+    });
+    changed = true;
+  }
+
+  if (changed) {
+    hist.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    try { localStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(0, 30))); } catch (_) {}
+    renderHistory();
+  }
+}
+
+async function regenerateExpediente(index) {
+  const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+  const h = hist[index];
+  if (!h?.formData || !(h.mercados || []).length) return;
+
+  if (!confirm(`¿Regenerar expediente de "${h.nombre}"?\nSe volverá a llamar a la IA (~$0.03). Los archivos Word se generarán de nuevo.`)) return;
+
+  closeHistory();
+  const formData = h.formData;
+  const markets  = h.mercados;
+
+  document.getElementById('form-section').classList.add('hidden');
+  document.getElementById('results-section').classList.add('hidden');
+  showProgress(true);
+  generatedDocs = {};
+  currentHistoryIndex = index;
+
+  try {
+    for (let i = 0; i < markets.length; i++) {
+      updateProgress(i, markets.length, markets[i]);
+      generatedDocs[markets[i]] = await generateForMarket(formData, markets[i]);
+    }
+    updateProgress(markets.length, markets.length, '');
+    await new Promise(r => setTimeout(r, 400));
+    showProgress(false);
+    renderResults(formData);
+  } catch (err) {
+    showProgress(false);
+    document.getElementById('form-section').classList.remove('hidden');
+    alert('Error al regenerar: ' + err.message);
+  }
+}
+
+// ── Supabase — evidencias del expediente ─────────────────────────────────────
+let sbClient = null;
+try {
+  if (typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+    sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+} catch (err) { console.warn('Supabase init failed:', err.message); }
+
+const SB_BUCKET = 'evidencias';
+
+async function uploadEvidencia(expId, file) {
+  if (!sbClient || !db) throw new Error('Supabase o Firestore no disponibles');
+  const session = getSession();
+  if (!session) throw new Error('Sin sesión activa');
+  const fileId   = generateId();
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path     = `${expId}/${fileId}_${safeName}`;
+  const { error } = await sbClient.storage.from(SB_BUCKET).upload(path, file, { cacheControl: '3600', upsert: false });
+  if (error) throw new Error(error.message);
+  const { data: { publicUrl } } = sbClient.storage.from(SB_BUCKET).getPublicUrl(path);
+  const ev = {
+    id: fileId, expId,
+    nombre: file.name,
+    tipo: file.type.startsWith('image/') ? 'imagen' : 'pdf',
+    url: publicUrl, storagePath: path, tamano: file.size,
+    subidoPor: session.userId, subidoPorNombre: session.name,
+    subidoEn: Date.now(),
+    revisado: false, revisadoPor: null, revisadoPorNombre: null, revisadoEn: null,
+  };
+  await db.collection('expedientes').doc(expId).collection('evidencias').doc(fileId).set(ev);
+  return ev;
+}
+
+async function loadEvidencias(expId) {
+  if (!db) return [];
+  try {
+    const snap = await db.collection('expedientes').doc(expId)
+      .collection('evidencias').orderBy('subidoEn', 'asc').get();
+    return snap.docs.map(d => d.data());
+  } catch (e) { console.warn('Load evidencias failed:', e.message); return []; }
+}
+
+async function toggleRevisado(expId, evidenciaId, currentState) {
+  if (!db) return;
+  const session = getSession();
+  if (!session) return;
+  const newState = !currentState;
+  const upd = newState
+    ? { revisado: true,  revisadoPor: session.userId, revisadoPorNombre: session.name, revisadoEn: Date.now() }
+    : { revisado: false, revisadoPor: null, revisadoPorNombre: null, revisadoEn: null };
+  await db.collection('expedientes').doc(expId).collection('evidencias').doc(evidenciaId).update(upd);
+}
+
+async function deleteEvidenciaDoc(expId, evidenciaId, storagePath) {
+  if (sbClient) await sbClient.storage.from(SB_BUCKET).remove([storagePath]).catch(() => {});
+  if (db) await db.collection('expedientes').doc(expId).collection('evidencias').doc(evidenciaId).delete();
+}
+
+async function renderEvidenciasPanel(expId) {
+  const panel = document.getElementById('ev-list');
+  if (!panel) return;
+  panel.innerHTML = '<p class="ev-empty">Cargando...</p>';
+  const items = await loadEvidencias(expId);
+  const isAdmin = getActiveRole() === 'admin';
+  const session = getSession();
+  if (!items.length) {
+    panel.innerHTML = '<p class="ev-empty">Sin evidencias. Sube PDFs de reportes de lab, fotos del producto o declaraciones de conformidad.</p>';
+    return;
+  }
+  panel.innerHTML = items.map(ev => {
+    const icon  = ev.tipo === 'imagen' ? '🖼' : '📄';
+    const fecha = new Date(ev.subidoEn).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
+    const byRev = ev.revisado ? ` · ✓ ${ev.revisadoPorNombre}` : '';
+    return `<div class="ev-item" id="ev-${ev.id}">
+      <span class="ev-icon">${icon}</span>
+      <div class="ev-info">
+        <span class="ev-name" title="${escapeHtml(ev.nombre)}">${escapeHtml(ev.nombre)}</span>
+        <span class="ev-meta">${escapeHtml(ev.subidoPorNombre)} · ${fecha}${byRev}</span>
+      </div>
+      <div class="ev-actions">
+        <button class="btn-ev btn-ev-view" onclick="window.open('${ev.url}','_blank')" title="Ver">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        <button class="btn-ev btn-ev-check${ev.revisado ? ' checked' : ''}"
+                onclick="handleToggleRevisado('${expId}','${ev.id}',${ev.revisado})"
+                title="${ev.revisado ? 'Quitar revisión' : 'Marcar revisado'}">
+          ${ev.revisado ? '✓ Revisado' : 'Revisar'}
+        </button>
+        ${isAdmin ? `<button class="btn-ev btn-ev-del" onclick="handleDeleteEvidencia('${expId}','${ev.id}','${ev.storagePath}')" title="Eliminar">✕</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function handleToggleRevisado(expId, evidenciaId, currentState) {
+  const btn = document.querySelector(`#ev-${evidenciaId} .btn-ev-check`);
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+  try {
+    await toggleRevisado(expId, evidenciaId, currentState);
+    await renderEvidenciasPanel(expId);
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = currentState ? '✓ Revisado' : 'Revisar'; }
+    alert('Error: ' + e.message);
+  }
+}
+
+async function handleDeleteEvidencia(expId, evidenciaId, storagePath) {
+  if (!confirm('¿Eliminar esta evidencia? No se puede deshacer.')) return;
+  const item = document.getElementById(`ev-${evidenciaId}`);
+  if (item) item.style.opacity = '0.4';
+  try {
+    await deleteEvidenciaDoc(expId, evidenciaId, storagePath);
+    await renderEvidenciasPanel(expId);
+  } catch (e) {
+    if (item) item.style.opacity = '1';
+    alert('Error: ' + e.message);
+  }
+}
+
+function setupEvidenciasUpload(expId) {
+  const inp = document.getElementById('ev-file-input');
+  if (!inp) return;
+  const fresh = inp.cloneNode(true);
+  inp.parentNode.replaceChild(fresh, inp);
+  fresh.addEventListener('change', async e => {
+    const files = [...e.target.files];
+    if (!files.length) return;
+    const btn = document.getElementById('btn-ev-upload');
+    if (btn) { btn.disabled = true; btn.textContent = `⏳ Subiendo (${files.length})…`; }
+    let ok = 0; const errs = [];
+    for (const f of files) {
+      const valid = f.type === 'application/pdf' || f.type.startsWith('image/');
+      if (!valid) { errs.push(`${f.name}: tipo no permitido`); continue; }
+      if (f.size > 20 * 1024 * 1024) { errs.push(`${f.name}: excede 20 MB`); continue; }
+      try { await uploadEvidencia(expId, f); ok++; } catch (err) { errs.push(`${f.name}: ${err.message}`); }
+    }
+    fresh.value = '';
+    if (btn) { btn.disabled = false; btn.textContent = '+ Subir'; }
+    await renderEvidenciasPanel(expId);
+    if (errs.length) alert('Errores:\n' + errs.join('\n'));
+    else if (ok > 0) showToast(`✓ ${ok} evidencia${ok > 1 ? 's' : ''} subida${ok > 1 ? 's' : ''}`);
+  });
+}
+
 function escapeHtml(str) {
   return String(str)
     .replace(/&/g, '&amp;')
@@ -599,7 +852,7 @@ function apiErrorMsg(err) {
   const msg = err.message || String(err);
   if (msg.includes('Failed to fetch')) {
     return window.location.protocol === 'file:'
-      ? 'Abre la app en <a href="https://hector5olution5.github.io/compliance-analyzer/" target="_blank" style="color:#185FA5;font-weight:600">hector5olution5.github.io/compliance-analyzer</a> para usar las funciones de IA.'
+      ? 'Abre la app en el servidor (no como archivo local) para usar las funciones de IA.'
       : 'Error de red — verifica tu conexión a internet.';
   }
   return msg;
@@ -858,7 +1111,7 @@ function addComponentRow(nombre = '', material = '', contacto = 'Sin contacto') 
   const row = document.createElement('tr');
   row.dataset.id = id;
   row.innerHTML = `
-    <td><input type="text" placeholder="Ej: Contenedor" value="${nombre}" oninput="syncComponents()"></td>
+    <td><input type="text" placeholder="Ej: Contenedor" value="${escapeHtml(nombre)}" oninput="syncComponents()"></td>
     <td><select onchange="syncComponents()">
       ${MATERIALS.map(m => `<option ${m === material ? 'selected' : ''}>${m}</option>`).join('')}
     </select></td>
@@ -2057,7 +2310,7 @@ function buildHTMLPreview(formData, mercadoKey, cfg, L, aiData) {
     if (c === 'Indirecto') return `<span class="contact-badge contact-indirecto">${contactFn('Indirecto')}</span>`;
     return `<span class="contact-badge contact-sin">${contactFn('Sin contacto')}</span>`;
   };
-  const nivelClass = n => n.includes('ALT') || n === 'HIGH' ? 'nivel-alto' : n.includes('MED') || n === 'MEDIUM' ? 'nivel-medio' : 'nivel-bajo';
+  const nivelClass = n => n.includes('ALT') || n === 'HIGH' ? 'nivel-alto' : n.includes('MED') || n === 'MEDIUM' || n.includes('MÉD') ? 'nivel-medio' : 'nivel-bajo';
 
   return `
 <div class="exp-cover">
@@ -2137,7 +2390,7 @@ ${(() => {
   const aiNc = (aiData.no_conformidades || []).filter(nc => nc.situacion && nc.accion);
   return [...contextual, ...aiNc].map(nc => {
     const crit = (nc.criticidad || '').toUpperCase();
-    const critClass = crit.includes('CRIT') ? 'nivel-alto' : crit.includes('ALT') || crit === 'HIGH' ? 'nivel-medio' : crit.includes('MED') || crit === 'MEDIUM' ? 'nivel-bajo' : '';
+    const critClass = crit.includes('CRIT') ? 'nivel-alto' : crit.includes('ALT') || crit === 'HIGH' ? 'nivel-medio' : crit.includes('MED') || crit === 'MEDIUM' || crit.includes('MÉD') ? 'nivel-bajo' : '';
     return `<tr><td>${nc.situacion}</td><td class="${critClass}">${nc.criticidad || ''}</td><td>${nc.accion}</td><td>${nc.responsable || ''}</td><td>${nc.plazo || ''}</td></tr>`;
   }).join('');
 })()}
@@ -2227,7 +2480,7 @@ async function buildDocx(formData, mercadoKey, cfg, L, aiData) {
 
   const fourColTable = (h1, h2, h3, h4, rows) => new Table({ rows: [new TableRow({ children: [hdrCell(h1, 15), hdrCell(h2, 20), hdrCell(h3, 30), hdrCell(h4, 35)], tableHeader: true }), ...rows.map(([a, b, c, d], i) => new TableRow({ children: [dataCell(a, i % 2 ? 'F8F9FA' : null, 15), dataCell(b, i % 2 ? 'F8F9FA' : null, 20), dataCell(c, i % 2 ? 'F8F9FA' : null, 30), dataCell(d, i % 2 ? 'F8F9FA' : null, 35)] }))], width: tableWidth });
 
-  const nivelBg = n => (n.includes('ALT') || n === 'HIGH') ? RED_BG : (n.includes('MED') || n === 'MEDIUM') ? AMB_BG : GRN_BG;
+  const nivelBg = n => (n.includes('ALT') || n === 'HIGH') ? RED_BG : (n.includes('MED') || n === 'MEDIUM' || n.includes('MÉD')) ? AMB_BG : GRN_BG;
   const contactFn = c => cfg.idioma === 'en' ? (c === 'Directo' ? 'Direct' : c === 'Indirecto' ? 'Indirect' : 'No contact') : cfg.idioma === 'pt' ? (c === 'Directo' ? 'Direto' : c === 'Indirecto' ? 'Indireto' : 'Sem contato') : c;
 
   const warnings = getContextualWarnings(formData, cfg, L, aiData);
@@ -2260,7 +2513,7 @@ async function buildDocx(formData, mercadoKey, cfg, L, aiData) {
     sub(L.s3_4), ...[...cfg.quimica_base,...(tieneElec?cfg.quimica_elec:[])].map(n => bullet(n)),
     // Section 4
     sec(4, L.s4), note(L.nota_riesgos),
-    new Table({ rows: [new TableRow({ children: [hdrCell(L.riesgo,40),hdrCell(L.nivel_ini,12),hdrCell(L.medida,36),hdrCell(L.nivel_res,12)], tableHeader:true }), ...risks.map((r,i) => new TableRow({ children: [dataCell(r.riesgo,i%2?'F8F9FA':null,40), new TableCell({children:[new Paragraph({children:[new TextRun({text:r.nivel_inicial,font:'Calibri',size:20,bold:true,color:r.nivel_inicial.includes('ALT')||r.nivel_inicial==='HIGH'?'C0392B':r.nivel_inicial.includes('MED')||r.nivel_inicial==='MEDIUM'?'B7770D':'2E7D32'})],spacing:{before:60,after:60}}),], shading:{type:ShadingType.SOLID,color:nivelBg(r.nivel_inicial)},borders}), dataCell(r.medida_control,i%2?'F8F9FA':null,36), dataCell(r.nivel_residual,GRN_BG,12)] }))], width:tableWidth }),
+    new Table({ rows: [new TableRow({ children: [hdrCell(L.riesgo,40),hdrCell(L.nivel_ini,12),hdrCell(L.medida,36),hdrCell(L.nivel_res,12)], tableHeader:true }), ...risks.map((r,i) => new TableRow({ children: [dataCell(r.riesgo,i%2?'F8F9FA':null,40), new TableCell({children:[new Paragraph({children:[new TextRun({text:r.nivel_inicial,font:'Calibri',size:20,bold:true,color:r.nivel_inicial.includes('ALT')||r.nivel_inicial==='HIGH'?'C0392B':r.nivel_inicial.includes('MED')||r.nivel_inicial==='MEDIUM'||r.nivel_inicial.includes('MÉD')?'B7770D':'2E7D32'})],spacing:{before:60,after:60}}),], shading:{type:ShadingType.SOLID,color:nivelBg(r.nivel_inicial)},borders}), dataCell(r.medida_control,i%2?'F8F9FA':null,36), dataCell(r.nivel_residual,GRN_BG,12)] }))], width:tableWidth }),
     // Section 5
     sec(5, L.s5), sub(L.s5_1), note(L.nota_ensayos),
     ...(ensayosMoca.length>0?[threeColTable(L.ensayo,L.norma,L.frecuencia,ensayosMoca.map(e=>[e.ensayo,e.norma,e.frecuencia]))]:[] ),
@@ -2275,10 +2528,10 @@ async function buildDocx(formData, mercadoKey, cfg, L, aiData) {
     // Section 8
     sec(8, L.s8),
     new Paragraph({children:[new TextRun({text:L.nc_intro,font:'Calibri',size:18,italics:true,color:GRAY})],spacing:{before:40,after:120},border:{left:{style:BorderStyle.SINGLE,size:4,color:BLUE}},indent:{left:200}}),
-    new Table({rows:[new TableRow({children:[hdrCell(L.situacion,32),hdrCell(L.criticidad,10),hdrCell(L.accion_req,30),hdrCell(L.responsable,15),hdrCell(L.plazo,13)],tableHeader:true}),...(()=>{const rows=[...getContextualNonConformities(formData,cfg,L),...(aiData.no_conformidades||[]).filter(nc=>nc.situacion&&nc.accion)];return rows.map((nc,i)=>{const crit=(nc.criticidad||'').toUpperCase();const bg=crit.includes('CRIT')?RED_BG:crit.includes('ALT')||crit==='HIGH'?AMB_BG:crit.includes('MED')||crit==='MEDIUM'?GRN_BG:(i%2?'F8F9FA':null);return new TableRow({children:[dataCell(nc.situacion,i%2?'F8F9FA':null,32),new TableCell({children:[new Paragraph({children:[new TextRun({text:nc.criticidad||'',font:'Calibri',size:18,bold:true})],spacing:{before:60,after:60}})],shading:{type:ShadingType.SOLID,color:bg||'FFFFFF'},borders}),dataCell(nc.accion,i%2?'F8F9FA':null,30),dataCell(nc.responsable||'',i%2?'F8F9FA':null,15),dataCell(nc.plazo||'',i%2?'F8F9FA':null,13)]})})})()],width:tableWidth}),
+    new Table({rows:[new TableRow({children:[hdrCell(L.situacion,32),hdrCell(L.criticidad,10),hdrCell(L.accion_req,30),hdrCell(L.responsable,15),hdrCell(L.plazo,13)],tableHeader:true}),...(()=>{const rows=[...getContextualNonConformities(formData,cfg,L),...(aiData.no_conformidades||[]).filter(nc=>nc.situacion&&nc.accion)];return rows.map((nc,i)=>{const crit=(nc.criticidad||'').toUpperCase();const bg=crit.includes('CRIT')?RED_BG:crit.includes('ALT')||crit==='HIGH'?AMB_BG:crit.includes('MED')||crit==='MEDIUM'||crit.includes('MÉD')?GRN_BG:(i%2?'F8F9FA':null);return new TableRow({children:[dataCell(nc.situacion,i%2?'F8F9FA':null,32),new TableCell({children:[new Paragraph({children:[new TextRun({text:nc.criticidad||'',font:'Calibri',size:18,bold:true})],spacing:{before:60,after:60}})],shading:{type:ShadingType.SOLID,color:bg||'FFFFFF'},borders}),dataCell(nc.accion,i%2?'F8F9FA':null,30),dataCell(nc.responsable||'',i%2?'F8F9FA':null,15),dataCell(nc.plazo||'',i%2?'F8F9FA':null,13)]})})})()],width:tableWidth}),
     // Section 9
     sec(9, L.s9),
-    new Table({rows:[new TableRow({children:[hdrCell(L.prioridad,12),hdrCell(L.accion,40),hdrCell(L.responsable,24),hdrCell(L.plazo,24)],tableHeader:true}),...(aiData.acciones_recomendadas||[]).map((a,i)=>{const bg=a.prioridad?.includes('ALT')||a.prioridad==='HIGH'?RED_BG:a.prioridad?.includes('MED')||a.prioridad==='MEDIUM'?AMB_BG:GRN_BG;return new TableRow({children:[new TableCell({children:[new Paragraph({children:[new TextRun({text:a.prioridad,font:'Calibri',size:20,bold:true})],spacing:{before:60,after:60}})],shading:{type:ShadingType.SOLID,color:bg},borders}),dataCell(a.accion,i%2?'F8F9FA':null,40),dataCell(a.responsable,i%2?'F8F9FA':null,24),dataCell(a.plazo,i%2?'F8F9FA':null,24)]})})],width:tableWidth}),
+    new Table({rows:[new TableRow({children:[hdrCell(L.prioridad,12),hdrCell(L.accion,40),hdrCell(L.responsable,24),hdrCell(L.plazo,24)],tableHeader:true}),...(aiData.acciones_recomendadas||[]).map((a,i)=>{const bg=a.prioridad?.includes('ALT')||a.prioridad==='HIGH'?RED_BG:a.prioridad?.includes('MED')||a.prioridad==='MEDIUM'||a.prioridad?.includes('MÉD')?AMB_BG:GRN_BG;return new TableRow({children:[new TableCell({children:[new Paragraph({children:[new TextRun({text:a.prioridad,font:'Calibri',size:20,bold:true})],spacing:{before:60,after:60}})],shading:{type:ShadingType.SOLID,color:bg},borders}),dataCell(a.accion,i%2?'F8F9FA':null,40),dataCell(a.responsable,i%2?'F8F9FA':null,24),dataCell(a.plazo,i%2?'F8F9FA':null,24)]})})],width:tableWidth}),
     // Section 10
     sec(10, L.s10),
     fourColTable(L.version,L.fecha,L.autor,L.cambios,[[version,fecha,formData.responsable||pd,cfg.idioma==='en'?'Initial version':cfg.idioma==='pt'?'Versão inicial':'Versión inicial']]),
@@ -2302,7 +2555,8 @@ function renderResults(formData) {
   const tabsEl = document.getElementById('results-market-tabs');
   tabsEl.innerHTML =
     keys.map(k => `<button class="result-tab" data-key="${k}" onclick="showResultTab('${k}')">${MARKETS[k]?.flag || ''} ${MARKETS[k]?.nombre || k}</button>`).join('') +
-    `<button class="result-tab result-tab--label" data-key="etiquetado" onclick="showResultTab('etiquetado')">🏷 Etiquetado</button>`;
+    `<button class="result-tab result-tab--label" data-key="etiquetado" onclick="showResultTab('etiquetado')">🏷 Etiquetado</button>` +
+    `<button class="result-tab result-tab--ev" data-key="evidencias" onclick="showResultTab('evidencias')">📎 Evidencias</button>`;
   const hasBlobs = keys.some(k => generatedDocs[k].blob);
   document.getElementById('btn-download-zip').classList.toggle('hidden', keys.length < 2 || !hasBlobs);
   setupLabelCheck();
@@ -2318,6 +2572,35 @@ function showResultTab(key) {
     content?.classList.add('hidden');
     inline?.classList.remove('hidden');
     renderLabelCtxBox();
+    return;
+  }
+  if (key === 'evidencias') {
+    inline?.classList.add('hidden');
+    content?.classList.remove('hidden');
+    const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+    const expId = currentHistoryIndex !== null ? hist[currentHistoryIndex]?.expId : null;
+    content.innerHTML = `
+      <div class="expediente-card">
+        <div class="ev-panel">
+          <div class="ev-header">
+            <span class="ev-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              Evidencias del expediente
+            </span>
+            ${sbClient && expId ? `
+              <button id="btn-ev-upload" class="btn-ev-upload" onclick="document.getElementById('ev-file-input').click()">+ Subir</button>
+              <input id="ev-file-input" type="file" accept=".pdf,image/*" multiple style="display:none">
+            ` : !sbClient ? '<span class="ev-no-sb">Configura Supabase para subir archivos</span>' : ''}
+          </div>
+          <div id="ev-list" class="ev-list">
+            ${expId ? '<p class="ev-empty">Cargando...</p>' : '<p class="ev-empty">Guarda el expediente primero para adjuntar evidencias.</p>'}
+          </div>
+        </div>
+      </div>`;
+    if (expId) {
+      renderEvidenciasPanel(expId);
+      if (sbClient) setupEvidenciasUpload(expId);
+    }
     return;
   }
   inline?.classList.add('hidden');
@@ -2343,7 +2626,7 @@ function showResultTab(key) {
   const { docxError } = generatedDocs[key];
   const wordBtn = blob
     ? `<button class="btn-primary" onclick="downloadDoc('${key}')">⬇ Descargar Word (.docx)</button>`
-    : `<span style="font-size:12px;color:#E53E3E" title="${docxError || ''}">⚠ Word no disponible — recarga la página e intenta de nuevo</span>`;
+    : `<span style="font-size:12px;color:#888">Word no disponible en esta sesión — usa "Regenerar" en el historial</span>`;
   document.getElementById('results-content').innerHTML = `
     <div class="expediente-card">
       ${statusBar}
@@ -2398,6 +2681,7 @@ function saveToHistory(formData, markets) {
   const previews = {};
   markets.forEach(k => { if (generatedDocs[k]?.html) previews[k] = generatedDocs[k].html; });
   const entry = {
+    expId: generateId(),
     nombre: formData.nombre,
     categoria: formData.categoria,
     mercados: markets,
@@ -2419,6 +2703,13 @@ function saveToHistory(formData, markets) {
     try { localStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(0, 10))); } catch (_) {}
   }
   renderHistory();
+
+  // Save formData to Firestore in background (cross-device access)
+  if (db) {
+    saveExpedienteToFirestore(0, markets)
+      .then(() => showToast('☁ Expediente guardado en la nube'))
+      .catch(e => console.warn('Cloud save error:', e));
+  }
 }
 
 const STATUS_CFG = {
@@ -2441,19 +2732,24 @@ function renderHistory() {
   el.innerHTML = hist.map((h, i) => {
     const hasPreviews = h.previews && Object.keys(h.previews).length > 0;
     const sc = STATUS_CFG[h.status || 'borrador'];
-    const hasFormData = !!h.formData;
+    const hasFormData = !!h.formData && !!(h.mercados || []).length;
+    const hasCloud = !!h.expId;
+    const cloudBadge = hasCloud
+      ? `<span style="font-size:11px;color:#185FA5;font-weight:600;margin-left:6px" title="Guardado en la nube">☁</span>`
+      : '';
     return `
     <div class="history-item">
       <div class="history-item-top">
         <div>
-          <div class="history-name">${h.nombre}</div>
-          <div class="history-meta">${h.categoria} · ${h.fecha}</div>
+          <div class="history-name">${escapeHtml(h.nombre)}${cloudBadge}</div>
+          <div class="history-meta">${escapeHtml(h.categoria || '')} · ${h.fecha}</div>
           <div class="history-markets">${(h.mercados || FIXED_MARKETS).map(k => (MARKETS[k]?.flag || '') + ' ' + (MARKETS[k]?.nombre || k)).join(' · ')}</div>
         </div>
         <span class="history-status-badge ${sc.cls}">${sc.label}</span>
       </div>
       <div class="history-item-actions">
         ${hasPreviews ? `<button class="btn-hist-action btn-hist-view" onclick="openHistoryItem(${i})">Ver expediente</button>` : ''}
+        ${hasFormData ? `<button class="btn-hist-action btn-hist-template btn-hist-regen" onclick="regenerateExpediente(${i})" title="Regenerar Word con IA">☁ Regenerar</button>` : ''}
         ${hasFormData ? `<button class="btn-hist-action btn-hist-template" onclick="loadAsTemplate(${i})">Usar como base</button>` : ''}
         <button class="btn-delete-history" onclick="deleteHistoryItem(${i})" title="Eliminar">✕</button>
       </div>
@@ -2464,10 +2760,9 @@ function renderHistory() {
 function openHistoryItem(index) {
   const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
   const h = hist[index];
-  if (!h?.previews) return;
+  if (!h?.previews || !Object.keys(h.previews).length) return;
   closeHistory();
   currentHistoryIndex = index;
-  // Restore generatedDocs with saved HTML (no blobs — download unavailable)
   generatedDocs = {};
   (h.mercados || FIXED_MARKETS).forEach(k => {
     if (h.previews[k]) generatedDocs[k] = { html: h.previews[k], blob: null };
@@ -2478,18 +2773,20 @@ function openHistoryItem(index) {
 
 function deleteHistoryItem(index) {
   const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+  const expId = hist[index]?.expId;
   hist.splice(index, 1);
   localStorage.setItem(HIST_KEY, JSON.stringify(hist));
   renderHistory();
+  if (expId && db) db.collection('expedientes').doc(expId).delete().catch(() => {});
 }
 
 function seedDemoHistory() {
   const demos = [
-    { nombre: 'Battle Cat 3D Container', categoria: 'Contenedor de alimentos', mercados: ['Internacional', 'LATAM', 'Mexico', 'CAM'], fecha: '12/05/2026', ts: Date.now() - 86400000 * 3, status: 'en_revision', nota: 'Pendiente validar migración ABS con proveedor.' },
-    { nombre: 'Happy Meal Tray Set', categoria: 'Set de utensilios', mercados: FIXED_MARKETS, fecha: '02/05/2026', ts: Date.now() - 86400000 * 13, status: 'aprobado', nota: '' },
-    { nombre: 'Dino Bowl Kids', categoria: 'Plato / Bowl', mercados: ['Internacional', 'LATAM', 'Mexico', 'CAM'], fecha: '28/04/2026', ts: Date.now() - 86400000 * 17, status: 'borrador', nota: 'Falta confirmar edad mínima con equipo de diseño.' },
-    { nombre: 'Thermo Cup Pro 500ml', categoria: 'Vaso / Taza', mercados: FIXED_MARKETS, fecha: '10/04/2026', ts: Date.now() - 86400000 * 35, status: 'aprobado', nota: '' },
-    { nombre: 'Kids Lunchbox Adventure', categoria: 'Contenedor de alimentos', mercados: ['Internacional', 'LATAM', 'Mexico', 'CAM'], fecha: '20/03/2026', ts: Date.now() - 86400000 * 56, status: 'borrador', nota: '' },
+    { nombre: 'Battle Cat 3D Container', categoria: 'Contenedor de alimentos', mercados: ['Internacional', 'LATAM', 'Mexico', 'CAM'], fecha: new Date(Date.now() - 86400000 * 3).toISOString().split('T')[0], ts: Date.now() - 86400000 * 3, status: 'en_revision', nota: 'Pendiente validar migración ABS con proveedor.' },
+    { nombre: 'Happy Meal Tray Set', categoria: 'Set de utensilios', mercados: FIXED_MARKETS, fecha: new Date(Date.now() - 86400000 * 13).toISOString().split('T')[0], ts: Date.now() - 86400000 * 13, status: 'aprobado', nota: '' },
+    { nombre: 'Dino Bowl Kids', categoria: 'Plato / Bowl', mercados: ['Internacional', 'LATAM', 'Mexico', 'CAM'], fecha: new Date(Date.now() - 86400000 * 17).toISOString().split('T')[0], ts: Date.now() - 86400000 * 17, status: 'borrador', nota: 'Falta confirmar edad mínima con equipo de diseño.' },
+    { nombre: 'Thermo Cup Pro 500ml', categoria: 'Vaso / Taza', mercados: FIXED_MARKETS, fecha: new Date(Date.now() - 86400000 * 35).toISOString().split('T')[0], ts: Date.now() - 86400000 * 35, status: 'aprobado', nota: '' },
+    { nombre: 'Kids Lunchbox Adventure', categoria: 'Contenedor de alimentos', mercados: ['Internacional', 'LATAM', 'Mexico', 'CAM'], fecha: new Date(Date.now() - 86400000 * 56).toISOString().split('T')[0], ts: Date.now() - 86400000 * 56, status: 'borrador', nota: '' },
   ];
   localStorage.setItem(HIST_KEY, JSON.stringify(demos));
   renderHistory();
@@ -2541,8 +2838,10 @@ function changeStatus(index, newStatus) {
   if (!hist[index]) return;
   hist[index].status = newStatus;
   localStorage.setItem(HIST_KEY, JSON.stringify(hist));
+  if (db && hist[index].expId) {
+    db.collection('expedientes').doc(hist[index].expId).update({ status: newStatus }).catch(() => {});
+  }
   renderHistory();
-  // Re-render status bar in results
   if (activeResultTab) showResultTab(activeResultTab);
 }
 
@@ -2552,6 +2851,9 @@ function saveNoteToHistory(index, text) {
   if (!hist[index]) return;
   hist[index].nota = text;
   try { localStorage.setItem(HIST_KEY, JSON.stringify(hist)); } catch (e) {}
+  if (db && hist[index].expId) {
+    db.collection('expedientes').doc(hist[index].expId).update({ nota: text }).catch(() => {});
+  }
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
@@ -2570,6 +2872,7 @@ function showToast(msg) {
 function openHistory() {
   document.getElementById('history-overlay').classList.remove('hidden');
   document.getElementById('history-drawer').classList.add('open');
+  mergeCloudHistory().catch(() => {});
 }
 
 function closeHistory() {
@@ -2591,6 +2894,8 @@ function resetForm() {
   addComponentRow();
   document.getElementById('ps-status').innerHTML = '';
   document.getElementById('ps-upload-area').className = 'ps-upload-area';
+  const psInput = document.getElementById('f-ps'); if (psInput) psInput.value = '';
+  const pdfInput = document.getElementById('f-pdf'); if (pdfInput) pdfInput.value = '';
 
   // ── Tab 3 ──
   document.querySelectorAll('.char-option input').forEach(cb => { cb.checked = false; cb.closest('.char-option').classList.remove('selected'); });

@@ -1490,3 +1490,64 @@ textarea { resize: vertical; }
   letter-spacing: .02em;
   min-height: 72px;
 }
+
+/* ── Evidencias del expediente ──────────────────────────────────────── */
+.result-tab--ev { border-color: #D97706 !important; }
+.result-tab--ev.active { background: #D97706 !important; border-color: #D97706 !important; }
+
+.ev-panel { padding: 4px 0 8px; }
+.ev-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px; flex-wrap: wrap;
+}
+.ev-title {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600; color: #374151; flex: 1;
+}
+.btn-ev-upload {
+  font-size: 12px; font-weight: 600; padding: 5px 14px;
+  background: #D97706; color: white; border: none;
+  border-radius: 6px; cursor: pointer; transition: background .15s;
+  font-family: var(--font);
+}
+.btn-ev-upload:hover { background: #B45309; }
+.btn-ev-upload:disabled { opacity: .6; cursor: not-allowed; }
+.ev-no-sb { font-size: 11px; color: #9CA3AF; }
+
+.ev-list { display: flex; flex-direction: column; gap: 6px; }
+.ev-empty {
+  font-size: 12px; color: #9CA3AF; text-align: center;
+  padding: 20px 16px; background: #F9FAFB;
+  border: 1px dashed #E5E7EB; border-radius: 8px; margin: 0;
+}
+.ev-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; background: #F9FAFB;
+  border: 1px solid #E5E7EB; border-radius: 8px;
+  transition: opacity .2s;
+}
+.ev-item:hover { border-color: #D1D5DB; }
+.ev-icon { font-size: 20px; flex-shrink: 0; line-height: 1; }
+.ev-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ev-name {
+  font-size: 13px; font-weight: 500; color: #111827;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ev-meta { font-size: 11px; color: #6B7280; }
+.ev-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.btn-ev {
+  font-size: 11px; padding: 4px 9px;
+  border: 1px solid #D1D5DB; border-radius: 5px;
+  cursor: pointer; background: white; color: #374151;
+  transition: all .15s; font-family: var(--font);
+  display: flex; align-items: center; gap: 4px;
+}
+.btn-ev:disabled { opacity: .5; cursor: not-allowed; }
+.btn-ev-view { color: #185FA5; border-color: #BFDBFE; background: #EFF6FF; }
+.btn-ev-view:hover { background: #DBEAFE; }
+.btn-ev-check { color: #6B7280; }
+.btn-ev-check:hover { border-color: #9CA3AF; }
+.btn-ev-check.checked { background: #ECFDF5; border-color: #6EE7B7; color: #065F46; font-weight: 600; }
+.btn-ev-check.checked:hover { background: #D1FAE5; }
+.btn-ev-del { color: #EF4444; border-color: #FECACA; background: #FFF5F5; }
+.btn-ev-del:hover { background: #FEE2E2; }
