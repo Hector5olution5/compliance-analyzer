@@ -238,9 +238,6 @@ function finishLogin(user) {
   hideLoginScreen();
   applyRoleRestrictions(user.role);
   renderUserBadge(user);
-  if (user.role === 'admin' && !getApiKey()) {
-    setTimeout(openSettingsModal, 700);
-  }
   if (user.role === 'viewer') {
     setTimeout(openHistory, 300);
   }
@@ -494,32 +491,16 @@ function cancelAddUser() {
 
 function setupSettingsModal() {
   document.getElementById('btn-settings').addEventListener('click', openSettingsModal);
-  document.getElementById('btn-save-key').addEventListener('click', () => {
-    const val = document.getElementById('input-apikey').value.trim();
-    if (val) localStorage.setItem('claude_api_key', val);
+  document.getElementById('btn-close-settings').addEventListener('click', () => {
     document.getElementById('modal-settings').classList.add('hidden');
   });
-  document.getElementById('btn-cancel-key').addEventListener('click', () => {
-    document.getElementById('modal-settings').classList.add('hidden');
-  });
-  document.querySelectorAll('.settings-tab').forEach(tab =>
-    tab.addEventListener('click', () => switchSettingsTab(tab.dataset.stab))
-  );
 }
 
 function openSettingsModal() {
   if (getActiveRole() !== 'admin') return;
-  document.getElementById('input-apikey').value = localStorage.getItem('claude_api_key') || '';
   cancelAddUser();
-  switchSettingsTab('apikey');
-  renderUsersPanel();
+  syncUsersFromFirestore().then(() => renderUsersPanel());
   document.getElementById('modal-settings').classList.remove('hidden');
-}
-
-function switchSettingsTab(tab) {
-  document.querySelectorAll('.settings-tab').forEach(t => t.classList.toggle('active', t.dataset.stab === tab));
-  document.querySelectorAll('.stab-content').forEach(p => p.classList.toggle('hidden', p.dataset.stab !== tab));
-  if (tab === 'users') syncUsersFromFirestore().then(() => renderUsersPanel());
 }
 
 // ── Init ─────────────────────────────────────────────────────────────────────
@@ -552,9 +533,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('welcome-screen').classList.add('hidden');
       applyRoleRestrictions(session.role);
       renderUserBadge(user);
-      if (session.role === 'admin' && !getApiKey()) {
-        setTimeout(openSettingsModal, 800);
-      }
       if (session.role === 'viewer') {
         setTimeout(openHistory, 300);
       }
@@ -1218,9 +1196,7 @@ async function generateForMarket(formData, mercadoKey) {
 
 // ── Claude API ────────────────────────────────────────────────────────────────
 const CLAUDE_BASE_HEADERS = () => ({
-  'x-api-key': getApiKey(),
   'anthropic-version': '2023-06-01',
-  'anthropic-dangerous-direct-browser-access': 'true',
   'Content-Type': 'application/json',
 });
 
@@ -1234,8 +1210,6 @@ async function readFileAsBase64(file) {
 }
 
 async function callClaudeWithDoc(pdfFile, textPrompt, { system, maxTokens = 1200, model = 'claude-haiku-4-5-20251001' } = {}) {
-  const key = getApiKey();
-  if (!key) throw new Error('Falta la API key de Claude. Agrégala en Configuración.');
   const base64 = await readFileAsBase64(pdfFile);
   const body = {
     model, max_tokens: maxTokens,
@@ -1245,7 +1219,7 @@ async function callClaudeWithDoc(pdfFile, textPrompt, { system, maxTokens = 1200
     ]}]
   };
   if (system) body.system = system;
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch('/api/claude', {
     method: 'POST', headers: CLAUDE_BASE_HEADERS(), body: JSON.stringify(body)
   });
   if (!res.ok) throw new Error(`Claude API error ${res.status}: ${await res.text()}`);
@@ -1254,10 +1228,9 @@ async function callClaudeWithDoc(pdfFile, textPrompt, { system, maxTokens = 1200
 }
 
 async function callClaude(prompt, { system, maxTokens = 1200, model = 'claude-haiku-4-5-20251001' } = {}) {
-  if (!getApiKey()) throw new Error('Falta la API key de Claude. Agrégala en Configuración.');
   const body = { model, max_tokens: maxTokens, messages: [{ role: 'user', content: prompt }] };
   if (system) body.system = system;
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch('/api/claude', {
     method: 'POST', headers: CLAUDE_BASE_HEADERS(), body: JSON.stringify(body)
   });
   if (!res.ok) throw new Error(`Claude API error ${res.status}: ${await res.text()}`);
@@ -1266,10 +1239,9 @@ async function callClaude(prompt, { system, maxTokens = 1200, model = 'claude-ha
 }
 
 async function callClaudeVision(file, textPrompt) {
-  if (!getApiKey()) throw new Error('Falta la API key de Claude. Agrégala en Configuración.');
   const base64 = await readFileAsBase64(file);
   const mediaType = file.type || 'image/png';
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch('/api/claude', {
     method: 'POST', headers: CLAUDE_BASE_HEADERS(),
     body: JSON.stringify({
       model: 'claude-sonnet-4-6', max_tokens: 2000,

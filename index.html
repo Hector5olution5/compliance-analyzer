@@ -195,62 +195,45 @@
 <!-- Settings Modal -->
 <div id="modal-settings" class="modal hidden">
   <div class="modal-box modal-settings-box">
-    <div class="settings-tabs">
-      <button class="settings-tab active" data-stab="apikey">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="15" r="3"/><path d="M11 15h9M17 12v6"/><path d="M15 12v6"/></svg>
-        API Key
-      </button>
-      <button class="settings-tab" data-stab="users">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Usuarios
+    <div class="modal-settings-header">
+      <h3 style="margin:0;font-size:16px;color:var(--navy)">Gestión de usuarios</h3>
+      <button id="btn-close-settings" class="btn-icon-sm" title="Cerrar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
 
-    <!-- Panel: API Key -->
-    <div class="stab-content" data-stab="apikey">
-      <p class="modal-desc">Tu API key de Anthropic se guarda localmente en el navegador.</p>
-      <input id="input-apikey" type="password" placeholder="sk-ant-...">
-      <div class="modal-actions">
-        <button id="btn-save-key" class="btn-primary">Guardar</button>
-        <button id="btn-cancel-key" class="btn-secondary">Cancelar</button>
+    <div class="users-panel-header">
+      <span class="users-count" id="users-count"></span>
+      <div style="display:flex;gap:8px">
+        <button id="btn-export-users" class="btn-secondary btn-sm" onclick="exportUsers()">↑ Exportar</button>
+        <button id="btn-add-user" class="btn-primary btn-sm" onclick="showAddUserForm()">+ Agregar</button>
       </div>
     </div>
 
-    <!-- Panel: Usuarios -->
-    <div class="stab-content hidden" data-stab="users">
-      <div class="users-panel-header">
-        <span class="users-count" id="users-count"></span>
-        <div style="display:flex;gap:8px">
-          <button id="btn-export-users" class="btn-secondary btn-sm" onclick="exportUsers()">↑ Exportar</button>
-          <button id="btn-add-user" class="btn-primary btn-sm" onclick="showAddUserForm()">+ Agregar</button>
-        </div>
+    <!-- Add user form -->
+    <div id="user-add-form" class="user-add-form hidden">
+      <input id="new-user-name" type="text" placeholder="Nombre completo" autocomplete="off">
+      <select id="new-user-role">
+        <option value="coord_desarrollo">Coord. Desarrollo de Producto</option>
+        <option value="coord_compliance">Coord. Compliance</option>
+        <option value="gerente_nd">Gerente Nuevos Desarrollos</option>
+        <option value="coord_supply">Coord. Supply Chain</option>
+        <option value="analyst">Analista</option>
+        <option value="viewer">Visor — solo lectura</option>
+        <option value="admin">Administrador</option>
+      </select>
+      <div class="pin-input-row">
+        <input id="new-user-pin" type="password" maxlength="4" inputmode="numeric" placeholder="PIN (4 dígitos)">
+        <input id="new-user-pin-confirm" type="password" maxlength="4" inputmode="numeric" placeholder="Confirmar PIN">
       </div>
-
-      <!-- Add user form -->
-      <div id="user-add-form" class="user-add-form hidden">
-        <input id="new-user-name" type="text" placeholder="Nombre completo" autocomplete="off">
-        <select id="new-user-role">
-          <option value="coord_desarrollo">Coord. Desarrollo de Producto</option>
-          <option value="coord_compliance">Coord. Compliance</option>
-          <option value="gerente_nd">Gerente Nuevos Desarrollos</option>
-          <option value="coord_supply">Coord. Supply Chain</option>
-          <option value="analyst">Analista</option>
-          <option value="viewer">Visor — solo lectura</option>
-          <option value="admin">Administrador</option>
-        </select>
-        <div class="pin-input-row">
-          <input id="new-user-pin" type="password" maxlength="4" inputmode="numeric" placeholder="PIN (4 dígitos)">
-          <input id="new-user-pin-confirm" type="password" maxlength="4" inputmode="numeric" placeholder="Confirmar PIN">
-        </div>
-        <p id="new-user-error" class="form-error hidden"></p>
-        <div class="modal-actions" style="margin-top:10px">
-          <button class="btn-primary btn-sm" onclick="saveNewUser()">Guardar</button>
-          <button class="btn-secondary btn-sm" onclick="cancelAddUser()">Cancelar</button>
-        </div>
+      <p id="new-user-error" class="form-error hidden"></p>
+      <div class="modal-actions" style="margin-top:10px">
+        <button class="btn-primary btn-sm" onclick="saveNewUser()">Guardar</button>
+        <button class="btn-secondary btn-sm" onclick="cancelAddUser()">Cancelar</button>
       </div>
-
-      <div id="users-list"></div>
     </div>
+
+    <div id="users-list"></div>
 
   </div>
 </div>

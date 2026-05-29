@@ -1387,6 +1387,7 @@ textarea { resize: vertical; }
 
 /* ── Settings modal (expanded) ── */
 .modal-settings-box { width: 430px; max-width: 95vw; max-height: 82vh; overflow-y: auto; }
+.modal-settings-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
 
 .settings-tabs {
   display: flex; gap: 2px;
