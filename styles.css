@@ -1375,7 +1375,7 @@ textarea { resize: vertical; }
 }
 .user-badge-info { display: flex; flex-direction: column; }
 .user-badge-name { font-size: 12px; font-weight: 600; color: white; line-height: 1.25; }
-.user-badge-role { font-size: 10px; color: rgba(255,255,255,.5); line-height: 1.25; }
+.user-badge-role { font-size: 10px; color: rgba(255,255,255,.5); line-height: 1.25; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .user-badge-logout {
   background: none; border: none;
   color: rgba(255,255,255,.45);

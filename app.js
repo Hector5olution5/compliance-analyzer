@@ -10,8 +10,24 @@ const HIST_KEY = 'ca_history_v3';
 // ── Auth ─────────────────────────────────────────────────────────────────────
 const USERS_KEY = 'ca_users_v1';
 const SESSION_KEY = 'ca_session';
-const ROLE_LABELS = { admin: 'Administrador', analyst: 'Analista', viewer: 'Visor' };
-const ROLE_COLORS = { admin: '#185FA5', analyst: '#2E7D32', viewer: '#9CA3AF' };
+const ROLE_LABELS = {
+  admin:            'Administrador',
+  analyst:          'Analista',
+  viewer:           'Visor',
+  coord_desarrollo: 'Coord. Desarrollo de Producto',
+  coord_compliance: 'Coord. Compliance',
+  gerente_nd:       'Gerente Nuevos Desarrollos',
+  coord_supply:     'Coord. Supply Chain'
+};
+const ROLE_COLORS = {
+  admin:            '#185FA5',
+  analyst:          '#2E7D32',
+  viewer:           '#9CA3AF',
+  coord_desarrollo: '#7B3F9E',
+  coord_compliance: '#B71C1C',
+  gerente_nd:       '#00695C',
+  coord_supply:     '#E65100'
+};
 
 let _loginSelectedUser = null;
 let _loginPinBuffer = '';
@@ -202,26 +218,22 @@ function applyRoleRestrictions(role) {
   const isViewer = role === 'viewer';
   const isAdmin  = role === 'admin';
 
-  // Viewers can't generate
+  // Only viewers can't generate
   const genSec = document.getElementById('generate-section');
   if (genSec && isViewer) genSec.style.display = 'none';
 
-  // Non-admins: hide settings button
+  // Only admins see settings
   const btnSettings = document.getElementById('btn-settings');
   if (btnSettings) btnSettings.style.display = isAdmin ? '' : 'none';
 
-  // Viewers: dim form and disable interaction + no label analysis
+  // Viewers: read-only mode — dim form, hide uploads and label analysis
   if (isViewer) {
     const formSec = document.getElementById('form-section');
     if (formSec) { formSec.style.opacity = '0.55'; formSec.style.pointerEvents = 'none'; }
-    const psArea = document.getElementById('ps-upload-area');
-    if (psArea) psArea.style.display = 'none';
-    const upArea = document.getElementById('upload-area');
-    if (upArea) upArea.style.display = 'none';
-    const labelZone = document.getElementById('label-upload-zone');
-    if (labelZone) labelZone.style.display = 'none';
-    const btnRunLabel = document.getElementById('btn-run-label');
-    if (btnRunLabel) btnRunLabel.style.display = 'none';
+    ['ps-upload-area', 'upload-area', 'label-upload-zone', 'btn-run-label'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
     const labelSel = document.querySelector('.label-selector-wrap');
     if (labelSel) labelSel.style.display = 'none';
   }
@@ -358,13 +370,12 @@ function editUserInline(userId) {
   const user = getUsers().find(u => u.id === userId);
   if (!user) return;
   const row = document.getElementById(`user-row-${userId}`);
+  const roleOptions = Object.entries(ROLE_LABELS)
+    .map(([k, v]) => `<option value="${k}" ${user.role === k ? 'selected' : ''}>${v}</option>`)
+    .join('');
   row.innerHTML = `<div class="user-edit-form" style="width:100%">
     <input id="edit-name-${userId}" value="${escapeHtml(user.name)}" placeholder="Nombre">
-    <select id="edit-role-${userId}">
-      <option value="admin" ${user.role==='admin'?'selected':''}>Administrador</option>
-      <option value="analyst" ${user.role==='analyst'?'selected':''}>Analista</option>
-      <option value="viewer" ${user.role==='viewer'?'selected':''}>Visor</option>
-    </select>
+    <select id="edit-role-${userId}">${roleOptions}</select>
     <input id="edit-pin-${userId}" type="password" maxlength="4" inputmode="numeric" placeholder="Nuevo PIN (dejar vacío = sin cambio)">
     <div class="user-edit-actions">
       <button class="btn-primary btn-sm" onclick="saveUserEdit('${userId}')">Guardar</button>
