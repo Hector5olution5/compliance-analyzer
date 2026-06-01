@@ -45,7 +45,7 @@ export default async function handler(req, res) {
 
     const signRes = await fetch(
       `${supabaseUrl}/storage/v1/object/sign/upload/evidencias/${path}`,
-      { method: 'POST', headers: { ...sbHeaders, 'Content-Type': 'application/json' }, body: '{}' }
+      { method: 'POST', headers: { ...sbHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify({ expiresIn: 300 }) }
     );
 
     if (!signRes.ok) {
