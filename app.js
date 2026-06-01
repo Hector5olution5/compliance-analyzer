@@ -236,20 +236,35 @@ async function regenerateExpediente(index) {
 }
 
 // ── Supabase — evidencias del expediente ─────────────────────────────────────
-let sbClient = null;
-
-const SB_BUCKET = 'evidencias';
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 async function uploadEvidencia(expId, file) {
-  if (!sbClient || !db) throw new Error('Supabase o Firestore no disponibles');
+  if (!db) throw new Error('Firestore no disponible');
   const session = getSession();
   if (!session) throw new Error('Sin sesión activa');
   const fileId   = generateId();
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
   const path     = `${expId}/${fileId}_${safeName}`;
-  const { error } = await sbClient.storage.from(SB_BUCKET).upload(path, file, { cacheControl: '3600', upsert: false });
-  if (error) throw new Error(error.message);
-  const { data: { publicUrl } } = sbClient.storage.from(SB_BUCKET).getPublicUrl(path);
+
+  const data = await fileToBase64(file);
+  const res  = await fetch('/api/upload-evidencia', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path, data, contentType: file.type || 'application/octet-stream' }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Error al subir el archivo');
+  }
+  const { publicUrl } = await res.json();
+
   const ev = {
     id: fileId, expId,
     nombre: file.name,
@@ -284,7 +299,11 @@ async function toggleRevisado(expId, evidenciaId, currentState) {
 }
 
 async function deleteEvidenciaDoc(expId, evidenciaId, storagePath) {
-  if (sbClient) await sbClient.storage.from(SB_BUCKET).remove([storagePath]).catch(() => {});
+  await fetch('/api/upload-evidencia', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path: storagePath }),
+  }).catch(() => {});
   if (db) await db.collection('expedientes').doc(expId).collection('evidencias').doc(evidenciaId).delete();
 }
 
@@ -982,15 +1001,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('file-protocol-banner').style.display = 'block';
   }
 
-  try {
-    const cfgRes = await fetch('/api/config');
-    if (cfgRes.ok) {
-      const { supabaseUrl, supabaseAnonKey } = await cfgRes.json();
-      if (supabaseUrl && supabaseAnonKey) {
-        sbClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
-      }
-    }
-  } catch (err) { console.warn('Supabase config fetch failed:', err.message); }
+  // Storage uploads are now handled server-side via /api/upload-evidencia
 
   renderCharacteristics();
   addComponentRow();
@@ -2780,10 +2791,10 @@ function showResultTab(key) {
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
               Evidencias del expediente
             </span>
-            ${sbClient && expId ? `
+            ${expId ? `
               <button id="btn-ev-upload" class="btn-ev-upload" onclick="document.getElementById('ev-file-input').click()">+ Subir</button>
               <input id="ev-file-input" type="file" accept=".pdf,image/*" multiple style="display:none">
-            ` : !sbClient ? '<span class="ev-no-sb">Configura Supabase para subir archivos</span>' : ''}
+            ` : ''}
           </div>
           <div id="ev-list" class="ev-list">
             ${expId ? '<p class="ev-empty">Cargando...</p>' : '<p class="ev-empty">Guarda el expediente primero para adjuntar evidencias.</p>'}
@@ -2792,7 +2803,7 @@ function showResultTab(key) {
       </div>`;
     if (expId) {
       renderEvidenciasPanel(expId);
-      if (sbClient) setupEvidenciasUpload(expId);
+      setupEvidenciasUpload(expId);
     }
     return;
   }

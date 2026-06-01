@@ -20,8 +20,6 @@ export default function handler(req, res) {
   if (!isAllowedReferer(req.headers.referer)) {
     return res.status(403).json({ error: 'Forbidden' });
   }
-  return res.status(200).json({
-    supabaseUrl:      process.env.SUPABASE_URL      || '',
-    supabaseAnonKey:  process.env.SUPABASE_ANON_KEY || '',
-  });
+  // Storage credentials are server-side only (api/upload-evidencia.js)
+  return res.status(200).json({});
 }
