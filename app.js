@@ -7,6 +7,47 @@ const TOTAL_TABS = 4;
 let currentHistoryIndex = null;
 const HIST_KEY = 'ca_history_v3';
 
+// ── Error monitoring ─────────────────────────────────────────────────────────
+const _reportedErrors = new Set();
+
+async function reportError(message, stack, source) {
+  const key = `${message}|${source}`;
+  if (_reportedErrors.has(key)) return;
+  _reportedErrors.add(key);
+  if (_reportedErrors.size > 50) _reportedErrors.clear();
+
+  const session = (() => { try { return JSON.parse(sessionStorage.getItem('ca_session')); } catch { return null; } })();
+  const payload = {
+    message: String(message).slice(0, 500),
+    stack:   String(stack || '').slice(0, 2000),
+    source:  String(source || '').slice(0, 300),
+    url:     window.location.href,
+    userId:  session?.userId || 'anonymous',
+    role:    session?.role   || null,
+    ts:      Date.now(),
+  };
+
+  fetch('/api/log-error', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }).catch(() => {});
+
+  if (typeof db !== 'undefined' && db) {
+    db.collection('errors').add(payload).catch(() => {});
+  }
+}
+
+window.onerror = (message, source, lineno, colno, error) => {
+  reportError(message, error?.stack, `${source}:${lineno}:${colno}`);
+  return false;
+};
+
+window.addEventListener('unhandledrejection', (event) => {
+  const err = event.reason;
+  reportError(err?.message || String(err), err?.stack, 'unhandledrejection');
+});
+
 // ── Auth ─────────────────────────────────────────────────────────────────────
 const USERS_KEY = 'ca_users_v1';
 const SESSION_KEY = 'ca_session';
