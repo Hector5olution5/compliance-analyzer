@@ -674,7 +674,9 @@ function renderUserBadge(user) {
 function exportUsers() {
   const users = getUsers();
   if (users.length === 0) { alert('No hay usuarios para exportar.'); return; }
-  const code = 'CAU:' + btoa(encodeURIComponent(JSON.stringify(users)));
+  // Strip credentials — hashes must never travel in the export code
+  const safe = users.map(({ id, name, role, created_at }) => ({ id, name, role, created_at }));
+  const code = 'CAU:' + btoa(encodeURIComponent(JSON.stringify(safe)));
   const btn = document.getElementById('btn-export-users');
 
   navigator.clipboard.writeText(code).then(() => {
@@ -708,7 +710,7 @@ async function doImportUsers() {
     errEl.classList.remove('pin-error-hidden'); return;
   }
 
-  const valid = users.filter(u => u.id && u.name && u.role && u.pin_hash);
+  const valid = users.filter(u => u.id && u.name && u.role);
   if (valid.length === 0) {
     errEl.textContent = 'El código no contiene usuarios válidos.';
     errEl.classList.remove('pin-error-hidden'); return;
@@ -717,7 +719,18 @@ async function doImportUsers() {
   const existing = getUsers();
   if (existing.length > 0 && !confirm(`Esto reemplazará los ${existing.length} usuario(s) actuales con ${valid.length} importados. ¿Continuar?`)) return;
 
-  saveUsers(valid);
+  // Assign a random temporary PIN to each imported user (credentials not in export)
+  const tempPins = [];
+  const withPins = await Promise.all(valid.map(async u => {
+    const existingUser = existing.find(e => e.id === u.id);
+    if (existingUser?.pin_hash) return existingUser; // keep existing credentials
+    const tempPin = String(Math.floor(1000 + Math.random() * 9000));
+    const salt = generateSalt();
+    tempPins.push({ name: u.name, pin: tempPin });
+    return { ...u, pin_salt: salt, pin_hash: await hashPin(tempPin, salt) };
+  }));
+
+  saveUsers(withPins);
 
   // Sync imported users to Firestore (replace all)
   if (db) {
@@ -725,14 +738,20 @@ async function doImportUsers() {
       const snap = await db.collection('users').get();
       const batch = db.batch();
       snap.docs.forEach(d => batch.delete(d.ref));
-      valid.forEach(u => batch.set(db.collection('users').doc(u.id), u));
+      withPins.forEach(u => batch.set(db.collection('users').doc(u.id), u));
       await batch.commit();
     } catch (err) { console.warn('Import Firestore sync failed:', err.message); }
   }
 
   document.getElementById('import-code-input').value = '';
   errEl.classList.add('pin-error-hidden');
-  renderLoginUserList(valid);
+
+  if (tempPins.length > 0) {
+    const list = tempPins.map(p => `${p.name}: PIN ${p.pin}`).join('\n');
+    alert(`Usuarios importados. PINs temporales asignados (cámbialos en el primer login):\n\n${list}`);
+  }
+
+  renderLoginUserList(withPins);
   showLoginStep('users');
 }
 
@@ -1706,6 +1725,10 @@ async function callClaudeForMarket(formData, cfg, L) {
 
   const t = (es, en, pt) => isEn ? en : isPt ? pt : es;
 
+  // Sanitize user inputs: truncate and wrap in XML tags so Claude treats them as data, not instructions
+  const safeName = String(formData.nombre || '').slice(0, 200);
+  const safeDesc = String(formData.descripcion || '').slice(0, 500);
+
   const systemMsg = isEn
     ? 'You are a compliance expert for food-contact promotional products. Write ALL text values in English. Output valid JSON only, no markdown, no extra text.'
     : isPt
@@ -1714,8 +1737,8 @@ async function callClaudeForMarket(formData, cfg, L) {
 
   const prompt = `${t('Mercado','Market','Mercado')}: ${cfg.nombre}. ${t('Idioma de respuesta: Español.','Response language: English.','Idioma de resposta: Português do Brasil.')}
 
-${t('PRODUCT','PRODUCT','PRODUTO')}: ${formData.nombre} | ${translateCategory(formData.categoria, cfg.idioma)}
-${formData.descripcion ? t('PROVIDED DESCRIPTION: ','PROVIDED DESCRIPTION: ','DESCRIÇÃO FORNECIDA: ') + formData.descripcion : ''}
+${t('PRODUCT','PRODUCT','PRODUTO')}: <product_name>${safeName}</product_name> | ${translateCategory(formData.categoria, cfg.idioma)}
+${safeDesc ? t('PROVIDED DESCRIPTION: ','PROVIDED DESCRIPTION: ','DESCRIÇÃO FORNECIDA: ') + `<description>${safeDesc}</description>` : ''}
 ${t('MATERIALS','MATERIALS','MATERIAIS')}: ${matAll}
 ${t('DIRECT FOOD CONTACT','DIRECT FOOD CONTACT','CONTATO DIRETO COM ALIMENTOS')}: ${matDirecto}
 ${t('CHARACTERISTICS','CHARACTERISTICS','CARACTERÍSTICAS')}: ${formData.caracteristicas.join(', ') || t('none','none','nenhuma')}
@@ -1723,7 +1746,7 @@ ${formData.edad ? t('MINIMUM AGE: ','MINIMUM AGE: ','FAIXA ETÁRIA: ') + formDat
 ${formData.capacidad ? t('CAPACITY: ','CAPACITY: ','CAPACIDADE: ') + formData.capacidad : ''}
 
 ${t('Generate ONLY valid JSON (no markdown):','Generate ONLY valid JSON (no markdown):','Gere APENAS JSON válido (sem markdown):')}
-{"descripcion_general":"${t('1 concise paragraph about the product using only declared materials','1 concise paragraph about the product using only declared materials','1 parágrafo conciso sobre o produto usando apenas materiais declarados')}${formData.descripcion ? t(' — improve the provided description',' — improve the provided description',' — melhore a descrição fornecida') : ''}","uso_previsto":"${t('1 clear sentence about the intended use','1 clear sentence about the intended use','1 frase clara sobre o uso pretendido')}","usos_indebidos":["${t('misuse 1','misuse 1','mau uso 1')}","${t('misuse 2','misuse 2','mau uso 2')}","${t('misuse 3','misuse 3','mau uso 3')}"],"advertencias_adicionales":["${t('product-specific warning derived from materials/characteristics — NOT generic microwave/dishwasher/sharp-edge warnings','product-specific warning derived from materials/characteristics — NOT generic microwave/dishwasher/sharp-edge warnings','aviso específico do produto derivado de materiais/características — NÃO incluir avisos genéricos sobre micro-ondas/lava-louças/bordas cortantes')}"],"no_conformidades":[{"situacion":"${t('specific non-conformity situation for this product','specific non-conformity situation for this product','situação de não conformidade específica para este produto')}","criticidad":"${prioHi}","accion":"${t('specific corrective action','specific corrective action','ação corretiva específica')}","responsable":"${t('responsible department','responsible department','departamento responsável')}","plazo":"${t('30 days','30 days','30 dias')}"}],"acciones_recomendadas":[{"prioridad":"${prioHi}","accion":"${t('specific action','specific action','ação específica')}","responsable":"${t('responsible department','responsible department','departamento responsável')}","plazo":"${t('30 days','30 days','30 dias')}"}]}
+{"descripcion_general":"${t('1 concise paragraph about the product using only declared materials','1 concise paragraph about the product using only declared materials','1 parágrafo conciso sobre o produto usando apenas materiais declarados')}${safeDesc ? t(' — improve the provided description',' — improve the provided description',' — melhore a descrição fornecida') : ''}","uso_previsto":"${t('1 clear sentence about the intended use','1 clear sentence about the intended use','1 frase clara sobre o uso pretendido')}","usos_indebidos":["${t('misuse 1','misuse 1','mau uso 1')}","${t('misuse 2','misuse 2','mau uso 2')}","${t('misuse 3','misuse 3','mau uso 3')}"],"advertencias_adicionales":["${t('product-specific warning derived from materials/characteristics — NOT generic microwave/dishwasher/sharp-edge warnings','product-specific warning derived from materials/characteristics — NOT generic microwave/dishwasher/sharp-edge warnings','aviso específico do produto derivado de materiais/características — NÃO incluir avisos genéricos sobre micro-ondas/lava-louças/bordas cortantes')}"],"no_conformidades":[{"situacion":"${t('specific non-conformity situation for this product','specific non-conformity situation for this product','situação de não conformidade específica para este produto')}","criticidad":"${prioHi}","accion":"${t('specific corrective action','specific corrective action','ação corretiva específica')}","responsable":"${t('responsible department','responsible department','departamento responsável')}","plazo":"${t('30 days','30 days','30 dias')}"}],"acciones_recomendadas":[{"prioridad":"${prioHi}","accion":"${t('specific action','specific action','ação específica')}","responsable":"${t('responsible department','responsible department','departamento responsável')}","plazo":"${t('30 days','30 days','30 dias')}"}]}
 
 ${t('IMPORTANT for advertencias_adicionales: generate 1-3 warnings SPECIFIC to this product\'s materials, category and characteristics. Do NOT repeat warnings about: microwave, dishwasher, sharp edges. Focus on material-specific risks.','IMPORTANT for advertencias_adicionales: generate 1-3 warnings SPECIFIC to this product\'s materials, category and characteristics. Do NOT repeat warnings about: microwave, dishwasher, sharp edges. Focus on material-specific risks.','IMPORTANTE para advertencias_adicionales: gere 1-3 avisos ESPECÍFICOS para os materiais, categoria e características deste produto. NÃO repita avisos sobre: micro-ondas, lava-louças, bordas cortantes. Foque em riscos específicos do material.')}`;
 
@@ -1735,7 +1758,7 @@ ${t('IMPORTANT for advertencias_adicionales: generate 1-3 warnings SPECIFIC to t
   } catch (err) {
     console.warn('[callClaudeForMarket] AI call failed, using fallback data:', err);
     return {
-      descripcion_general: formData.descripcion || `${formData.nombre} — ${formData.categoria}`,
+      descripcion_general: safeDesc || `${safeName} — ${formData.categoria}`,
       uso_previsto: cfg.idioma === 'en' ? 'Intended for food storage and serving.' : cfg.idioma === 'pt' ? 'Destinado ao armazenamento e serviço de alimentos.' : 'Destinado al almacenamiento y servicio de alimentos.',
       usos_indebidos: cfg.idioma === 'en' ? ['Do not use near open flames','Do not use in microwave','Do not use as toy'] : cfg.idioma === 'pt' ? ['Não usar perto de chamas abertas','Não usar em micro-ondas','Não usar como brinquedo'] : ['No usar cerca de llamas abiertas','No usar en microondas','No usar como juguete'],
       advertencias_adicionales: [],
