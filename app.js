@@ -338,14 +338,64 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
-async function hashPin(pin) {
+const PBKDF2_ITERATIONS   = 100_000;
+const LOCKOUT_MAX_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS  = 30_000;
+const LOCKOUT_KEY          = 'ca_lockout_v1';
+
+function generateSalt() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(16)))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function hashPin(pin, salt) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(pin), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', hash: 'SHA-256', salt: enc.encode(salt), iterations: PBKDF2_ITERATIONS },
+    key, 256
+  );
+  return Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function hashPinLegacy(pin) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('ca_salt_' + pin));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+function getLockouts() {
+  try { return JSON.parse(localStorage.getItem(LOCKOUT_KEY) || '{}'); } catch { return {}; }
+}
+
+function isLockedOut(userId) {
+  const entry = getLockouts()[userId];
+  if (entry?.lockedUntil && Date.now() < entry.lockedUntil) return entry.lockedUntil;
+  return false;
+}
+
+function recordFailedAttempt(userId) {
+  const state = getLockouts();
+  const entry = state[userId] || { attempts: 0 };
+  entry.attempts = (entry.attempts || 0) + 1;
+  if (entry.attempts >= LOCKOUT_MAX_ATTEMPTS) {
+    entry.lockedUntil = Date.now() + LOCKOUT_DURATION_MS;
+    entry.attempts = 0;
+  }
+  state[userId] = entry;
+  localStorage.setItem(LOCKOUT_KEY, JSON.stringify(state));
+  return entry;
+}
+
+function clearFailedAttempts(userId) {
+  const state = getLockouts();
+  delete state[userId];
+  localStorage.setItem(LOCKOUT_KEY, JSON.stringify(state));
+}
+
 async function createUser(name, role, pin) {
   const users = getUsers();
-  const user = { id: generateId(), name: name.trim(), role, pin_hash: await hashPin(pin), created_at: Date.now() };
+  const salt = generateSalt();
+  const user = { id: generateId(), name: name.trim(), role, pin_hash: await hashPin(pin, salt), pin_salt: salt, created_at: Date.now() };
   users.push(user);
   saveUsers(users);
   await fsSetUser(user);
@@ -357,7 +407,11 @@ async function updateUser(id, fields, newPin) {
   const idx = users.findIndex(u => u.id === id);
   if (idx === -1) return null;
   Object.assign(users[idx], fields);
-  if (newPin) users[idx].pin_hash = await hashPin(newPin);
+  if (newPin) {
+    const salt = generateSalt();
+    users[idx].pin_salt = salt;
+    users[idx].pin_hash = await hashPin(newPin, salt);
+  }
   saveUsers(users);
   await fsSetUser(users[idx]);
   return users[idx];
@@ -378,7 +432,15 @@ function deleteUser(id) {
 async function verifyPin(userId, pin) {
   const user = getUsers().find(u => u.id === userId);
   if (!user) return false;
-  return user.pin_hash === await hashPin(pin);
+  if (user.pin_salt) {
+    return user.pin_hash === await hashPin(pin, user.pin_salt);
+  }
+  // Legacy hash: upgrade on successful login
+  const legacyHash = await hashPinLegacy(pin);
+  if (user.pin_hash !== legacyHash) return false;
+  const salt = generateSalt();
+  await updateUser(userId, { pin_hash: await hashPin(pin, salt), pin_salt: salt });
+  return true;
 }
 
 function getActiveRole() { return getSession()?.role || null; }
@@ -466,15 +528,33 @@ async function handlePinKey(key) {
   updatePinDots();
 
   if (_loginPinBuffer.length === 4) {
+    const errEl = document.getElementById('pin-error');
+    const dots  = document.getElementById('pin-dots');
+
+    const lockedUntil = isLockedOut(_loginSelectedUser.id);
+    if (lockedUntil) {
+      const secs = Math.ceil((lockedUntil - Date.now()) / 1000);
+      errEl.textContent = `Bloqueado — intenta en ${secs}s`;
+      errEl.classList.remove('pin-error-hidden');
+      _loginPinBuffer = '';
+      updatePinDots();
+      return;
+    }
+
     const ok = await verifyPin(_loginSelectedUser.id, _loginPinBuffer);
     _loginPinBuffer = '';
     updatePinDots();
     if (ok) {
+      clearFailedAttempts(_loginSelectedUser.id);
+      errEl.textContent = 'PIN incorrecto — intenta de nuevo';
       finishLogin(_loginSelectedUser);
     } else {
-      const errEl = document.getElementById('pin-error');
+      const entry = recordFailedAttempt(_loginSelectedUser.id);
+      const remaining = LOCKOUT_MAX_ATTEMPTS - (entry.attempts || 0);
+      errEl.textContent = entry.lockedUntil
+        ? `Demasiados intentos — bloqueado 30s`
+        : `PIN incorrecto — ${remaining} intento${remaining !== 1 ? 's' : ''} restante${remaining !== 1 ? 's' : ''}`;
       errEl.classList.remove('pin-error-hidden');
-      const dots = document.getElementById('pin-dots');
       dots.classList.add('pin-shake');
       setTimeout(() => dots.classList.remove('pin-shake'), 400);
     }
