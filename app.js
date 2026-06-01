@@ -2893,7 +2893,7 @@ function showResultTab(key) {
   const { docxError } = generatedDocs[key];
   const wordBtn = blob
     ? `<button class="btn-primary" onclick="downloadDoc('${key}')">⬇ Descargar Word (.docx)</button>`
-    : `<span style="font-size:12px;color:#888">Word no disponible en esta sesión — usa "Regenerar" en el historial</span>`;
+    : `<span style="font-size:12px;color:#888" title="${escapeHtml(docxError || '')}">Word no disponible en esta sesión — usa "Regenerar" en el historial${docxError ? ' ⓘ' : ''}</span>`;
   document.getElementById('results-content').innerHTML = `
     <div class="expediente-card">
       ${statusBar}
