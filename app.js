@@ -5,7 +5,8 @@ let generatedDocs = {};
 let activeResultTab = null;
 const TOTAL_TABS = 4;
 let currentHistoryIndex = null;
-const HIST_KEY = 'ca_history_v3';
+const HIST_KEY        = 'ca_history_v3';
+const HIST_LOCAL_LIMIT = 20;
 
 // ── Error monitoring ─────────────────────────────────────────────────────────
 const _reportedErrors = new Set();
@@ -195,7 +196,7 @@ async function mergeCloudHistory() {
 
   if (changed) {
     hist.sort((a, b) => (b.ts || 0) - (a.ts || 0));
-    try { localStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(0, 30))); } catch (_) {}
+    try { localStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(0, HIST_LOCAL_LIMIT))); } catch (_) {}
     renderHistory();
   }
 }
@@ -1280,9 +1281,10 @@ async function extractPdfTextForPS(file) {
 const MATERIALS = ['ABS', 'PP', 'PS', 'PVC', 'PET', 'HDPE', 'LDPE', 'Silicona', 'Acero inoxidable', 'Aluminio', 'Metal', 'Vidrio', 'Cartón', 'Papel', 'Madera', 'Nylon', 'Policarbonato', 'Otro'];
 const CONTACT_OPTS = ['Directo', 'Indirecto', 'Sin contacto'];
 
+let _rowId = 0;
 function addComponentRow(nombre = '', material = '', contacto = 'Sin contacto') {
   const tbody = document.getElementById('components-body');
-  const id = Date.now();
+  const id = ++_rowId;
   const row = document.createElement('tr');
   row.dataset.id = id;
   row.innerHTML = `
@@ -2882,11 +2884,11 @@ function saveToHistory(formData, markets) {
   currentHistoryIndex = 0;
   // Keep last 10 — HTML previews are large
   try {
-    localStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(0, 10)));
+    localStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(0, HIST_LOCAL_LIMIT)));
   } catch (e) {
     // localStorage full: retry without previews
     hist[0].previews = {};
-    try { localStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(0, 10))); } catch (_) {}
+    try { localStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(0, HIST_LOCAL_LIMIT))); } catch (_) {}
   }
   renderHistory();
 

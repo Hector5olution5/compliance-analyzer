@@ -1,8 +1,3 @@
-// ── API Key ───────────────────────────────────────────────────────────────────
-function getApiKey() {
-  return localStorage.getItem('claude_api_key') || (typeof DEFAULT_API_KEY !== 'undefined' ? DEFAULT_API_KEY : '');
-}
-
 // ── Market Configurations ────────────────────────────────────────────────────
 const FIXED_MARKETS = ['Internacional', 'LATAM', 'CAM'];
 
