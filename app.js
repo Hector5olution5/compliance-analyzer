@@ -192,11 +192,6 @@ async function regenerateExpediente(index) {
 
 // ── Supabase — evidencias del expediente ─────────────────────────────────────
 let sbClient = null;
-try {
-  if (typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
-    sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  }
-} catch (err) { console.warn('Supabase init failed:', err.message); }
 
 const SB_BUCKET = 'evidencias';
 
@@ -811,6 +806,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (window.location.protocol === 'file:') {
     document.getElementById('file-protocol-banner').style.display = 'block';
   }
+
+  try {
+    const cfgRes = await fetch('/api/config');
+    if (cfgRes.ok) {
+      const { supabaseUrl, supabaseAnonKey } = await cfgRes.json();
+      if (supabaseUrl && supabaseAnonKey) {
+        sbClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+      }
+    }
+  } catch (err) { console.warn('Supabase config fetch failed:', err.message); }
+
   renderCharacteristics();
   addComponentRow();
   setupTabNav();
