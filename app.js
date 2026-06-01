@@ -1476,7 +1476,7 @@ document.getElementById('f-pdf').addEventListener('change', async (e) => {
 
 async function parsePdfFieldsWithClaude(file) {
   const categorias = ['Contenedor de alimentos','Vaso / Taza','Plato / Bowl','Utensilio de cocina','Envase de alimentos','Juguete con función alimentaria','Accesorio de cocina','Set de utensilios'];
-  const charIds = ['juguete','ninos','food_direct','plastico','multicolor','disenio_3d','bordes_filosos','partes_pequenas','piezas_moviles','imanes','cuerdas','proyectiles','liquidos','electronico','bateria','bateria_boton','led','vapor','ruido'];
+  const charIds = ['juguete','ninos','food_direct','plastico','multicolor','disenio_3d','bordes_filosos','partes_pequenas','piezas_moviles','imanes','cuerdas','proyectiles','liquidos','electronico','bateria','bateria_boton','led','vapor','conectividad','internet','ruido','kit_quimico'];
 
   const prompt = `Analiza esta ficha técnica de producto y extrae los campos. Devuelve SOLO JSON válido.
 
@@ -3676,13 +3676,34 @@ function getProductAttribs(formData) {
     has_electronics:      c.some(x => ['electronico','led','vapor'].includes(x)),
     has_battery:          c.some(x => ['bateria','bateria_boton'].includes(x)),
     has_magnets:          c.includes('imanes'),
-    has_connectivity:     c.some(x => ['electronico'].includes(x)),
+    has_connectivity:     c.some(x => ['electronico','conectividad'].includes(x)),
     has_liquid_media:     c.includes('liquidos'),
-    has_chemical_kit:     false,
-    has_internet:         false,
+    has_chemical_kit:     c.includes('kit_quimico'),
+    has_internet:         c.includes('internet'),
     mfg_outside_eu:       true,
     target_age_under_36m: edad > 0 && edad <= 3,
   };
+}
+
+const STANDARDS_EQUIVALENCE = {
+  'astm f963':    { note: 'Cubre mecánico + flamabilidad para UE, USA y Australia en un solo reporte', markets: ['UE','USA','Australia'] },
+  'en 71-1':      { note: 'Equivalente a ASTM F963 (mecánico) — válido para UE; acepta para USA con datos adicionales', markets: ['UE'] },
+  'en 62115':     { note: 'Equivalente a AS/NZS 62115 para Australia — un reporte puede cubrir ambos', markets: ['UE','Australia'] },
+  'iec 62115':    { note: 'Base de EN 62115 y AS/NZS 62115 — puede cubrir UE, USA y Australia', markets: ['UE','USA','Australia'] },
+  'iec 62133':    { note: 'Certificación de batería aceptada en UE, USA y Australia', markets: ['UE','USA','Australia'] },
+  'un 38.3':      { note: 'Transporte de baterías — requerido para los tres mercados', markets: ['UE','USA','Australia'] },
+};
+
+function getStandardHint(standard) {
+  if (!standard) return '';
+  const key = standard.toLowerCase().replace(/[-–—]/g, '-').trim();
+  for (const [pattern, info] of Object.entries(STANDARDS_EQUIVALENCE)) {
+    if (key.includes(pattern)) {
+      const flags = info.markets.map(m => DOC_MARKET_FLAGS[m] || m).join(' ');
+      return `<span class="doc-standard-hint">💡 ${info.note} ${flags}</span>`;
+    }
+  }
+  return '';
 }
 
 function expandDocMarkets(markets) {
@@ -3780,7 +3801,8 @@ function openDocUploadModal(expId, code) {
       </div>
       <div class="doc-upload-field">
         <label>Norma de referencia</label>
-        <input type="text" id="doc-meta-standard" placeholder="ASTM F963-23, EN 71-1:2014...">
+        <input type="text" id="doc-meta-standard" placeholder="ASTM F963-23, EN 71-1:2014..." oninput="updateStandardHintInModal()">
+        <div id="doc-standard-hint-modal" class="doc-standard-hint-modal"></div>
       </div>` : ''}
       <div class="doc-upload-field">
         <label>Emitido por</label>
@@ -3810,6 +3832,13 @@ function openDocUploadModal(expId, code) {
 
 function closeDocUploadModal() {
   document.getElementById('modal-doc-upload').classList.add('hidden');
+}
+
+function updateStandardHintInModal() {
+  const val = document.getElementById('doc-meta-standard')?.value || '';
+  const hintEl = document.getElementById('doc-standard-hint-modal');
+  if (!hintEl) return;
+  hintEl.innerHTML = getStandardHint(val);
 }
 
 async function submitDocUpload(expId, code) {
@@ -3971,12 +4000,16 @@ async function renderDocumentosTab(expId, formData, markets) {
       const rowCls = s?.status === 'approved' ? 'doc-row--approved' : s ? 'doc-row--uploaded' : 'doc-row--pending';
       const condBadge = d.req === 'conditional' ? `<span class="doc-req-badge doc-req--cond">Condicional</span>` : '';
       const expiryBadge = getExpiryBadge(s, d.markets, docMarkets);
-      const metaLine = s && (s.issuedDate || s.labName || s.standard || s.issuedBy) ? `
+      const standardHint = s?.standard ? getStandardHint(s.standard) : '';
+      const docHint = d.hint ? `<span class="doc-hint">ℹ ${escapeHtml(d.hint)}</span>` : '';
+      const metaLine = (s && (s.issuedDate || s.labName || s.standard || s.issuedBy)) || standardHint || (!s && docHint) ? `
         <div class="doc-row-details">
-          ${s.issuedDate ? `<span>${s.issuedDate}${s.expiryDate ? ` → ${s.expiryDate}` : ''}</span>` : ''}
-          ${s.labName    ? `<span>🔬 ${escapeHtml(s.labName)}${s.labAcc ? ` · ${escapeHtml(s.labAcc)}` : ''}</span>` : ''}
-          ${s.standard   ? `<span>📐 ${escapeHtml(s.standard)}</span>` : ''}
-          ${s.issuedBy   ? `<span>✍ ${escapeHtml(s.issuedBy)}</span>` : ''}
+          ${s?.issuedDate ? `<span>${s.issuedDate}${s.expiryDate ? ` → ${s.expiryDate}` : ''}</span>` : ''}
+          ${s?.labName    ? `<span>🔬 ${escapeHtml(s.labName)}${s.labAcc ? ` · ${escapeHtml(s.labAcc)}` : ''}</span>` : ''}
+          ${s?.standard   ? `<span>📐 ${escapeHtml(s.standard)}</span>` : ''}
+          ${s?.issuedBy   ? `<span>✍ ${escapeHtml(s.issuedBy)}</span>` : ''}
+          ${standardHint}
+          ${docHint}
         </div>` : '';
       return `
         <div class="doc-row ${rowCls}" id="doc-row-${d.code}">

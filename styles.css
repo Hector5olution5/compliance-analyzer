@@ -1641,6 +1641,13 @@ textarea { resize: vertical; }
 .doc-expiry--soon    { background: #FFF7ED; color: #D97706; }
 .doc-expiry--ok      { background: #F0FDF4; color: #16A34A; }
 
+/* Standards equivalence hint */
+.doc-standard-hint { font-size: 11px; color: #6366F1; font-style: italic; }
+.doc-standard-hint-modal { font-size: 11px; color: #6366F1; font-style: italic; margin-top: 4px; min-height: 16px; }
+
+/* Doc hint (CPC and other static hints) */
+.doc-hint { font-size: 11px; color: #6B7280; font-style: italic; }
+
 /* Doc upload modal */
 .modal-doc-upload-box { width: 480px; max-width: 95vw; }
 .modal-doc-upload-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; gap: 8px; }

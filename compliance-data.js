@@ -27,7 +27,7 @@ const DOCS_MASTER = [
   // Category 3 — Regulatory and conformity
   { code: 'REG_EU_DOC',           name: 'Declaración de Conformidad UE (DoC)',                    cat: 3, catName: 'Documentos regulatorios', markets: ['UE'],           req: 'required' },
   { code: 'REG_EU_SAFETY_ASSESS', name: 'Evaluación de seguridad (TSR Anexo V)',                  cat: 3, catName: 'Documentos regulatorios', markets: ['UE'],           req: 'required' },
-  { code: 'REG_US_CPC',           name: "Children's Product Certificate (CPC)",                   cat: 3, catName: 'Documentos regulatorios', markets: ['USA'],          req: 'required' },
+  { code: 'REG_US_CPC',           name: "Children's Product Certificate (CPC)",                   cat: 3, catName: 'Documentos regulatorios', markets: ['USA'],          req: 'required', hint: 'El CPC lo genera el importador o fabricante, no el laboratorio. Es una declaración propia basada en los reportes de prueba.' },
   { code: 'REG_US_TESTING_PLAN',  name: 'Plan de pruebas periódicas (16 CFR 1107)',               cat: 3, catName: 'Documentos regulatorios', markets: ['USA'],          req: 'required' },
   { code: 'REG_US_LAB_POLICY',    name: 'Política de no influencia indebida (16 CFR 1107.26)',    cat: 3, catName: 'Documentos regulatorios', markets: ['USA'],          req: 'required' },
   { code: 'REG_AU_DOC',           name: 'Declaración de Conformidad Australia',                   cat: 3, catName: 'Documentos regulatorios', markets: ['Australia'],    req: 'required' },
@@ -922,8 +922,12 @@ const CHARACTERISTICS = [
   { id: 'bateria_boton',    label: 'Pila botón / moneda (coin cell)',     group: 'electrico' },
   { id: 'led',              label: 'LEDs / iluminación',                 group: 'electrico' },
   { id: 'vapor',            label: 'Generador de vapor / calor',         group: 'electrico' },
+  { id: 'conectividad',     label: 'Conectividad Bluetooth / WiFi / radio', group: 'electrico' },
+  { id: 'internet',         label: 'Conectado a internet (app / IoT)',   group: 'electrico' },
   // ── Peligros acústicos ──
   { id: 'ruido',            label: 'Genera ruido / sonidos > 80 dB',     group: 'acustico' },
+  // ── Químico ──
+  { id: 'kit_quimico',      label: 'Kit químico / pintura / cosméticos', group: 'quimico' },
 ];
 
 // ── Docs Checklist ───────────────────────────────────────────────────────────
