@@ -47,7 +47,7 @@ export default async function handler(req, res) {
     if (!ALLOWED_TYPES.includes(contentType)) {
       return res.status(400).json({ error: 'Tipo de archivo no permitido' });
     }
-    if (!/^[a-zA-Z0-9_-]+\/[a-zA-Z0-9._-]+$/.test(path) || path.includes('..')) {
+    if (!/^[a-zA-Z0-9_-]+(\/[a-zA-Z0-9._-]+)+$/.test(path) || path.includes('..')) {
       return res.status(400).json({ error: 'Path inválido' });
     }
 
