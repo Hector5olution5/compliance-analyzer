@@ -248,7 +248,7 @@ async function uploadEvidencia(expId, file) {
   const session = getSession();
   if (!session) throw new Error('Sin sesión activa');
   const fileId      = generateId();
-  const safeName    = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const safeName    = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/\.{2,}/g, '_');
   const path        = `${expId}/${fileId}_${safeName}`;
   const contentType = file.type || 'application/octet-stream';
 
@@ -3747,7 +3747,7 @@ async function uploadDocumento(expId, code, file, meta = {}) {
     fileToUpload = await compressPdf(file, () => {});
   }
   const fileId      = generateId();
-  const safeName    = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const safeName    = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/\.{2,}/g, '_');
   const path        = `${expId}/docs/${code}_${fileId}_${safeName}`;
   const contentType = file.type || 'application/octet-stream';
   const data        = await fileToBase64(fileToUpload);
