@@ -236,34 +236,37 @@ async function regenerateExpediente(index) {
 }
 
 // ── Supabase — evidencias del expediente ─────────────────────────────────────
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(',')[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 async function uploadEvidencia(expId, file) {
   if (!db) throw new Error('Firestore no disponible');
   const session = getSession();
   if (!session) throw new Error('Sin sesión activa');
-  const fileId   = generateId();
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-  const path     = `${expId}/${fileId}_${safeName}`;
+  const fileId      = generateId();
+  const safeName    = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path        = `${expId}/${fileId}_${safeName}`;
+  const contentType = file.type || 'application/octet-stream';
 
-  const data = await fileToBase64(file);
-  const res  = await fetch('/api/upload-evidencia', {
+  // 1. Get signed upload URL from server (no file data sent to Vercel)
+  const signRes = await fetch('/api/upload-evidencia', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path, data, contentType: file.type || 'application/octet-stream' }),
+    body: JSON.stringify({ path, contentType }),
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Error al subir el archivo');
+  if (!signRes.ok) {
+    const err = await signRes.json().catch(() => ({}));
+    throw new Error(err.error || 'Error al preparar la subida');
   }
-  const { publicUrl } = await res.json();
+  const { signedUrl, publicUrl } = await signRes.json();
+
+  // 2. Upload directly to Supabase — bypasses Vercel size limits entirely
+  const uploadRes = await fetch(signedUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': contentType },
+    body: file,
+  });
+  if (!uploadRes.ok) {
+    const err = await uploadRes.json().catch(() => ({}));
+    throw new Error(err.message || err.error || 'Error al subir el archivo');
+  }
 
   const ev = {
     id: fileId, expId,
@@ -383,7 +386,7 @@ function setupEvidenciasUpload(expId) {
     for (const f of files) {
       const valid = f.type === 'application/pdf' || f.type.startsWith('image/');
       if (!valid) { errs.push(`${f.name}: tipo no permitido`); continue; }
-      if (f.size > 20 * 1024 * 1024) { errs.push(`${f.name}: excede 20 MB`); continue; }
+      if (f.size > 50 * 1024 * 1024) { errs.push(`${f.name}: excede 50 MB`); continue; }
       try { await uploadEvidencia(expId, f); ok++; } catch (err) {
         const msg = err.message === 'Failed to fetch'
           ? 'No se pudo conectar con el almacenamiento — el servicio puede estar pausado, intenta en un momento'
