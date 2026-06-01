@@ -43,8 +43,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing path, data or contentType' });
     }
 
-    const ALLOWED_TYPES = ['application/pdf','image/jpeg','image/png','image/gif','image/webp'];
-    if (!ALLOWED_TYPES.includes(contentType)) {
+    if (contentType !== 'application/pdf' && !contentType.startsWith('image/')) {
       return res.status(400).json({ error: 'Tipo de archivo no permitido' });
     }
     if (!/^[a-zA-Z0-9_-]+(\/[a-zA-Z0-9._-]+)+$/.test(path) || path.includes('..')) {
