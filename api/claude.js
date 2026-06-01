@@ -13,7 +13,30 @@ const ALLOWED_HOSTS = [
   '127.0.0.1',
 ];
 
-const MAX_TOKENS_CAP = 4000;
+const MAX_TOKENS_CAP    = 4000;
+const RATE_WINDOW_MS    = 60_000; // 1 minute sliding window
+const RATE_MAX_REQUESTS = 30;     // max requests per IP per window
+
+// In-memory sliding window — resets on cold start, acceptable for internal tool
+const ipLog = new Map(); // ip -> number[]
+
+function getClientIp(req) {
+  const fwd = req.headers['x-forwarded-for'];
+  return (fwd ? fwd.split(',')[0] : req.socket?.remoteAddress || 'unknown').trim();
+}
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const windowStart = now - RATE_WINDOW_MS;
+  const timestamps = (ipLog.get(ip) || []).filter(t => t > windowStart);
+  if (timestamps.length >= RATE_MAX_REQUESTS) {
+    ipLog.set(ip, timestamps);
+    return true;
+  }
+  timestamps.push(now);
+  ipLog.set(ip, timestamps);
+  return false;
+}
 
 function isAllowedReferer(referer) {
   if (!referer) return false;
@@ -38,6 +61,12 @@ export default async function handler(req, res) {
 
   if (!isAllowedReferer(req.headers.referer)) {
     return res.status(403).json({ error: 'Forbidden' });
+  }
+
+  const ip = getClientIp(req);
+  if (isRateLimited(ip)) {
+    res.setHeader('Retry-After', '60');
+    return res.status(429).json({ error: 'Too many requests — wait a minute and try again.' });
   }
 
   if (!process.env.CLAUDE_API_KEY) {
