@@ -1621,3 +1621,32 @@ textarea { resize: vertical; }
 .doc-optional-toggle { padding: 10px 20px; font-size: 12px; font-weight: 600; color: #6B7280; cursor: pointer; list-style: none; background: #F9FAFB; }
 .doc-optional-toggle:hover { background: #F3F4F6; }
 .doc-optional-list { padding: 0; }
+
+/* Delete button */
+.btn-doc-delete { font-size: 11px; padding: 4px 8px; background: transparent; color: #9CA3AF; border: 1px solid #E5E7EB; border-radius: 6px; cursor: pointer; font-weight: 700; transition: all .15s; line-height: 1; }
+.btn-doc-delete:hover { background: #FEF2F2; color: #DC2626; border-color: #FECACA; }
+
+/* Metadata details row */
+.doc-row-details { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.doc-row-details span { font-size: 11px; color: #6B7280; }
+
+/* Expiry badges */
+.doc-expiry-badge { font-size: 10px; padding: 1px 6px; border-radius: 99px; font-weight: 600; }
+.doc-expiry--expired { background: #FEF2F2; color: #DC2626; }
+.doc-expiry--soon    { background: #FFF7ED; color: #D97706; }
+.doc-expiry--ok      { background: #F0FDF4; color: #16A34A; }
+
+/* Doc upload modal */
+.modal-doc-upload-box { width: 480px; max-width: 95vw; }
+.modal-doc-upload-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; gap: 8px; }
+.doc-upload-form { display: flex; flex-direction: column; gap: 12px; }
+.doc-upload-file-area { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #F9FAFB; border: 1px dashed #D1D5DB; border-radius: 8px; }
+.btn-doc-file-select { font-size: 12px; padding: 5px 12px; background: #185FA5; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: var(--font); font-weight: 600; white-space: nowrap; }
+.btn-doc-file-select:hover { background: #1451A0; }
+.doc-upload-file-name { font-size: 12px; color: #6B7280; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.doc-upload-field { display: flex; flex-direction: column; gap: 4px; }
+.doc-upload-field label { font-size: 12px; font-weight: 600; color: #374151; }
+.doc-upload-field input { font-size: 13px; padding: 7px 10px; border: 1px solid #D1D5DB; border-radius: 6px; font-family: var(--font); color: #111827; }
+.doc-upload-field input:focus { outline: none; border-color: #185FA5; }
+.doc-upload-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.optional-tag { font-size: 10px; font-weight: 400; color: #9CA3AF; }

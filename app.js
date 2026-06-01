@@ -3693,7 +3693,7 @@ async function saveDocStatus(expId, code, data) {
   await db.collection('expedientes').doc(expId).collection('documentos').doc(code).set(data, { merge: true });
 }
 
-async function uploadDocumento(expId, code, file) {
+async function uploadDocumento(expId, code, file, meta = {}) {
   const session = getSession();
   if (!session) throw new Error('Sin sesión activa');
   let fileToUpload = file;
@@ -3716,31 +3716,133 @@ async function uploadDocumento(expId, code, file) {
     code, status: 'uploaded',
     fileName: file.name, fileUrl: publicUrl, storagePath: path,
     uploadedBy: session.userId, uploadedByName: session.name, uploadedAt: Date.now(),
+    issuedBy:   meta.issuedBy   || '',
+    issuedDate: meta.issuedDate || '',
+    expiryDate: meta.expiryDate || '',
+    labName:    meta.labName    || '',
+    labAcc:     meta.labAcc     || '',
+    standard:   meta.standard   || '',
   });
 }
 
-async function handleDocUpload(expId, code) {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.pdf,image/*';
-  input.onchange = async () => {
-    const file = input.files[0];
-    if (!file) return;
-    const row = document.getElementById(`doc-row-${code}`);
-    const btn = row?.querySelector('.btn-doc-upload');
-    if (btn) { btn.disabled = true; btn.textContent = '⏳ Subiendo…'; }
-    try {
-      await uploadDocumento(expId, code, file);
-      showToast(`✓ ${DOCS_MASTER.find(d => d.code === code)?.name || code} subido`);
-      const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
-      const hEntry = currentHistoryIndex !== null ? hist[currentHistoryIndex] : null;
-      await renderDocumentosTab(expId, hEntry?.formData || {}, hEntry?.mercados || []);
-    } catch (e) {
-      alert('Error: ' + e.message);
-      if (btn) { btn.disabled = false; btn.textContent = '+ Subir'; }
-    }
+function handleDocUpload(expId, code) {
+  openDocUploadModal(expId, code);
+}
+
+function openDocUploadModal(expId, code) {
+  const doc = DOCS_MASTER.find(d => d.code === code);
+  if (!doc) return;
+  const isTestReport = doc.cat === 2 || doc.cat === 5;
+  document.getElementById('doc-upload-modal-title').textContent = doc.name;
+  document.getElementById('doc-upload-modal-code').textContent = code;
+  document.getElementById('doc-upload-modal-body').innerHTML = `
+    <div class="doc-upload-form">
+      <div class="doc-upload-file-area">
+        <input type="file" id="doc-upload-file" accept=".pdf,image/*" style="display:none">
+        <button class="btn-doc-file-select" onclick="document.getElementById('doc-upload-file').click()">📎 Seleccionar archivo</button>
+        <span id="doc-upload-file-name" class="doc-upload-file-name">Ningún archivo seleccionado</span>
+      </div>
+      ${isTestReport ? `
+      <div class="doc-upload-row">
+        <div class="doc-upload-field">
+          <label>Laboratorio</label>
+          <input type="text" id="doc-meta-lab" placeholder="Nombre del laboratorio">
+        </div>
+        <div class="doc-upload-field">
+          <label>N° acreditación</label>
+          <input type="text" id="doc-meta-lab-acc" placeholder="CPSC ID / NB number...">
+        </div>
+      </div>
+      <div class="doc-upload-field">
+        <label>Norma de referencia</label>
+        <input type="text" id="doc-meta-standard" placeholder="ASTM F963-23, EN 71-1:2014...">
+      </div>` : ''}
+      <div class="doc-upload-field">
+        <label>Emitido por</label>
+        <input type="text" id="doc-meta-issued-by" placeholder="Persona u organismo que emite">
+      </div>
+      <div class="doc-upload-row">
+        <div class="doc-upload-field">
+          <label>Fecha de emisión</label>
+          <input type="date" id="doc-meta-issued-date">
+        </div>
+        <div class="doc-upload-field">
+          <label>Vencimiento <span class="optional-tag">opcional</span></label>
+          <input type="date" id="doc-meta-expiry-date">
+        </div>
+      </div>
+      <p id="doc-upload-error" class="form-error hidden"></p>
+      <div class="modal-actions">
+        <button id="btn-doc-upload-submit" class="btn-primary" onclick="submitDocUpload('${expId}','${code}')">Subir documento</button>
+        <button class="btn-secondary" onclick="closeDocUploadModal()">Cancelar</button>
+      </div>
+    </div>`;
+  document.getElementById('doc-upload-file').addEventListener('change', function () {
+    document.getElementById('doc-upload-file-name').textContent = this.files[0]?.name || 'Ningún archivo seleccionado';
+  });
+  document.getElementById('modal-doc-upload').classList.remove('hidden');
+}
+
+function closeDocUploadModal() {
+  document.getElementById('modal-doc-upload').classList.add('hidden');
+}
+
+async function submitDocUpload(expId, code) {
+  const file = document.getElementById('doc-upload-file')?.files[0];
+  const errEl = document.getElementById('doc-upload-error');
+  if (!file) { errEl.textContent = 'Selecciona un archivo.'; errEl.classList.remove('hidden'); return; }
+  const meta = {
+    issuedBy:   (document.getElementById('doc-meta-issued-by')?.value  || '').trim(),
+    issuedDate:  document.getElementById('doc-meta-issued-date')?.value  || '',
+    expiryDate:  document.getElementById('doc-meta-expiry-date')?.value  || '',
+    labName:    (document.getElementById('doc-meta-lab')?.value         || '').trim(),
+    labAcc:     (document.getElementById('doc-meta-lab-acc')?.value     || '').trim(),
+    standard:   (document.getElementById('doc-meta-standard')?.value    || '').trim(),
   };
-  input.click();
+  const btn = document.getElementById('btn-doc-upload-submit');
+  btn.disabled = true; btn.textContent = '⏳ Subiendo…';
+  errEl.classList.add('hidden');
+  try {
+    await uploadDocumento(expId, code, file, meta);
+    closeDocUploadModal();
+    showToast(`✓ ${DOCS_MASTER.find(d => d.code === code)?.name || code} subido`);
+    const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+    const hEntry = currentHistoryIndex !== null ? hist[currentHistoryIndex] : null;
+    await renderDocumentosTab(expId, hEntry?.formData || {}, hEntry?.mercados || []);
+  } catch (e) {
+    errEl.textContent = 'Error: ' + e.message;
+    errEl.classList.remove('hidden');
+    btn.disabled = false; btn.textContent = 'Subir documento';
+  }
+}
+
+async function handleDocDelete(expId, code, storagePath) {
+  if (!['admin','coord_compliance'].includes(getActiveRole())) return;
+  if (!confirm('¿Eliminar este documento? Esta acción no se puede deshacer.')) return;
+  if (storagePath) {
+    await fetch('/api/upload-evidencia', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: storagePath }),
+    }).catch(() => {});
+  }
+  if (db && expId) {
+    await db.collection('expedientes').doc(expId).collection('documentos').doc(code).delete().catch(() => {});
+  }
+  const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+  const hEntry = currentHistoryIndex !== null ? hist[currentHistoryIndex] : null;
+  await renderDocumentosTab(expId, hEntry?.formData || {}, hEntry?.mercados || []);
+  showToast('✓ Documento eliminado');
+}
+
+function getExpiryBadge(status, docMarketsList, activeDocMarkets) {
+  if (!status?.expiryDate) return '';
+  const expiry = new Date(status.expiryDate);
+  const daysLeft = Math.round((expiry - new Date()) / 86400000);
+  const threshold = docMarketsList.filter(m => activeDocMarkets.includes(m)).includes('UE') ? 180 : 90;
+  if (daysLeft < 0)          return `<span class="doc-expiry-badge doc-expiry--expired">⚠ Vencido</span>`;
+  if (daysLeft <= threshold) return `<span class="doc-expiry-badge doc-expiry--soon">⏰ ${daysLeft}d para vencer</span>`;
+  return `<span class="doc-expiry-badge doc-expiry--ok">📅 Vence ${status.expiryDate}</span>`;
 }
 
 async function handleDocApprove(expId, code) {
@@ -3796,6 +3898,9 @@ async function renderDocumentosTab(expId, formData, markets) {
 
   const actionBtn = (expId, code) => {
     const s = statuses[code];
+    const deleteBtn = s && canApprove
+      ? `<button class="btn-doc-delete" title="Eliminar" onclick="handleDocDelete('${expId}','${code}','${escapeHtml(s.storagePath || '')}')">✕</button>`
+      : '';
     if (!s) {
       return canUpload ? `<button class="btn-doc-upload" onclick="handleDocUpload('${expId}','${code}')">+ Subir</button>` : '';
     }
@@ -3803,7 +3908,7 @@ async function renderDocumentosTab(expId, formData, markets) {
     const approveBtn = s.status === 'uploaded' && canApprove
       ? `<button class="btn-doc-approve" onclick="handleDocApprove('${expId}','${code}')">Aprobar</button>`
       : '';
-    return viewBtn + approveBtn;
+    return viewBtn + approveBtn + deleteBtn;
   };
 
   const marketBadges = (docMarkets, docMarketsList) =>
@@ -3831,6 +3936,14 @@ async function renderDocumentosTab(expId, formData, markets) {
       const s = statuses[d.code];
       const rowCls = s?.status === 'approved' ? 'doc-row--approved' : s ? 'doc-row--uploaded' : 'doc-row--pending';
       const condBadge = d.req === 'conditional' ? `<span class="doc-req-badge doc-req--cond">Condicional</span>` : '';
+      const expiryBadge = getExpiryBadge(s, d.markets, docMarkets);
+      const metaLine = s && (s.issuedDate || s.labName || s.standard || s.issuedBy) ? `
+        <div class="doc-row-details">
+          ${s.issuedDate ? `<span>${s.issuedDate}${s.expiryDate ? ` → ${s.expiryDate}` : ''}</span>` : ''}
+          ${s.labName    ? `<span>🔬 ${escapeHtml(s.labName)}${s.labAcc ? ` · ${escapeHtml(s.labAcc)}` : ''}</span>` : ''}
+          ${s.standard   ? `<span>📐 ${escapeHtml(s.standard)}</span>` : ''}
+          ${s.issuedBy   ? `<span>✍ ${escapeHtml(s.issuedBy)}</span>` : ''}
+        </div>` : '';
       return `
         <div class="doc-row ${rowCls}" id="doc-row-${d.code}">
           <div class="doc-row-left">
@@ -3842,7 +3955,9 @@ async function renderDocumentosTab(expId, formData, markets) {
                 ${condBadge}
                 ${marketBadges(docMarkets, d.markets)}
                 ${s?.fileName ? `<span class="doc-filename" title="${escapeHtml(s.fileName)}">📄 ${escapeHtml(s.fileName.slice(0,30))}${s.fileName.length>30?'…':''}</span>` : ''}
+                ${expiryBadge}
               </div>
+              ${metaLine}
             </div>
           </div>
           <div class="doc-row-actions">${actionBtn(expId, d.code)}</div>
