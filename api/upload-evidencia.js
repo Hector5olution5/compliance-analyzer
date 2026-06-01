@@ -36,27 +36,26 @@ export default async function handler(req, res) {
     'apikey': serviceKey,
   };
 
-  // ── Generate signed upload URL (browser uploads directly to Supabase) ────
+  // ── Upload (base64 body from browser) ────────────────────────────────────
   if (req.method === 'POST') {
-    const { path, contentType } = req.body || {};
-    if (!path || !contentType) {
-      return res.status(400).json({ error: 'Missing path or contentType' });
+    const { path, data, contentType } = req.body || {};
+    if (!path || !data || !contentType) {
+      return res.status(400).json({ error: 'Missing path, data or contentType' });
     }
 
-    const signRes = await fetch(
-      `${supabaseUrl}/storage/v1/object/sign/upload/evidencias/${path}`,
-      { method: 'POST', headers: { ...sbHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify({ expiresIn: 300 }) }
+    const buffer = Buffer.from(data, 'base64');
+    const uploadRes = await fetch(
+      `${supabaseUrl}/storage/v1/object/evidencias/${path}`,
+      { method: 'POST', headers: { ...sbHeaders, 'Content-Type': contentType }, body: buffer }
     );
 
-    if (!signRes.ok) {
-      const err = await signRes.json().catch(() => ({}));
-      return res.status(signRes.status).json({ error: err.message || err.error || 'Failed to generate upload URL' });
+    if (!uploadRes.ok) {
+      const err = await uploadRes.json().catch(() => ({}));
+      return res.status(uploadRes.status).json({ error: err.message || err.error || 'Upload failed' });
     }
 
-    const { signedURL } = await signRes.json();
-    const signedUrl = `${supabaseUrl}${signedURL}`;
     const publicUrl = `${supabaseUrl}/storage/v1/object/public/evidencias/${path}`;
-    return res.status(200).json({ signedUrl, publicUrl });
+    return res.status(200).json({ publicUrl, path });
   }
 
   // ── Delete ────────────────────────────────────────────────────────────────

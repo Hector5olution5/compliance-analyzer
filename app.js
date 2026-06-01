@@ -236,6 +236,15 @@ async function regenerateExpediente(index) {
 }
 
 // ── Supabase — evidencias del expediente ─────────────────────────────────────
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 async function uploadEvidencia(expId, file) {
   if (!db) throw new Error('Firestore no disponible');
   const session = getSession();
@@ -245,28 +254,17 @@ async function uploadEvidencia(expId, file) {
   const path        = `${expId}/${fileId}_${safeName}`;
   const contentType = file.type || 'application/octet-stream';
 
-  // 1. Get signed upload URL from server (no file data sent to Vercel)
-  const signRes = await fetch('/api/upload-evidencia', {
+  const data = await fileToBase64(file);
+  const res  = await fetch('/api/upload-evidencia', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path, contentType }),
+    body: JSON.stringify({ path, data, contentType }),
   });
-  if (!signRes.ok) {
-    const err = await signRes.json().catch(() => ({}));
-    throw new Error(err.error || 'Error al preparar la subida');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Error al subir el archivo');
   }
-  const { signedUrl, publicUrl } = await signRes.json();
-
-  // 2. Upload directly to Supabase — bypasses Vercel size limits entirely
-  const uploadRes = await fetch(signedUrl, {
-    method: 'PUT',
-    headers: { 'Content-Type': contentType },
-    body: file,
-  });
-  if (!uploadRes.ok) {
-    const err = await uploadRes.json().catch(() => ({}));
-    throw new Error(err.message || err.error || 'Error al subir el archivo');
-  }
+  const { publicUrl } = await res.json();
 
   const ev = {
     id: fileId, expId,
@@ -372,9 +370,9 @@ async function handleDeleteEvidencia(expId, evidenciaId, storagePath) {
   }
 }
 
-const PDF_COMPRESS_THRESHOLD = 45 * 1024 * 1024; // compress PDFs over 45 MB
-const PDF_COMPRESS_SCALE    = 1.5;  // render resolution
-const PDF_COMPRESS_QUALITY  = 0.75; // JPEG quality (0–1)
+const PDF_COMPRESS_THRESHOLD = 10 * 1024 * 1024; // compress PDFs over 10 MB
+const PDF_COMPRESS_SCALE    = 1.2;  // render resolution
+const PDF_COMPRESS_QUALITY  = 0.55; // JPEG quality — aggressive to stay under 20 MB after compress
 
 async function compressPdf(file, onProgress) {
   const arrayBuffer = await file.arrayBuffer();
@@ -436,8 +434,8 @@ function setupEvidenciasUpload(expId) {
           });
           if (btn) btn.textContent = `⏳ Subiendo…`;
         }
-        if (fileToUpload.size > 50 * 1024 * 1024) {
-          errs.push(`${f.name}: no se pudo reducir por debajo de 50 MB — comprime el PDF manualmente`);
+        if (fileToUpload.size > 45 * 1024 * 1024) {
+          errs.push(`${f.name}: no se pudo reducir lo suficiente (${(fileToUpload.size/1024/1024).toFixed(0)} MB) — comprime el PDF manualmente en smallpdf.com`);
           continue;
         }
         await uploadEvidencia(expId, fileToUpload); ok++;
