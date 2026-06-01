@@ -125,24 +125,22 @@ async function fsDeleteUser(id) {
 
 // ── Firestore — expedientes (guardado permanente cross-device) ────────────────
 
-async function saveExpedienteToFirestore(histIndex, markets) {
+async function saveExpedienteToFirestore(entryOrIndex, markets) {
   if (!db) return;
   const session = getSession();
   if (!session) return;
 
-  let hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
-  const hEntry = hist[histIndex];
-  if (!hEntry) return;
-
-  const expId = hEntry.expId || generateId();
-
-  // Persist expId in localStorage
-  if (!hEntry.expId) {
-    hist[histIndex].expId = expId;
-    try { localStorage.setItem(HIST_KEY, JSON.stringify(hist)); } catch (_) {}
+  // Accept either a history entry object or a legacy numeric index
+  let e;
+  if (typeof entryOrIndex === 'number') {
+    const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+    e = hist[entryOrIndex];
+  } else {
+    e = entryOrIndex;
   }
+  if (!e) return;
 
-  const e = hist[histIndex] || hEntry;
+  const expId = e.expId || generateId();
   try {
     const fd = e.formData ? { ...e.formData } : {};
     delete fd.previews;
@@ -659,6 +657,8 @@ function updatePinDots() {
   );
 }
 
+let _pinVerifying = false;
+
 async function handlePinKey(key) {
   if (!_loginSelectedUser) return;
   if (key === 'back') {
@@ -671,6 +671,8 @@ async function handlePinKey(key) {
   updatePinDots();
 
   if (_loginPinBuffer.length === 4) {
+    if (_pinVerifying) return;
+    _pinVerifying = true;
     const errEl = document.getElementById('pin-error');
     const dots  = document.getElementById('pin-dots');
 
@@ -684,22 +686,26 @@ async function handlePinKey(key) {
       return;
     }
 
-    const ok = await verifyPin(_loginSelectedUser.id, _loginPinBuffer);
-    _loginPinBuffer = '';
-    updatePinDots();
-    if (ok) {
-      clearFailedAttempts(_loginSelectedUser.id);
-      errEl.textContent = 'PIN incorrecto — intenta de nuevo';
-      finishLogin(_loginSelectedUser);
-    } else {
-      const entry = recordFailedAttempt(_loginSelectedUser.id);
-      const remaining = LOCKOUT_MAX_ATTEMPTS - (entry.attempts || 0);
-      errEl.textContent = entry.lockedUntil
-        ? `Demasiados intentos — bloqueado 30s`
-        : `PIN incorrecto — ${remaining} intento${remaining !== 1 ? 's' : ''} restante${remaining !== 1 ? 's' : ''}`;
-      errEl.classList.remove('pin-error-hidden');
-      dots.classList.add('pin-shake');
-      setTimeout(() => dots.classList.remove('pin-shake'), 400);
+    try {
+      const ok = await verifyPin(_loginSelectedUser.id, _loginPinBuffer);
+      _loginPinBuffer = '';
+      updatePinDots();
+      if (ok) {
+        clearFailedAttempts(_loginSelectedUser.id);
+        errEl.textContent = 'PIN incorrecto — intenta de nuevo';
+        finishLogin(_loginSelectedUser);
+      } else {
+        const entry = recordFailedAttempt(_loginSelectedUser.id);
+        const remaining = LOCKOUT_MAX_ATTEMPTS - (entry.attempts || 0);
+        errEl.textContent = entry.lockedUntil
+          ? `Demasiados intentos — bloqueado 30s`
+          : `PIN incorrecto — ${remaining} intento${remaining !== 1 ? 's' : ''} restante${remaining !== 1 ? 's' : ''}`;
+        errEl.classList.remove('pin-error-hidden');
+        dots.classList.add('pin-shake');
+        setTimeout(() => dots.classList.remove('pin-shake'), 400);
+      }
+    } finally {
+      _pinVerifying = false;
     }
   }
 }
@@ -2965,7 +2971,7 @@ function saveToHistory(formData, markets) {
 
   // Save formData to Firestore in background (cross-device access)
   if (db) {
-    saveExpedienteToFirestore(0, markets)
+    saveExpedienteToFirestore(entry, markets)
       .then(() => showToast('☁ Expediente guardado en la nube'))
       .catch(e => console.warn('Cloud save error:', e));
   }
@@ -3036,6 +3042,8 @@ function deleteHistoryItem(index) {
   const expId = hist[index]?.expId;
   hist.splice(index, 1);
   localStorage.setItem(HIST_KEY, JSON.stringify(hist));
+  if (currentHistoryIndex === index) currentHistoryIndex = null;
+  else if (currentHistoryIndex > index) currentHistoryIndex--;
   renderHistory();
   if (expId && db) db.collection('expedientes').doc(expId).delete().catch(() => {});
 }
