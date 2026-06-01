@@ -372,6 +372,47 @@ async function handleDeleteEvidencia(expId, evidenciaId, storagePath) {
   }
 }
 
+const PDF_COMPRESS_THRESHOLD = 45 * 1024 * 1024; // compress PDFs over 45 MB
+const PDF_COMPRESS_SCALE    = 1.5;  // render resolution
+const PDF_COMPRESS_QUALITY  = 0.75; // JPEG quality (0–1)
+
+async function compressPdf(file, onProgress) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const numPages = pdfDoc.numPages;
+
+  const firstPage  = await pdfDoc.getPage(1);
+  const viewport   = firstPage.getViewport({ scale: PDF_COMPRESS_SCALE });
+  const isLandscape = viewport.width > viewport.height;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({
+    orientation: isLandscape ? 'landscape' : 'portrait',
+    unit: 'pt',
+    format: [viewport.width * 0.75, viewport.height * 0.75], // px → pt
+  });
+
+  for (let i = 1; i <= numPages; i++) {
+    if (i > 1) {
+      const pv = (await pdfDoc.getPage(i)).getViewport({ scale: PDF_COMPRESS_SCALE });
+      doc.addPage([pv.width * 0.75, pv.height * 0.75]);
+    }
+    const page = await pdfDoc.getPage(i);
+    const pv   = page.getViewport({ scale: PDF_COMPRESS_SCALE });
+    const canvas = document.createElement('canvas');
+    canvas.width  = pv.width;
+    canvas.height = pv.height;
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport: pv }).promise;
+    const imgData = canvas.toDataURL('image/jpeg', PDF_COMPRESS_QUALITY);
+    const w = pv.width * 0.75, h = pv.height * 0.75;
+    doc.addImage(imgData, 'JPEG', 0, 0, w, h);
+    if (onProgress) onProgress(i, numPages);
+  }
+
+  const blob = doc.output('blob');
+  return new File([blob], file.name, { type: 'application/pdf' });
+}
+
 function setupEvidenciasUpload(expId) {
   const inp = document.getElementById('ev-file-input');
   if (!inp) return;
@@ -386,8 +427,21 @@ function setupEvidenciasUpload(expId) {
     for (const f of files) {
       const valid = f.type === 'application/pdf' || f.type.startsWith('image/');
       if (!valid) { errs.push(`${f.name}: tipo no permitido`); continue; }
-      if (f.size > 50 * 1024 * 1024) { errs.push(`${f.name}: excede 50 MB`); continue; }
-      try { await uploadEvidencia(expId, f); ok++; } catch (err) {
+      try {
+        let fileToUpload = f;
+        if (f.type === 'application/pdf' && f.size > PDF_COMPRESS_THRESHOLD) {
+          if (btn) btn.textContent = `⏳ Comprimiendo PDF…`;
+          fileToUpload = await compressPdf(f, (page, total) => {
+            if (btn) btn.textContent = `⏳ Comprimiendo ${page}/${total}…`;
+          });
+          if (btn) btn.textContent = `⏳ Subiendo…`;
+        }
+        if (fileToUpload.size > 50 * 1024 * 1024) {
+          errs.push(`${f.name}: no se pudo reducir por debajo de 50 MB — comprime el PDF manualmente`);
+          continue;
+        }
+        await uploadEvidencia(expId, fileToUpload); ok++;
+      } catch (err) {
         const msg = err.message === 'Failed to fetch'
           ? 'No se pudo conectar con el almacenamiento — el servicio puede estar pausado, intenta en un momento'
           : err.message;
