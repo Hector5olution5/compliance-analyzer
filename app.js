@@ -365,7 +365,12 @@ function setupEvidenciasUpload(expId) {
       const valid = f.type === 'application/pdf' || f.type.startsWith('image/');
       if (!valid) { errs.push(`${f.name}: tipo no permitido`); continue; }
       if (f.size > 20 * 1024 * 1024) { errs.push(`${f.name}: excede 20 MB`); continue; }
-      try { await uploadEvidencia(expId, f); ok++; } catch (err) { errs.push(`${f.name}: ${err.message}`); }
+      try { await uploadEvidencia(expId, f); ok++; } catch (err) {
+        const msg = err.message === 'Failed to fetch'
+          ? 'No se pudo conectar con el almacenamiento — el servicio puede estar pausado, intenta en un momento'
+          : err.message;
+        errs.push(`${f.name}: ${msg}`);
+      }
     }
     fresh.value = '';
     if (btn) { btn.disabled = false; btn.textContent = '+ Subir'; }
