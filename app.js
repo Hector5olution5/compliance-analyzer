@@ -177,11 +177,13 @@ async function mergeCloudHistory() {
   if (!cloud.length) return;
 
   const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
-  const localIds = new Set(hist.map(h => h.expId).filter(Boolean));
+  const localIds  = new Set(hist.map(h => h.expId).filter(Boolean));
+  const localKeys = new Set(hist.map(h => `${h.nombre}|${h.fecha}`));
   let changed = false;
 
   for (const c of cloud) {
     if (localIds.has(c.id)) continue;
+    if (localKeys.has(`${c.nombre}|${c.fecha}`)) continue; // fallback dedup for entries without expId
     hist.push({
       nombre: c.nombre, categoria: c.categoria,
       mercados: c.mercados, fecha: c.fecha, ts: c.ts,
@@ -426,6 +428,10 @@ function recordFailedAttempt(userId) {
   }
   state[userId] = entry;
   localStorage.setItem(LOCKOUT_KEY, JSON.stringify(state));
+  // Backup to Firestore so clearing localStorage doesn't bypass lockout
+  if (typeof db !== 'undefined' && db) {
+    db.collection('lockouts').doc(userId).set(entry).catch(() => {});
+  }
   return entry;
 }
 
@@ -433,6 +439,20 @@ function clearFailedAttempts(userId) {
   const state = getLockouts();
   delete state[userId];
   localStorage.setItem(LOCKOUT_KEY, JSON.stringify(state));
+  if (typeof db !== 'undefined' && db) {
+    db.collection('lockouts').doc(userId).delete().catch(() => {});
+  }
+}
+
+async function isLockedOutFirestore(userId) {
+  if (typeof db === 'undefined' || !db) return false;
+  try {
+    const doc = await db.collection('lockouts').doc(userId).get();
+    if (!doc.exists) return false;
+    const data = doc.data();
+    if (data?.lockedUntil && Date.now() < data.lockedUntil) return data.lockedUntil;
+    return false;
+  } catch { return false; }
 }
 
 async function createUser(name, role, pin) {
@@ -574,7 +594,7 @@ async function handlePinKey(key) {
     const errEl = document.getElementById('pin-error');
     const dots  = document.getElementById('pin-dots');
 
-    const lockedUntil = isLockedOut(_loginSelectedUser.id);
+    const lockedUntil = isLockedOut(_loginSelectedUser.id) || await isLockedOutFirestore(_loginSelectedUser.id);
     if (lockedUntil) {
       const secs = Math.ceil((lockedUntil - Date.now()) / 1000);
       errEl.textContent = `Bloqueado — intenta en ${secs}s`;
@@ -787,9 +807,16 @@ async function saveChangedPin() {
   if (!ok) { errEl.textContent = 'PIN actual incorrecto.'; errEl.classList.remove('hidden'); return; }
 
   btn.textContent = 'Guardando…'; btn.disabled = true;
-  await updateUser(session.userId, {}, newPin);
-  closeChangePinModal();
-  btn.textContent = 'Guardar'; btn.disabled = false;
+  try {
+    await updateUser(session.userId, {}, newPin);
+    closeChangePinModal();
+  } catch (e) {
+    errEl.textContent = 'Error al guardar el PIN. Intenta de nuevo.';
+    errEl.classList.remove('hidden');
+    return;
+  } finally {
+    btn.textContent = 'Guardar'; btn.disabled = false;
+  }
 
   // Brief success toast
   const badge = document.getElementById('user-badge');
@@ -3148,6 +3175,7 @@ function setupLabelCheck() {
 
 let labelFileReady = false;
 let labelFile = null; // PDF File object when using native PDF; null for images
+let _labelToken = 0;  // increments on each new file drop to cancel stale async ops
 
 function updateLabelRunButton() {
   const sel = document.getElementById('label-country-select')?.value;
@@ -3155,6 +3183,7 @@ function updateLabelRunButton() {
 }
 
 async function handleLabelFile(file) {
+  const myToken = ++_labelToken;
   const nameEl = document.getElementById('label-file-name');
   const status = document.getElementById('label-status');
   const isImage = file.type.startsWith('image/');
@@ -3168,7 +3197,9 @@ async function handleLabelFile(file) {
   try {
     if (isImage) {
       status.textContent = '⏳ Leyendo imagen con IA (visión)...';
-      labelPdfText = await extractTextFromImageLabel(file);
+      const extracted = await extractTextFromImageLabel(file);
+      if (myToken !== _labelToken) return; // another file was dropped — discard
+      labelPdfText = extracted;
       if (!labelPdfText || labelPdfText.trim().length < 30) {
         status.textContent = '⚠ Poco texto extraído. El análisis usará lo disponible.';
       } else {
@@ -3179,9 +3210,11 @@ async function handleLabelFile(file) {
       labelFile = file;
       status.textContent = `✓ PDF listo (${(file.size / 1024).toFixed(0)} KB). Selecciona el país o región para continuar.`;
     }
+    if (myToken !== _labelToken) return; // stale check before committing ready state
     labelFileReady = true;
     updateLabelRunButton();
   } catch(e) {
+    if (myToken !== _labelToken) return;
     status.textContent = '⚠ Error al leer el archivo: ' + e.message;
   }
 }
