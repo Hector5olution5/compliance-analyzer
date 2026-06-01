@@ -3660,10 +3660,15 @@ function getProductAttribs(formData) {
   };
 }
 
+function expandDocMarkets(markets) {
+  const expanded = [...markets];
+  if (markets.includes('Internacional')) expanded.push('UE', 'USA', 'Australia');
+  return ['UE','USA','Australia'].filter(m => expanded.includes(m));
+}
+
 function getRequiredDocs(formData, markets) {
   const attribs = getProductAttribs(formData);
-  const docMarkets = ['UE','USA','Australia'];
-  const activeDocMarkets = docMarkets.filter(m => markets.includes(m));
+  const activeDocMarkets = expandDocMarkets(markets);
   if (!activeDocMarkets.length) return [];
   return DOCS_MASTER.filter(doc => {
     if (!doc.markets.some(m => activeDocMarkets.includes(m))) return false;
@@ -3756,7 +3761,7 @@ async function renderDocumentosTab(expId, formData, markets) {
   const content = document.getElementById('results-content');
   if (!content) return;
 
-  const docMarkets = ['UE','USA','Australia'].filter(m => markets.includes(m));
+  const docMarkets = expandDocMarkets(markets);
   const required   = getRequiredDocs(formData, markets);
   const optional   = DOCS_MASTER.filter(d => d.req === 'optional' && d.markets.some(m => docMarkets.includes(m)));
   const statuses   = await loadDocStatuses(expId);
