@@ -5,6 +5,26 @@ export const config = {
   },
 };
 
+const ALLOWED_HOSTS = [
+  'compliance-analyzer-pearl.vercel.app',
+  'compliance-analyzer-hector5olution5s-projects.vercel.app',
+  'compliance-analyzer-git-main-hector5olution5s-projects.vercel.app',
+  'localhost',
+  '127.0.0.1',
+];
+
+const MAX_TOKENS_CAP = 4000;
+
+function isAllowedReferer(referer) {
+  if (!referer) return false;
+  try {
+    const { hostname } = new URL(referer);
+    return ALLOWED_HOSTS.some(h => hostname === h || hostname.endsWith('.' + h));
+  } catch {
+    return false;
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -16,9 +36,16 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  if (!isAllowedReferer(req.headers.referer)) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
   if (!process.env.CLAUDE_API_KEY) {
     return res.status(500).json({ error: 'API key not configured on server.' });
   }
+
+  const body = { ...req.body };
+  if ((body.max_tokens || 0) > MAX_TOKENS_CAP) body.max_tokens = MAX_TOKENS_CAP;
 
   const headers = {
     'Content-Type':      'application/json',
@@ -31,7 +58,7 @@ export default async function handler(req, res) {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers,
-      body: JSON.stringify(req.body),
+      body: JSON.stringify(body),
     });
     const data = await response.json();
     return res.status(response.status).json(data);
