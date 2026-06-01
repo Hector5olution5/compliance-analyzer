@@ -343,6 +343,7 @@ async function renderEvidenciasPanel(expId) {
 }
 
 async function handleToggleRevisado(expId, evidenciaId, currentState) {
+  if (getActiveRole() === 'viewer') return;
   const btn = document.querySelector(`#ev-${evidenciaId} .btn-ev-check`);
   if (btn) { btn.disabled = true; btn.textContent = '…'; }
   try {
@@ -373,6 +374,7 @@ const PDF_COMPRESS_SCALE    = 1.2;  // render resolution
 const PDF_COMPRESS_QUALITY  = 0.55; // JPEG quality — aggressive to stay under 20 MB after compress
 
 async function compressPdf(file, onProgress) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const arrayBuffer = await file.arrayBuffer();
   const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   const numPages = pdfDoc.numPages;
@@ -3320,6 +3322,13 @@ async function runLabelAnalysis() {
   const btn = document.getElementById('btn-run-label');
   const status = document.getElementById('label-status');
   const results = document.getElementById('label-results');
+
+  if (!labelFile && !labelPdfText.trim()) {
+    status.textContent = '⚠ No hay archivo cargado. Sube una imagen o PDF de la etiqueta primero.';
+    status.classList.remove('hidden');
+    return;
+  }
+
   btn.disabled = true;
   results.classList.add('hidden');
   results.innerHTML = '';

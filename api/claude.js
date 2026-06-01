@@ -94,7 +94,10 @@ export default async function handler(req, res) {
     'x-api-key':         process.env.CLAUDE_API_KEY,
     'anthropic-version': '2023-06-01',
   };
-  if (req.headers['anthropic-beta']) headers['anthropic-beta'] = req.headers['anthropic-beta'];
+  const ALLOWED_BETA = new Set(['pdfs-2024-09-25', 'interleaved-thinking-2025-05-14']);
+  if (req.headers['anthropic-beta'] && ALLOWED_BETA.has(req.headers['anthropic-beta'])) {
+    headers['anthropic-beta'] = req.headers['anthropic-beta'];
+  }
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {

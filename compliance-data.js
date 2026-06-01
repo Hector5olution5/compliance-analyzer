@@ -1,5 +1,5 @@
 // ── Market Configurations ────────────────────────────────────────────────────
-const FIXED_MARKETS = ['Internacional', 'LATAM', 'CAM'];
+const FIXED_MARKETS = ['Internacional', 'LATAM', 'Mexico', 'CAM'];
 
 const MARKETS = {
   UE: {
