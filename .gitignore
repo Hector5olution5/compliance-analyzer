@@ -5,3 +5,5 @@ env.js
 Producto/
 Ejemplos de expedientes/
 coding.docx
+.vercel
+.env*
