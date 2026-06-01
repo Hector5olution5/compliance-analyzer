@@ -814,6 +814,11 @@ textarea { resize: vertical; }
 .history-name { font-size: 13px; font-weight: 600; color: var(--navy); }
 .history-meta { font-size: 11px; color: var(--gray-400); margin-top: 3px; }
 .history-markets { font-size: 11px; color: var(--blue); margin-top: 4px; }
+.hist-doc-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.hist-doc-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 99px; }
+.hist-doc--ok      { background: #DCFCE7; color: #15803D; }
+.hist-doc--partial { background: #FEF9C3; color: #92400E; }
+.hist-doc--missing { background: #FEE2E2; color: #B91C1C; }
 .history-item-actions { display: flex; gap: 6px; margin-top: 10px; align-items: center; flex-wrap: wrap; }
 .btn-hist-action {
   font-size: 11px; font-weight: 600; font-family: var(--font);

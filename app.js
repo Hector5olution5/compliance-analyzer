@@ -2999,6 +2999,22 @@ const STATUS_CFG = {
   aprobado:    { label: 'Aprobado',    cls: 'status-aprobado' },
 };
 
+function buildDocProgressBadges(docProgress) {
+  if (!docProgress || !Object.keys(docProgress).length) return '';
+  return Object.entries(docProgress).map(([m, p]) => {
+    const pct = p.total ? Math.round(p.done / p.total * 100) : 0;
+    const flag = DOC_MARKET_FLAGS[m] || '';
+    if (pct === 100) return `<span class="hist-doc-badge hist-doc--ok">${flag} ${DOC_MARKET_SHORT[m]} ✓</span>`;
+    if (p.done > 0)  return `<span class="hist-doc-badge hist-doc--partial">${flag} ${DOC_MARKET_SHORT[m]} ${p.done}/${p.total}</span>`;
+    return           `<span class="hist-doc-badge hist-doc--missing">${flag} ${DOC_MARKET_SHORT[m]} 0/${p.total}</span>`;
+  }).join('');
+}
+
+function getDocProgressMissing(docProgress) {
+  if (!docProgress) return 0;
+  return Object.values(docProgress).reduce((acc, p) => acc + (p.total - p.done), 0);
+}
+
 function renderHistory() {
   const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
   const el = document.getElementById('history-list');
@@ -3018,6 +3034,7 @@ function renderHistory() {
     const cloudBadge = hasCloud
       ? `<span style="font-size:11px;color:#185FA5;font-weight:600;margin-left:6px" title="Guardado en la nube">☁</span>`
       : '';
+    const docBadges = buildDocProgressBadges(h.docProgress);
     return `
     <div class="history-item">
       <div class="history-item-top">
@@ -3025,6 +3042,7 @@ function renderHistory() {
           <div class="history-name">${escapeHtml(h.nombre)}${cloudBadge}</div>
           <div class="history-meta">${escapeHtml(h.categoria || '')} · ${h.fecha}</div>
           <div class="history-markets">${(h.mercados || FIXED_MARKETS).map(k => (MARKETS[k]?.flag || '') + ' ' + (MARKETS[k]?.nombre || k)).join(' · ')}</div>
+          ${docBadges ? `<div class="hist-doc-badges">${docBadges}</div>` : ''}
         </div>
         <span class="history-status-badge ${sc.cls}">${sc.label}</span>
       </div>
@@ -3122,6 +3140,13 @@ function changeStatus(index, newStatus) {
   if (index === null || index === undefined) return;
   const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
   if (!hist[index]) return;
+  if (newStatus === 'aprobado') {
+    const missing = getDocProgressMissing(hist[index].docProgress);
+    if (missing > 0) {
+      const ok = confirm(`Faltan ${missing} documento${missing > 1 ? 's' : ''} requerido${missing > 1 ? 's' : ''} en la Ruta de Compliance.\n\n¿Marcar como Aprobado de todas formas?`);
+      if (!ok) return;
+    }
+  }
   hist[index].status = newStatus;
   localStorage.setItem(HIST_KEY, JSON.stringify(hist));
   if (db && hist[index].expId) {
@@ -3875,6 +3900,15 @@ async function renderDocumentosTab(expId, formData, markets) {
     const done  = mDocs.filter(d => ['uploaded','approved'].includes(statuses[d.code]?.status));
     marketProgress[m] = { total: mDocs.length, done: done.length };
   });
+
+  // Persist docProgress to localStorage so history cards can show badges
+  if (currentHistoryIndex !== null && Object.keys(marketProgress).length) {
+    const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+    if (hist[currentHistoryIndex]) {
+      hist[currentHistoryIndex].docProgress = marketProgress;
+      try { localStorage.setItem(HIST_KEY, JSON.stringify(hist)); } catch (e) {}
+    }
+  }
 
   // Next pending required doc
   const nextDoc = required.find(d => !statuses[d.code]);
