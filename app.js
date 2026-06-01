@@ -2823,7 +2823,8 @@ function renderResults(formData) {
   tabsEl.innerHTML =
     keys.map(k => `<button class="result-tab" data-key="${k}" onclick="showResultTab('${k}')">${MARKETS[k]?.flag || ''} ${MARKETS[k]?.nombre || k}</button>`).join('') +
     `<button class="result-tab result-tab--label" data-key="etiquetado" onclick="showResultTab('etiquetado')">🏷 Etiquetado</button>` +
-    `<button class="result-tab result-tab--ev" data-key="evidencias" onclick="showResultTab('evidencias')">📎 Evidencias</button>`;
+    `<button class="result-tab result-tab--ev" data-key="evidencias" onclick="showResultTab('evidencias')">📎 Evidencias</button>` +
+    `<button class="result-tab result-tab--docs" data-key="documentos" onclick="showResultTab('documentos')">📋 Documentos</button>`;
   const hasBlobs = keys.some(k => generatedDocs[k].blob);
   document.getElementById('btn-download-zip').classList.toggle('hidden', keys.length < 2 || !hasBlobs);
   setupLabelCheck();
@@ -2870,6 +2871,19 @@ function showResultTab(key) {
     }
     return;
   }
+
+  if (key === 'documentos') {
+    inline?.classList.add('hidden');
+    content?.classList.remove('hidden');
+    const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+    const hEntry = currentHistoryIndex !== null ? hist[currentHistoryIndex] : null;
+    const expId    = hEntry?.expId || null;
+    const formData = hEntry?.formData || {};
+    const markets  = hEntry?.mercados || [];
+    renderDocumentosTab(expId, formData, markets);
+    return;
+  }
+
   inline?.classList.add('hidden');
   content?.classList.remove('hidden');
   if (!generatedDocs[key]) return;
@@ -3623,4 +3637,271 @@ function renderLabelResults(allResults, ctx, groupsToAnalyze) {
   }
 
   container.innerHTML = html;
+}
+
+// ── Compliance Documents Module — Fase 1 ─────────────────────────────────────
+
+const DOC_MARKET_FLAGS = { UE: '🇪🇺', USA: '🇺🇸', Australia: '🇦🇺' };
+const DOC_MARKET_SHORT = { UE: 'UE', USA: 'USA', Australia: 'AU' };
+
+function getProductAttribs(formData) {
+  const c = formData.caracteristicas || [];
+  const edad = parseInt(formData.edad) || 0;
+  return {
+    has_electronics:      c.some(x => ['electronico','led','vapor'].includes(x)),
+    has_battery:          c.some(x => ['bateria','bateria_boton'].includes(x)),
+    has_magnets:          c.includes('imanes'),
+    has_connectivity:     c.some(x => ['electronico'].includes(x)),
+    has_liquid_media:     c.includes('liquidos'),
+    has_chemical_kit:     false,
+    has_internet:         false,
+    mfg_outside_eu:       true,
+    target_age_under_36m: edad > 0 && edad <= 3,
+  };
+}
+
+function getRequiredDocs(formData, markets) {
+  const attribs = getProductAttribs(formData);
+  const docMarkets = ['UE','USA','Australia'];
+  const activeDocMarkets = docMarkets.filter(m => markets.includes(m));
+  if (!activeDocMarkets.length) return [];
+  return DOCS_MASTER.filter(doc => {
+    if (!doc.markets.some(m => activeDocMarkets.includes(m))) return false;
+    if (doc.req === 'required') return true;
+    if (doc.req === 'conditional') return !!attribs[doc.trigger];
+    return false;
+  });
+}
+
+async function loadDocStatuses(expId) {
+  if (!db || !expId) return {};
+  try {
+    const snap = await db.collection('expedientes').doc(expId).collection('documentos').get();
+    const out = {};
+    snap.docs.forEach(d => { out[d.id] = d.data(); });
+    return out;
+  } catch (e) { console.warn('Load doc statuses failed:', e.message); return {}; }
+}
+
+async function saveDocStatus(expId, code, data) {
+  if (!db || !expId) return;
+  await db.collection('expedientes').doc(expId).collection('documentos').doc(code).set(data, { merge: true });
+}
+
+async function uploadDocumento(expId, code, file) {
+  const session = getSession();
+  if (!session) throw new Error('Sin sesión activa');
+  let fileToUpload = file;
+  if (file.type === 'application/pdf' && file.size > PDF_COMPRESS_THRESHOLD) {
+    fileToUpload = await compressPdf(file, () => {});
+  }
+  const fileId      = generateId();
+  const safeName    = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path        = `${expId}/docs/${code}_${fileId}_${safeName}`;
+  const contentType = file.type || 'application/octet-stream';
+  const data        = await fileToBase64(fileToUpload);
+  const res = await fetch('/api/upload-evidencia', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path, data, contentType }),
+  });
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Error al subir'); }
+  const { publicUrl } = await res.json();
+  await saveDocStatus(expId, code, {
+    code, status: 'uploaded',
+    fileName: file.name, fileUrl: publicUrl, storagePath: path,
+    uploadedBy: session.userId, uploadedByName: session.name, uploadedAt: Date.now(),
+  });
+}
+
+async function handleDocUpload(expId, code) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.pdf,image/*';
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+    const row = document.getElementById(`doc-row-${code}`);
+    const btn = row?.querySelector('.btn-doc-upload');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Subiendo…'; }
+    try {
+      await uploadDocumento(expId, code, file);
+      showToast(`✓ ${DOCS_MASTER.find(d => d.code === code)?.name || code} subido`);
+      const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+      const hEntry = currentHistoryIndex !== null ? hist[currentHistoryIndex] : null;
+      await renderDocumentosTab(expId, hEntry?.formData || {}, hEntry?.mercados || []);
+    } catch (e) {
+      alert('Error: ' + e.message);
+      if (btn) { btn.disabled = false; btn.textContent = '+ Subir'; }
+    }
+  };
+  input.click();
+}
+
+async function handleDocApprove(expId, code) {
+  const role = getActiveRole();
+  if (role !== 'admin' && role !== 'coord_compliance') return;
+  const session = getSession();
+  await saveDocStatus(expId, code, {
+    status: 'approved',
+    approvedBy: session.userId, approvedByName: session.name, approvedAt: Date.now(),
+  });
+  const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+  const hEntry = currentHistoryIndex !== null ? hist[currentHistoryIndex] : null;
+  await renderDocumentosTab(expId, hEntry?.formData || {}, hEntry?.mercados || []);
+  showToast('✓ Documento aprobado');
+}
+
+async function renderDocumentosTab(expId, formData, markets) {
+  const content = document.getElementById('results-content');
+  if (!content) return;
+
+  const docMarkets = ['UE','USA','Australia'].filter(m => markets.includes(m));
+  const required   = getRequiredDocs(formData, markets);
+  const optional   = DOCS_MASTER.filter(d => d.req === 'optional' && d.markets.some(m => docMarkets.includes(m)));
+  const statuses   = await loadDocStatuses(expId);
+
+  // Progress per market
+  const marketProgress = {};
+  docMarkets.forEach(m => {
+    const mDocs = required.filter(d => d.markets.includes(m));
+    const done  = mDocs.filter(d => ['uploaded','approved'].includes(statuses[d.code]?.status));
+    marketProgress[m] = { total: mDocs.length, done: done.length };
+  });
+
+  // Next pending required doc
+  const nextDoc = required.find(d => !statuses[d.code]);
+
+  // Group by category
+  const cats = {};
+  required.forEach(d => {
+    if (!cats[d.cat]) cats[d.cat] = { name: d.catName, docs: [] };
+    cats[d.cat].docs.push(d);
+  });
+
+  const canApprove = ['admin','coord_compliance'].includes(getActiveRole());
+  const canUpload  = getActiveRole() !== 'viewer';
+
+  const statusBadge = (code) => {
+    const s = statuses[code];
+    if (!s) return `<span class="doc-status doc-status--pending">⬜ Pendiente</span>`;
+    if (s.status === 'approved') return `<span class="doc-status doc-status--approved">✅ Aprobado</span>`;
+    return `<span class="doc-status doc-status--uploaded">📎 Subido</span>`;
+  };
+
+  const actionBtn = (expId, code) => {
+    const s = statuses[code];
+    if (!s) {
+      return canUpload ? `<button class="btn-doc-upload" onclick="handleDocUpload('${expId}','${code}')">+ Subir</button>` : '';
+    }
+    const viewBtn = `<a class="btn-doc-view" href="${escapeHtml(s.fileUrl)}" target="_blank" rel="noopener">Ver</a>`;
+    const approveBtn = s.status === 'uploaded' && canApprove
+      ? `<button class="btn-doc-approve" onclick="handleDocApprove('${expId}','${code}')">Aprobar</button>`
+      : '';
+    return viewBtn + approveBtn;
+  };
+
+  const marketBadges = (docMarkets, docMarketsList) =>
+    docMarketsList.filter(m => docMarkets.includes(m))
+      .map(m => `<span class="doc-mkt-badge">${DOC_MARKET_FLAGS[m]} ${DOC_MARKET_SHORT[m]}</span>`)
+      .join('');
+
+  const progressBars = docMarkets.map(m => {
+    const p = marketProgress[m];
+    const pct = p.total ? Math.round(p.done / p.total * 100) : 0;
+    const color = pct === 100 ? '#16a34a' : pct >= 50 ? '#d97706' : '#dc2626';
+    return `
+      <div class="doc-progress-market">
+        <span class="doc-progress-label">${DOC_MARKET_FLAGS[m]} ${DOC_MARKET_SHORT[m]}</span>
+        <div class="doc-progress-track">
+          <div class="doc-progress-fill" style="width:${pct}%;background:${color}"></div>
+        </div>
+        <span class="doc-progress-count" style="color:${color}">${p.done}/${p.total}</span>
+      </div>`;
+  }).join('');
+
+  const catBlocks = Object.values(cats).map(cat => {
+    const catDone = cat.docs.filter(d => statuses[d.code]).length;
+    const rows = cat.docs.map(d => {
+      const s = statuses[d.code];
+      const rowCls = s?.status === 'approved' ? 'doc-row--approved' : s ? 'doc-row--uploaded' : 'doc-row--pending';
+      const condBadge = d.req === 'conditional' ? `<span class="doc-req-badge doc-req--cond">Condicional</span>` : '';
+      return `
+        <div class="doc-row ${rowCls}" id="doc-row-${d.code}">
+          <div class="doc-row-left">
+            ${statusBadge(d.code)}
+            <div class="doc-row-info">
+              <span class="doc-name">${escapeHtml(d.name)}</span>
+              <div class="doc-row-meta">
+                <span class="doc-code">${d.code}</span>
+                ${condBadge}
+                ${marketBadges(docMarkets, d.markets)}
+                ${s?.fileName ? `<span class="doc-filename" title="${escapeHtml(s.fileName)}">📄 ${escapeHtml(s.fileName.slice(0,30))}${s.fileName.length>30?'…':''}</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <div class="doc-row-actions">${actionBtn(expId, d.code)}</div>
+        </div>`;
+    }).join('');
+    return `
+      <div class="doc-cat">
+        <div class="doc-cat-header">
+          <span class="doc-cat-name">${cat.name}</span>
+          <span class="doc-cat-progress">${catDone}/${cat.docs.length}</span>
+        </div>
+        ${rows}
+      </div>`;
+  }).join('');
+
+  const optionalRows = optional.map(d => {
+    const s = statuses[d.code];
+    return `
+      <div class="doc-row doc-row--optional ${s ? 'doc-row--uploaded' : ''}" id="doc-row-${d.code}">
+        <div class="doc-row-left">
+          ${statusBadge(d.code)}
+          <div class="doc-row-info">
+            <span class="doc-name">${escapeHtml(d.name)}</span>
+            <div class="doc-row-meta">
+              <span class="doc-code">${d.code}</span>
+              <span class="doc-req-badge doc-req--opt">Opcional</span>
+              ${marketBadges(docMarkets, d.markets)}
+            </div>
+          </div>
+        </div>
+        <div class="doc-row-actions">${actionBtn(expId, d.code)}</div>
+      </div>`;
+  }).join('');
+
+  const nextBanner = nextDoc && expId ? `
+    <div class="doc-next-step">
+      <span class="doc-next-label">Siguiente paso →</span>
+      <span class="doc-next-name">${escapeHtml(nextDoc.name)}</span>
+      <span class="doc-next-code">${nextDoc.code}</span>
+      ${canUpload ? `<button class="btn-doc-upload btn-doc-upload--sm" onclick="handleDocUpload('${expId}','${nextDoc.code}')">+ Subir</button>` : ''}
+    </div>` : '';
+
+  const noMarkets = docMarkets.length === 0 ? `
+    <div class="doc-no-markets">
+      <p>Este expediente no incluye mercados UE, USA ni Australia.</p>
+      <p>El módulo de documentos aplica para: 🇪🇺 Unión Europea · 🇺🇸 Estados Unidos · 🇦🇺 Australia</p>
+    </div>` : '';
+
+  content.innerHTML = `
+    <div class="expediente-card docs-tab">
+      <div class="doc-header">
+        <div class="doc-header-top">
+          <span class="doc-header-title">📋 Ruta de Compliance</span>
+          ${expId ? '' : '<span class="doc-save-note">Guarda el expediente para poder subir documentos</span>'}
+        </div>
+        ${docMarkets.length ? `<div class="doc-progress-row">${progressBars}</div>` : ''}
+        ${nextBanner}
+      </div>
+      ${noMarkets}
+      ${catBlocks}
+      ${optionalRows ? `
+        <details class="doc-optional-section">
+          <summary class="doc-optional-toggle">Documentos opcionales (${optional.length})</summary>
+          <div class="doc-optional-list">${optionalRows}</div>
+        </details>` : ''}
+    </div>`;
 }

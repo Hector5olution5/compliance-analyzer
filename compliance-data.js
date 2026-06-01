@@ -1,6 +1,53 @@
 // ── Market Configurations ────────────────────────────────────────────────────
 const FIXED_MARKETS = ['Internacional', 'LATAM', 'Mexico', 'CAM'];
 
+// ── Compliance Document Master List ──────────────────────────────────────────
+// req: 'required' | 'conditional' | 'optional'
+// trigger: product attribute key (from getProductAttribs) that activates conditional docs
+const DOCS_MASTER = [
+  // Category 1 — Product information
+  { code: 'PROD_SPEC',      name: 'Ficha técnica del producto',               cat: 1, catName: 'Información del producto',  markets: ['UE','USA','Australia'], req: 'required' },
+  { code: 'PROD_PHOTOS',    name: 'Fotografías del producto (mín. 6 vistas)', cat: 1, catName: 'Información del producto',  markets: ['UE','USA','Australia'], req: 'required' },
+  { code: 'PROD_DRAWINGS',  name: 'Planos técnicos / BOM',                    cat: 1, catName: 'Información del producto',  markets: ['UE','USA','Australia'], req: 'required' },
+  { code: 'PROD_BOM',       name: 'Lista de materiales (BOM) por componente', cat: 1, catName: 'Información del producto',  markets: ['UE','USA','Australia'], req: 'required' },
+  { code: 'PROD_MANUAL',    name: 'Manual / instrucciones de uso',             cat: 1, catName: 'Información del producto',  markets: ['UE','USA','Australia'], req: 'required' },
+  { code: 'PROD_LABEL',     name: 'Diseño de etiqueta y empaque',              cat: 1, catName: 'Información del producto',  markets: ['UE','USA','Australia'], req: 'required' },
+
+  // Category 2 — Test reports
+  { code: 'TEST_MECHANICAL',        name: 'Reporte de propiedades mecánicas y físicas',          cat: 2, catName: 'Reportes de prueba', markets: ['UE','USA','Australia'], req: 'required' },
+  { code: 'TEST_FLAMMABILITY',      name: 'Reporte de flamabilidad',                              cat: 2, catName: 'Reportes de prueba', markets: ['UE','USA','Australia'], req: 'required' },
+  { code: 'TEST_HEAVY_METALS',      name: 'Reporte de migración de metales pesados',              cat: 2, catName: 'Reportes de prueba', markets: ['UE','USA','Australia'], req: 'required' },
+  { code: 'TEST_PHTHALATES',        name: 'Reporte de ftalatos (16 CFR 1307)',                    cat: 2, catName: 'Reportes de prueba', markets: ['USA'],                 req: 'required' },
+  { code: 'TEST_ELECTRICAL',        name: 'Reporte de seguridad eléctrica',                       cat: 2, catName: 'Reportes de prueba', markets: ['UE','USA','Australia'], req: 'conditional', trigger: 'has_electronics' },
+  { code: 'TEST_MAGNETS',           name: 'Reporte de seguridad de imanes',                       cat: 2, catName: 'Reportes de prueba', markets: ['UE','USA','Australia'], req: 'conditional', trigger: 'has_magnets' },
+  { code: 'TEST_MICROBIOLOGICAL',   name: 'Reporte microbiológico (EN 71-20)',                    cat: 2, catName: 'Reportes de prueba', markets: ['UE'],                   req: 'conditional', trigger: 'has_liquid_media' },
+  { code: 'TEST_CHEMICAL_ORGANIC',  name: 'Reporte sustancias químicas orgánicas (EN 71-9)',      cat: 2, catName: 'Reportes de prueba', markets: ['UE'],                   req: 'conditional', trigger: 'has_chemical_kit' },
+  { code: 'TEST_BATTERY',           name: 'Certificación de batería (IEC 62133 / UN 38.3)',       cat: 2, catName: 'Reportes de prueba', markets: ['UE','USA','Australia'], req: 'conditional', trigger: 'has_battery' },
+
+  // Category 3 — Regulatory and conformity
+  { code: 'REG_EU_DOC',           name: 'Declaración de Conformidad UE (DoC)',                    cat: 3, catName: 'Documentos regulatorios', markets: ['UE'],           req: 'required' },
+  { code: 'REG_EU_SAFETY_ASSESS', name: 'Evaluación de seguridad (TSR Anexo V)',                  cat: 3, catName: 'Documentos regulatorios', markets: ['UE'],           req: 'required' },
+  { code: 'REG_US_CPC',           name: "Children's Product Certificate (CPC)",                   cat: 3, catName: 'Documentos regulatorios', markets: ['USA'],          req: 'required' },
+  { code: 'REG_US_TESTING_PLAN',  name: 'Plan de pruebas periódicas (16 CFR 1107)',               cat: 3, catName: 'Documentos regulatorios', markets: ['USA'],          req: 'required' },
+  { code: 'REG_US_LAB_POLICY',    name: 'Política de no influencia indebida (16 CFR 1107.26)',    cat: 3, catName: 'Documentos regulatorios', markets: ['USA'],          req: 'required' },
+  { code: 'REG_AU_DOC',           name: 'Declaración de Conformidad Australia',                   cat: 3, catName: 'Documentos regulatorios', markets: ['Australia'],    req: 'required' },
+  { code: 'REG_EU_CYBERSECURITY', name: 'Evaluación de ciberseguridad (TSR 2025/2509)',           cat: 3, catName: 'Documentos regulatorios', markets: ['UE'],           req: 'conditional', trigger: 'has_internet' },
+  { code: 'REG_US_FCC',           name: 'Certificación FCC ID',                                   cat: 3, catName: 'Documentos regulatorios', markets: ['USA'],          req: 'conditional', trigger: 'has_connectivity' },
+  { code: 'REG_EU_RED',           name: 'Certificado CE Radio Equipment Directive (RED)',         cat: 3, catName: 'Documentos regulatorios', markets: ['UE'],           req: 'conditional', trigger: 'has_connectivity' },
+  { code: 'REG_EU_TYPE',          name: 'Certificado de examen de tipo UE (Módulo B)',            cat: 3, catName: 'Documentos regulatorios', markets: ['UE'],           req: 'optional' },
+
+  // Category 4 — Manufacturer and production
+  { code: 'MFG_INFO',        name: 'Datos del fabricante / fábrica',              cat: 4, catName: 'Fabricante y producción', markets: ['UE','USA','Australia'], req: 'required' },
+  { code: 'MFG_BATCH',       name: 'Sistema de trazabilidad y estructura de lotes', cat: 4, catName: 'Fabricante y producción', markets: ['UE','USA','Australia'], req: 'required' },
+  { code: 'MFG_EU_REP',      name: 'Mandato de Representante Autorizado UE',      cat: 4, catName: 'Fabricante y producción', markets: ['UE'],                   req: 'conditional', trigger: 'mfg_outside_eu' },
+  { code: 'MFG_AU_SUPPLIER', name: 'Datos del proveedor / importador australiano', cat: 4, catName: 'Fabricante y producción', markets: ['Australia'],            req: 'required' },
+  { code: 'MFG_AUDIT',       name: 'Auditoría de fábrica (BSCI, SMETA, SA8000…)', cat: 4, catName: 'Fabricante y producción', markets: ['UE','USA','Australia'], req: 'optional' },
+
+  // Category 5 — Product-type specific
+  { code: 'SPEC_SDS',            name: 'Hoja de Datos de Seguridad (SDS/MSDS)',       cat: 5, catName: 'Específicos del producto', markets: ['UE','USA','Australia'], req: 'conditional', trigger: 'has_chemical_kit' },
+  { code: 'SPEC_SUSTAINABILITY', name: 'Certificados de sostenibilidad (FSC, GRS…)',  cat: 5, catName: 'Específicos del producto', markets: ['UE','USA','Australia'], req: 'optional' },
+];
+
 const MARKETS = {
   UE: {
     nombre: 'Union Europea', idioma: 'en', flag: '🇪🇺',
