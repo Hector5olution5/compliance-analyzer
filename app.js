@@ -199,6 +199,7 @@ async function mergeCloudHistory() {
 }
 
 async function regenerateExpediente(index) {
+  if (getActiveRole() === 'viewer') return;
   const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
   const h = hist[index];
   if (!h?.formData || !(h.mercados || []).length) return;
@@ -333,6 +334,7 @@ async function handleToggleRevisado(expId, evidenciaId, currentState) {
 }
 
 async function handleDeleteEvidencia(expId, evidenciaId, storagePath) {
+  if (getActiveRole() !== 'admin') return;
   if (!confirm('¿Eliminar esta evidencia? No se puede deshacer.')) return;
   const item = document.getElementById(`ev-${evidenciaId}`);
   if (item) item.style.opacity = '0.4';
@@ -1505,7 +1507,7 @@ function showToyBanner(result) {
   const confLabels = { alta: 'Confianza alta', media: 'Confianza media', baja: 'Confianza baja' };
   confidence.textContent = confLabels[result.confianza] || '';
   reason.textContent = result.razonamiento || '';
-  normas.innerHTML = (result.normas_aplicables || []).map(n => `<li>${n}</li>`).join('');
+  normas.innerHTML = (result.normas_aplicables || []).map(n => `<li>${escapeHtml(n)}</li>`).join('');
   banner.classList.remove('hidden');
 }
 
@@ -1540,6 +1542,7 @@ function setupButtons() {
 }
 
 async function startGeneration() {
+  if (getActiveRole() === 'viewer') return;
   syncComponents();
   const nombre = document.getElementById('f-nombre').value.trim();
   const categoria = document.getElementById('f-categoria').value;
@@ -2460,14 +2463,14 @@ ${ident.map(([k,v]) => `<tr><td><strong>${k}</strong></td><td>${v}</td></tr>`).j
 
 <div class="exp-section"><div class="exp-section-title">2. ${L.s2}</div>
 <div class="exp-subsection">${L.s2_1}</div>
-<div class="exp-body">${aiData.descripcion_general || ''}</div>
+<div class="exp-body">${escapeHtml(aiData.descripcion_general || '')}</div>
 <div class="exp-subsection">${L.s2_2}</div>
-<div class="exp-body">${aiData.uso_previsto || ''}</div>
+<div class="exp-body">${escapeHtml(aiData.uso_previsto || '')}</div>
 <div class="exp-subsection">${L.s2_3}</div>
-${(aiData.usos_indebidos || []).map(u => `<div class="exp-bullet">${u}</div>`).join('')}
+${(aiData.usos_indebidos || []).map(u => `<div class="exp-bullet">${escapeHtml(u)}</div>`).join('')}
 <div class="exp-subsection">${L.s2_4}</div>
 <table class="exp-table"><thead><tr><th>${L.componente}</th><th>${L.material}</th><th>${L.contacto}</th></tr></thead><tbody>
-${formData.componentes.map(c => `<tr><td>${c.componente}</td><td>${c.material}</td><td>${contactBadge(c.contacto_alimento)}</td></tr>`).join('')}
+${formData.componentes.map(c => `<tr><td>${escapeHtml(c.componente)}</td><td>${escapeHtml(c.material)}</td><td>${contactBadge(c.contacto_alimento)}</td></tr>`).join('')}
 </tbody></table></div>
 
 <div class="exp-section"><div class="exp-section-title">3. ${L.s3}</div>
@@ -2524,7 +2527,7 @@ ${(() => {
   return [...contextual, ...aiNc].map(nc => {
     const crit = (nc.criticidad || '').toUpperCase();
     const critClass = crit.includes('CRIT') ? 'nivel-alto' : crit.includes('ALT') || crit === 'HIGH' ? 'nivel-medio' : crit.includes('MED') || crit === 'MEDIUM' || crit.includes('MÉD') ? 'nivel-bajo' : '';
-    return `<tr><td>${nc.situacion}</td><td class="${critClass}">${nc.criticidad || ''}</td><td>${nc.accion}</td><td>${nc.responsable || ''}</td><td>${nc.plazo || ''}</td></tr>`;
+    return `<tr><td>${escapeHtml(nc.situacion)}</td><td class="${critClass}">${escapeHtml(nc.criticidad || '')}</td><td>${escapeHtml(nc.accion)}</td><td>${escapeHtml(nc.responsable || '')}</td><td>${escapeHtml(nc.plazo || '')}</td></tr>`;
   }).join('');
 })()}
 </tbody></table></div>
@@ -2533,7 +2536,7 @@ ${(() => {
 <table class="exp-table"><thead><tr><th>${L.prioridad}</th><th>${L.accion}</th><th>${L.responsable}</th><th>${L.plazo}</th></tr></thead><tbody>
 ${(aiData.acciones_recomendadas || []).map(a => {
   const pc = (a.prioridad || '').includes('ALT') || a.prioridad === 'HIGH' ? 'prioridad-alto' : (a.prioridad || '').includes('MED') || a.prioridad === 'MEDIUM' ? 'prioridad-medio' : 'prioridad-bajo';
-  return `<tr><td class="${pc}">${a.prioridad}</td><td>${a.accion}</td><td>${a.responsable}</td><td>${a.plazo}</td></tr>`;
+  return `<tr><td class="${pc}">${escapeHtml(a.prioridad)}</td><td>${escapeHtml(a.accion)}</td><td>${escapeHtml(a.responsable)}</td><td>${escapeHtml(a.plazo)}</td></tr>`;
 }).join('')}
 </tbody></table></div>
 
@@ -2905,6 +2908,7 @@ function openHistoryItem(index) {
 }
 
 function deleteHistoryItem(index) {
+  if (getActiveRole() === 'viewer') return;
   const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
   const expId = hist[index]?.expId;
   hist.splice(index, 1);
@@ -2926,6 +2930,7 @@ function seedDemoHistory() {
 }
 
 function loadAsTemplate(index) {
+  if (getActiveRole() === 'viewer') return;
   const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
   const h = hist[index];
   if (!h?.formData) return;
@@ -2966,6 +2971,7 @@ function loadAsTemplate(index) {
 }
 
 function changeStatus(index, newStatus) {
+  if (getActiveRole() === 'viewer') return;
   if (index === null || index === undefined) return;
   const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
   if (!hist[index]) return;

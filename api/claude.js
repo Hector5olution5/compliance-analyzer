@@ -14,8 +14,13 @@ const ALLOWED_HOSTS = [
 ];
 
 const MAX_TOKENS_CAP    = 4000;
-const RATE_WINDOW_MS    = 60_000; // 1 minute sliding window
-const RATE_MAX_REQUESTS = 30;     // max requests per IP per window
+const RATE_WINDOW_MS    = 60_000;
+const RATE_MAX_REQUESTS = 30;
+
+const ALLOWED_MODELS = new Set([
+  'claude-haiku-4-5-20251001',
+  'claude-sonnet-4-6',
+]);
 
 // In-memory sliding window — resets on cold start, acceptable for internal tool
 const ipLog = new Map(); // ip -> number[]
@@ -35,6 +40,12 @@ function isRateLimited(ip) {
   }
   timestamps.push(now);
   ipLog.set(ip, timestamps);
+  // Purge stale IPs to prevent memory leak under IP-rotating attacks
+  if (ipLog.size > 2000) {
+    for (const [k, ts] of ipLog) {
+      if (ts.every(t => t < windowStart)) ipLog.delete(k);
+    }
+  }
   return false;
 }
 
@@ -75,6 +86,7 @@ export default async function handler(req, res) {
 
   const body = { ...req.body };
   if ((body.max_tokens || 0) > MAX_TOKENS_CAP) body.max_tokens = MAX_TOKENS_CAP;
+  if (!ALLOWED_MODELS.has(body.model)) body.model = 'claude-haiku-4-5-20251001';
 
   const headers = {
     'Content-Type':      'application/json',
