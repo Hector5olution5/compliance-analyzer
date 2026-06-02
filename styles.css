@@ -1773,6 +1773,49 @@ textarea { resize: vertical; }
 .dash-sync-status { font-size: 12px; color: var(--blue); margin-left: 6px; opacity: .8; }
 .dash-new-btn { white-space: nowrap; }
 
+/* Search bar */
+.dash-search-bar { margin-bottom: 12px; }
+.dash-search-wrap {
+  position: relative;
+  max-width: 400px;
+}
+.dash-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gray-400);
+  pointer-events: none;
+}
+.dash-search-input {
+  width: 100%;
+  padding: 8px 36px 8px 34px;
+  border: 1.5px solid var(--gray-100);
+  border-radius: 99px;
+  font-size: 13px;
+  font-family: var(--font);
+  color: var(--gray-800);
+  background: white;
+  transition: border-color .15s;
+}
+.dash-search-input:focus { outline: none; border-color: var(--blue); }
+.dash-search-input::placeholder { color: var(--gray-400); }
+.dash-search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--gray-400);
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+}
+.dash-search-clear:hover { color: var(--gray-800); }
+.dash-card-ref { color: var(--blue); font-weight: 600; }
+
 .dash-filters {
   display: flex;
   gap: 8px;

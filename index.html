@@ -280,6 +280,13 @@
       </div>
       <button onclick="openNewExpediente()" class="btn-primary dash-new-btn">+ Nuevo expediente</button>
     </div>
+    <div class="dash-search-bar">
+      <div class="dash-search-wrap">
+        <svg class="dash-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input id="dash-search" type="text" class="dash-search-input" placeholder="Buscar por nombre o referencia…" oninput="setDashSearch(this.value)">
+        <button id="dash-search-clear" class="dash-search-clear hidden" onclick="clearDashSearch()" title="Limpiar">✕</button>
+      </div>
+    </div>
     <div class="dash-filters">
       <button class="dash-filter-btn active" data-filter="todos" onclick="setDashFilter('todos')">Todos</button>
       <button class="dash-filter-btn" data-filter="borrador" onclick="setDashFilter('borrador')">Borrador</button>

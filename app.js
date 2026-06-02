@@ -8,6 +8,7 @@ let currentHistoryIndex = null;
 const HIST_KEY        = 'ca_history_v3';
 const HIST_LOCAL_LIMIT = 20;
 let dashboardFilter = 'todos';
+let dashboardSearch  = '';
 
 // ── Error monitoring ─────────────────────────────────────────────────────────
 const _reportedErrors = new Set();
@@ -1176,6 +1177,22 @@ function setDashFilter(filter) {
   renderDashGrid();
 }
 
+function setDashSearch(value) {
+  dashboardSearch = value.trim().toLowerCase();
+  const clearBtn = document.getElementById('dash-search-clear');
+  if (clearBtn) clearBtn.classList.toggle('hidden', !dashboardSearch);
+  renderDashGrid();
+}
+
+function clearDashSearch() {
+  dashboardSearch = '';
+  const input = document.getElementById('dash-search');
+  if (input) input.value = '';
+  const clearBtn = document.getElementById('dash-search-clear');
+  if (clearBtn) clearBtn.classList.add('hidden');
+  renderDashGrid();
+}
+
 function renderDashboard() {
   const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
   const countEl = document.getElementById('dash-count');
@@ -1187,9 +1204,17 @@ function renderDashGrid() {
   const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
   const grid = document.getElementById('dash-grid');
 
-  const filtered = dashboardFilter === 'todos'
+  let filtered = dashboardFilter === 'todos'
     ? hist
     : hist.filter(h => (h.status || 'borrador') === dashboardFilter);
+
+  if (dashboardSearch) {
+    filtered = filtered.filter(h => {
+      const name = (h.nombre || '').toLowerCase();
+      const ref  = (h.formData?.referencia || '').toLowerCase();
+      return name.includes(dashboardSearch) || ref.includes(dashboardSearch);
+    });
+  }
 
   if (!hist.length) {
     grid.innerHTML = `
@@ -1202,7 +1227,10 @@ function renderDashGrid() {
   }
 
   if (!filtered.length) {
-    grid.innerHTML = `<div class="dash-empty"><p>No hay expedientes con ese estado.</p></div>`;
+    const msg = dashboardSearch
+      ? `No hay expedientes que coincidan con "<strong>${escapeHtml(dashboardSearch)}</strong>".`
+      : 'No hay expedientes con ese estado.';
+    grid.innerHTML = `<div class="dash-empty"><p>${msg}</p></div>`;
     return;
   }
 
@@ -1230,7 +1258,7 @@ function renderDashGrid() {
         ${cloudIcon}
       </div>
       <div class="dash-card-name">${escapeHtml(h.nombre)}</div>
-      <div class="dash-card-meta">${escapeHtml(h.categoria || '')} · ${h.fecha}</div>
+      <div class="dash-card-meta">${escapeHtml(h.categoria || '')} · ${h.fecha}${h.formData?.referencia ? ` · <span class="dash-card-ref">${escapeHtml(h.formData.referencia)}</span>` : ''}</div>
       <div class="dash-card-markets">${(h.mercados || []).map(k => (MARKETS[k]?.flag || '') + ' ' + (MARKETS[k]?.nombre || k)).join(' · ')}</div>
       ${docBadges ? `<div class="dash-doc-badges">${docBadges}</div>` : ''}
       ${docsStatus}
