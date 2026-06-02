@@ -2999,6 +2999,9 @@ function showResultTab(key) {
     content?.classList.add('hidden');
     inline?.classList.remove('hidden');
     renderLabelCtxBox();
+    const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+    const expId = currentHistoryIndex !== null ? hist[currentHistoryIndex]?.expId : null;
+    renderLabelChecklistPanel(expId);
     return;
   }
   if (key === 'evidencias') {
@@ -3383,6 +3386,7 @@ function resetForm() {
   labelPdfText = '';
   labelFile = null;
   labelFileReady = false;
+  labelChecklistDraft = {};
   const fn = document.getElementById('label-file-name'); if (fn) { fn.textContent = ''; fn.classList.add('hidden'); }
   const ls = document.getElementById('label-status'); if (ls) { ls.classList.add('hidden'); ls.textContent = ''; }
   const lr = document.getElementById('label-results'); if (lr) { lr.classList.add('hidden'); lr.innerHTML = ''; }
@@ -3399,6 +3403,7 @@ function resetForm() {
 
 // ── Label Check Panel ─────────────────────────────────────────────────────────
 let labelPdfText = '';
+let labelChecklistDraft = {};
 
 function renderLabelCtxBox() {
   const box = document.getElementById('label-ctx-box');
@@ -3755,16 +3760,26 @@ ${jsonSchema}`;
 
 function renderLabelResults(allResults, ctx, groupsToAnalyze) {
   const container = document.getElementById('label-results');
-  const statusBadge = s => {
-    const map = { present: ['✅','lc-present','Presente'], missing: ['❌','lc-missing','Ausente'], unclear: ['⚠','lc-unclear','No evaluable'], na: ['—','lc-na','N/A'] };
-    const [icon, cls, text] = map[s] || map.unclear;
-    return `<span class="lc-badge ${cls}">${icon} ${text}</span>`;
+
+  const toggleBtns = (countryKey, reqId, currentStatus) => {
+    const opts = [
+      { s: 'present', icon: '✅', label: 'Presente' },
+      { s: 'missing', icon: '❌', label: 'Ausente' },
+      { s: 'unclear', icon: '⚠',  label: 'No evaluable' },
+      { s: 'na',      icon: '—',  label: 'N/A' },
+    ];
+    return `<div class="lc-toggle-group">${opts.map(o =>
+      `<button class="lc-toggle-btn${o.s === currentStatus ? ' active lc-toggle-'+o.s : ''}" data-status="${o.s}"
+        onclick="toggleLabelItem('${countryKey}','${reqId}','${o.s}')" title="${o.label}">${o.icon}</button>`
+    ).join('')}</div>`;
   };
 
-  // Use only the groups that were analyzed
   const groupFilter = groupsToAnalyze || Object.entries(LABEL_GROUPS).map(([k,v]) => ({ groupKey:k, groupCfg:v, countries:v.countries }));
 
+  // Populate draft with AI results
+  labelChecklistDraft = {};
   let html = '';
+
   for (const { groupKey, groupCfg, countries } of groupFilter) {
     let countryRows = '';
     let totalOk = 0, totalFail = 0, totalWarn = 0;
@@ -3774,21 +3789,24 @@ function renderLabelResults(allResults, ctx, groupsToAnalyze) {
       if (!cfg) continue;
       const results = Array.isArray(allResults[countryKey]) ? allResults[countryKey] : [];
       const applicable = cfg.reqs.filter(r => isReqApplicable(r, ctx));
+      if (!labelChecklistDraft[countryKey]) labelChecklistDraft[countryKey] = {};
 
       let ok = 0, fail = 0, warn = 0;
       const rows = applicable.map(req => {
         const res = results.find(r => r.id === req.id) || { status: 'unclear', evidence: '' };
+        labelChecklistDraft[countryKey][req.id] = { status: res.status, note: res.evidence || '' };
         if (res.status === 'present') ok++;
         else if (res.status === 'missing') fail++;
         else if (res.status === 'unclear') warn++;
         totalOk += res.status === 'present' ? 1 : 0;
         totalFail += res.status === 'missing' ? 1 : 0;
         totalWarn += res.status === 'unclear' ? 1 : 0;
-        return `<tr>
+        return `<tr data-lc-row="${countryKey}:${req.id}">
           <td>${req.label}</td>
-          <td style="color:var(--gray-400);font-size:11px">${req.ref}</td>
-          <td>${statusBadge(res.status)}</td>
-          <td><span class="lc-evidence">${res.evidence || ''}</span></td>
+          <td class="lc-ref">${req.ref}</td>
+          <td>${toggleBtns(countryKey, req.id, res.status)}</td>
+          <td><input class="lc-note-input" value="${escapeHtml(res.evidence || '')}" placeholder="Evidencia / nota"
+            oninput="updateLabelNote('${countryKey}','${req.id}',this.value)"></td>
         </tr>`;
       }).join('');
 
@@ -3802,7 +3820,7 @@ function renderLabelResults(allResults, ctx, groupsToAnalyze) {
           </div>
         </div>
         <table class="lc-table">
-          <thead><tr><th style="width:32%">Requisito</th><th style="width:28%">Referencia</th><th style="width:12%">Estado</th><th>Evidencia</th></tr></thead>
+          <thead><tr><th style="width:30%">Requisito</th><th style="width:20%">Referencia</th><th style="width:17%">Estado</th><th>Evidencia / nota</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>`;
@@ -3820,7 +3838,130 @@ function renderLabelResults(allResults, ctx, groupsToAnalyze) {
     </div>`;
   }
 
-  container.innerHTML = html;
+  const saveBtnHtml = `<div class="lc-checklist-bar">
+    <span class="lc-checklist-hint">💡 Ajusta los estados manualmente y guarda</span>
+    <button id="btn-save-label-checklist" class="btn-save-lc" onclick="saveLabelChecklist()">☁ Guardar checklist</button>
+  </div>`;
+
+  container.innerHTML = saveBtnHtml + html;
+}
+
+// ── Label checklist persistence ───────────────────────────────────────────────
+
+function toggleLabelItem(countryKey, reqId, newStatus) {
+  if (!labelChecklistDraft[countryKey]) labelChecklistDraft[countryKey] = {};
+  if (!labelChecklistDraft[countryKey][reqId]) labelChecklistDraft[countryKey][reqId] = {};
+  labelChecklistDraft[countryKey][reqId].status = newStatus;
+  const row = document.querySelector(`[data-lc-row="${countryKey}:${reqId}"]`);
+  if (!row) return;
+  row.querySelectorAll('.lc-toggle-btn').forEach(btn => {
+    const s = btn.dataset.status;
+    btn.className = `lc-toggle-btn${s === newStatus ? ' active lc-toggle-' + s : ''}`;
+  });
+}
+
+function updateLabelNote(countryKey, reqId, note) {
+  if (!labelChecklistDraft[countryKey]) labelChecklistDraft[countryKey] = {};
+  if (!labelChecklistDraft[countryKey][reqId]) labelChecklistDraft[countryKey][reqId] = { status: 'unclear' };
+  labelChecklistDraft[countryKey][reqId].note = note;
+}
+
+async function saveLabelChecklist() {
+  const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+  const expId = currentHistoryIndex !== null ? hist[currentHistoryIndex]?.expId : null;
+  if (!expId || !db) {
+    showToast('Sin expediente activo en la nube — genera el expediente primero');
+    return;
+  }
+  const btn = document.getElementById('btn-save-label-checklist');
+  if (btn) { btn.disabled = true; btn.textContent = '↻ Guardando...'; }
+  try {
+    for (const [countryKey, items] of Object.entries(labelChecklistDraft)) {
+      await db.collection('expedientes').doc(expId).collection('etiquetado').doc(countryKey).set({
+        countryKey, ts: Date.now(), source: 'ai', items,
+      });
+    }
+    showToast('☁ Checklist guardado');
+    renderLabelChecklistPanel(expId);
+  } catch (e) {
+    showToast('Error al guardar: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '☁ Guardar checklist'; }
+  }
+}
+
+async function loadLabelChecklists(expId) {
+  if (!db || !expId) return {};
+  try {
+    const snap = await db.collection('expedientes').doc(expId).collection('etiquetado').get();
+    const result = {};
+    snap.docs.forEach(d => { result[d.id] = d.data(); });
+    return result;
+  } catch (e) { return {}; }
+}
+
+async function renderLabelChecklistPanel(expId) {
+  const panel = document.getElementById('label-checklist-panel');
+  if (!panel) return;
+  panel.innerHTML = '';
+  const checklists = await loadLabelChecklists(expId);
+  if (!Object.keys(checklists).length) return;
+
+  const rows = Object.entries(checklists).map(([countryKey, data]) => {
+    const cfg = LABEL_REQUIREMENTS[countryKey];
+    const name = cfg ? `${cfg.flag} ${cfg.nombre}` : countryKey;
+    const items = data.items || {};
+    const statuses = Object.values(items);
+    const ok   = statuses.filter(s => s.status === 'present').length;
+    const fail = statuses.filter(s => s.status === 'missing').length;
+    const warn = statuses.filter(s => s.status === 'unclear').length;
+    const date = data.ts ? new Date(data.ts).toLocaleDateString('es-MX', { day:'2-digit', month:'short' }) : '';
+    return `<div class="lc-saved-row" onclick="loadSavedChecklist('${countryKey}')">
+      <span class="lc-saved-country">${name}</span>
+      <div class="lc-saved-stats">
+        ${ok   ? `<span class="lc-stat lc-stat-ok">${ok} ✅</span>` : ''}
+        ${fail ? `<span class="lc-stat lc-stat-fail">${fail} ❌</span>` : ''}
+        ${warn ? `<span class="lc-stat lc-stat-warn">${warn} ⚠</span>` : ''}
+      </div>
+      <span class="lc-saved-date">${date}</span>
+    </div>`;
+  }).join('');
+
+  panel.innerHTML = `<div class="lc-saved-panel">
+    <div class="lc-saved-header">Checklists guardados <span class="lc-saved-hint">— clic para cargar y editar</span></div>
+    ${rows}
+  </div>`;
+}
+
+async function loadSavedChecklist(countryKey) {
+  const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+  const expId = currentHistoryIndex !== null ? hist[currentHistoryIndex]?.expId : null;
+  if (!expId || !db) return;
+  const doc = await db.collection('expedientes').doc(expId).collection('etiquetado').doc(countryKey).get().catch(() => null);
+  if (!doc?.exists) return;
+  const data = doc.data();
+  const items = data.items || {};
+
+  // Restore draft
+  labelChecklistDraft[countryKey] = JSON.parse(JSON.stringify(items));
+
+  // Find the LABEL_GROUP that contains this country
+  let groupKey = null, groupCfg = null;
+  for (const [gk, gc] of Object.entries(LABEL_GROUPS)) {
+    if (gc.countries.includes(countryKey)) { groupKey = gk; groupCfg = gc; break; }
+  }
+  if (!groupKey) return;
+
+  const ctx = buildLabelContext();
+  const allResults = {};
+  allResults[countryKey] = Object.entries(items).map(([id, v]) => ({ id, status: v.status, evidence: v.note || '' }));
+  const results = document.getElementById('label-results');
+  results?.classList.remove('hidden');
+  renderLabelResults(allResults, ctx, [{ groupKey, groupCfg, countries: [countryKey] }]);
+  // Restore draft values post-render (renderLabelResults overwrites draft)
+  labelChecklistDraft[countryKey] = JSON.parse(JSON.stringify(items));
+  // Re-apply toggle states
+  Object.entries(items).forEach(([reqId, v]) => toggleLabelItem(countryKey, reqId, v.status));
 }
 
 // ── Compliance Documents Module — Fase 1 ─────────────────────────────────────
