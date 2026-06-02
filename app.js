@@ -182,13 +182,29 @@ async function mergeCloudHistory() {
   let changed = false;
 
   for (const c of cloud) {
-    if (localIds.has(c.id)) continue;
-    if (localKeys.has(`${c.nombre}|${c.fecha}`)) continue; // fallback dedup for entries without expId
+    if (localIds.has(c.id)) {
+      // Item already exists locally — sync docProgress and status if cloud has newer data
+      const local = hist.find(h => h.expId === c.id);
+      if (local) {
+        if (c.docProgress && !local.docProgress) {
+          local.docProgress = c.docProgress;
+          changed = true;
+        }
+        if ((c.ts || 0) > (local.ts || 0)) {
+          local.status = c.status || local.status;
+          local.nota   = c.nota   ?? local.nota;
+          changed = true;
+        }
+      }
+      continue;
+    }
+    if (localKeys.has(`${c.nombre}|${c.fecha}`)) continue;
     hist.push({
       nombre: c.nombre, categoria: c.categoria,
       mercados: c.mercados, fecha: c.fecha, ts: c.ts,
       status: c.status || 'borrador', nota: c.nota || '',
       expId: c.id, formData: c.formData || {}, previews: {},
+      docProgress: c.docProgress || null,
     });
     changed = true;
   }
@@ -198,6 +214,7 @@ async function mergeCloudHistory() {
     try { localStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(0, HIST_LOCAL_LIMIT))); } catch (_) {}
     renderHistory();
   }
+  return changed;
 }
 
 async function regenerateExpediente(index) {
@@ -1125,6 +1142,20 @@ function showDashboard() {
   document.getElementById('progress-section').classList.add('hidden');
   document.getElementById('dashboard-section').classList.remove('hidden');
   renderDashboard();
+
+  if (db) {
+    setDashSyncState(true);
+    mergeCloudHistory()
+      .then(changed => { if (changed) renderDashboard(); })
+      .catch(() => {})
+      .finally(() => setDashSyncState(false));
+  }
+}
+
+function setDashSyncState(syncing) {
+  const el = document.getElementById('dash-sync-status');
+  if (!el) return;
+  el.textContent = syncing ? '↻ Sincronizando...' : '';
 }
 
 function hideDashboard() {
@@ -1147,7 +1178,8 @@ function setDashFilter(filter) {
 
 function renderDashboard() {
   const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
-  document.getElementById('dash-count').textContent = hist.length;
+  const countEl = document.getElementById('dash-count');
+  if (countEl) countEl.textContent = hist.length;
   renderDashGrid();
 }
 
@@ -4057,12 +4089,17 @@ async function renderDocumentosTab(expId, formData, markets) {
     marketProgress[m] = { total: mDocs.length, done: done.length };
   });
 
-  // Persist docProgress to localStorage so history cards can show badges
+  // Persist docProgress to localStorage + Firestore
   if (currentHistoryIndex !== null && Object.keys(marketProgress).length) {
     const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
     if (hist[currentHistoryIndex]) {
       hist[currentHistoryIndex].docProgress = marketProgress;
       try { localStorage.setItem(HIST_KEY, JSON.stringify(hist)); } catch (e) {}
+      const expId = hist[currentHistoryIndex].expId;
+      if (db && expId) {
+        db.collection('expedientes').doc(expId)
+          .update({ docProgress: marketProgress }).catch(() => {});
+      }
     }
   }
 

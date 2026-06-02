@@ -1675,6 +1675,7 @@ textarea { resize: vertical; }
 }
 .dash-title { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
 .dash-subtitle { font-size: 13px; color: var(--gray-600); }
+.dash-sync-status { font-size: 12px; color: var(--blue); margin-left: 6px; opacity: .8; }
 .dash-new-btn { white-space: nowrap; }
 
 .dash-filters {
