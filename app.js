@@ -7,6 +7,7 @@ const TOTAL_TABS = 4;
 let currentHistoryIndex = null;
 const HIST_KEY        = 'ca_history_v3';
 const HIST_LOCAL_LIMIT = 20;
+let dashboardFilter = 'todos';
 
 // ── Error monitoring ─────────────────────────────────────────────────────────
 const _reportedErrors = new Set();
@@ -719,6 +720,8 @@ function finishLogin(user) {
   renderUserBadge(user);
   if (user.role === 'viewer') {
     setTimeout(openHistory, 300);
+  } else {
+    showDashboard();
   }
 }
 
@@ -1093,6 +1096,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderUserBadge(user);
       if (session.role === 'viewer') {
         setTimeout(openHistory, 300);
+      } else {
+        showDashboard();
       }
     } else {
       clearSession();
@@ -1111,6 +1116,128 @@ function apiErrorMsg(err) {
       : 'Error de red — verifica tu conexión a internet.';
   }
   return msg;
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+function showDashboard() {
+  document.getElementById('form-section').classList.add('hidden');
+  document.getElementById('results-section').classList.add('hidden');
+  document.getElementById('progress-section').classList.add('hidden');
+  document.getElementById('dashboard-section').classList.remove('hidden');
+  renderDashboard();
+}
+
+function hideDashboard() {
+  document.getElementById('dashboard-section').classList.add('hidden');
+}
+
+function openNewExpediente() {
+  hideDashboard();
+  resetForm();
+  document.getElementById('form-section').classList.remove('hidden');
+}
+
+function setDashFilter(filter) {
+  dashboardFilter = filter;
+  document.querySelectorAll('.dash-filter-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.filter === filter)
+  );
+  renderDashGrid();
+}
+
+function renderDashboard() {
+  const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+  document.getElementById('dash-count').textContent = hist.length;
+  renderDashGrid();
+}
+
+function renderDashGrid() {
+  const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+  const grid = document.getElementById('dash-grid');
+
+  const filtered = dashboardFilter === 'todos'
+    ? hist
+    : hist.filter(h => (h.status || 'borrador') === dashboardFilter);
+
+  if (!hist.length) {
+    grid.innerHTML = `
+      <div class="dash-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
+        <p>Aún no hay expedientes.</p>
+        <button class="btn-primary" onclick="openNewExpediente()">Crear primer expediente</button>
+      </div>`;
+    return;
+  }
+
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="dash-empty"><p>No hay expedientes con ese estado.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((h, _) => {
+    const realIdx = hist.indexOf(h);
+    const sc = STATUS_CFG[h.status || 'borrador'];
+    const docBadges = buildDocProgressBadges(h.docProgress);
+    const missing = getDocProgressMissing(h.docProgress);
+    const hasPreviews = h.previews && Object.keys(h.previews).length > 0;
+    const hasFormData = !!h.formData && !!(h.mercados || []).length;
+    const cloudIcon = h.expId
+      ? `<span class="dash-cloud-icon" title="Guardado en la nube">☁</span>`
+      : '';
+
+    const docsStatus = h.docProgress
+      ? (missing === 0
+          ? `<div class="dash-docs-ok">✓ Documentos completos</div>`
+          : `<div class="dash-docs-warn">⚠ ${missing} doc${missing !== 1 ? 's' : ''} pendiente${missing !== 1 ? 's' : ''}</div>`)
+      : '';
+
+    return `
+    <div class="dash-card" onclick="openDashboardItem(${realIdx})">
+      <div class="dash-card-header">
+        <span class="dash-card-status ${sc.cls}">${sc.label}</span>
+        ${cloudIcon}
+      </div>
+      <div class="dash-card-name">${escapeHtml(h.nombre)}</div>
+      <div class="dash-card-meta">${escapeHtml(h.categoria || '')} · ${h.fecha}</div>
+      <div class="dash-card-markets">${(h.mercados || []).map(k => (MARKETS[k]?.flag || '') + ' ' + (MARKETS[k]?.nombre || k)).join(' · ')}</div>
+      ${docBadges ? `<div class="dash-doc-badges">${docBadges}</div>` : ''}
+      ${docsStatus}
+      <div class="dash-card-actions" onclick="event.stopPropagation()">
+        ${hasPreviews ? `<button class="btn-dash-action btn-dash-view" onclick="openDashboardItem(${realIdx})">Ver expediente</button>` : ''}
+        ${hasFormData ? `<button class="btn-dash-action btn-dash-regen" onclick="regenerateFromDash(${realIdx})">☁ Regenerar</button>` : ''}
+        ${hasFormData ? `<button class="btn-dash-action btn-dash-template" onclick="loadAsTemplateFromDash(${realIdx})">Usar como base</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openDashboardItem(index) {
+  const hist = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+  const h = hist[index];
+  if (!h?.previews || !Object.keys(h.previews).length) {
+    if (h?.formData) {
+      loadAsTemplateFromDash(index);
+    }
+    return;
+  }
+  hideDashboard();
+  currentHistoryIndex = index;
+  generatedDocs = {};
+  (h.mercados || FIXED_MARKETS).forEach(k => {
+    if (h.previews[k]) generatedDocs[k] = { html: h.previews[k], blob: null };
+  });
+  document.getElementById('form-section').classList.add('hidden');
+  renderResults({ nombre: h.nombre });
+}
+
+function regenerateFromDash(index) {
+  hideDashboard();
+  regenerateExpediente(index);
+}
+
+function loadAsTemplateFromDash(index) {
+  hideDashboard();
+  loadAsTemplate(index);
 }
 
 // ── Welcome Screen ────────────────────────────────────────────────────────────
@@ -1659,7 +1786,7 @@ function updateMarketCostHint() {
 
 function setupButtons() {
   document.getElementById('btn-generate').addEventListener('click', startGeneration);
-  document.getElementById('btn-new').addEventListener('click', resetForm);
+  document.getElementById('btn-new').addEventListener('click', showDashboard);
   document.getElementById('btn-history').addEventListener('click', openHistory);
   document.getElementById('btn-download-zip').addEventListener('click', downloadZip);
   document.querySelectorAll('.market-checkbox').forEach(cb =>

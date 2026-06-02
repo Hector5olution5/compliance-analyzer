@@ -1662,3 +1662,156 @@ textarea { resize: vertical; }
 .doc-upload-field input:focus { outline: none; border-color: #185FA5; }
 .doc-upload-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .optional-tag { font-size: 10px; font-weight: 400; color: #9CA3AF; }
+
+/* ── Dashboard ── */
+#dashboard-section { max-width: 1100px; margin: 0 auto; padding: 0 4px; }
+
+.dash-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+.dash-title { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.dash-subtitle { font-size: 13px; color: var(--gray-600); }
+.dash-new-btn { white-space: nowrap; }
+
+.dash-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.dash-filter-btn {
+  padding: 6px 16px;
+  border-radius: 99px;
+  border: 1.5px solid var(--gray-100);
+  background: white;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-600);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all .15s;
+}
+.dash-filter-btn:hover { border-color: var(--blue); color: var(--blue); }
+.dash-filter-btn.active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: white;
+  font-weight: 600;
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.dash-card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+  border: 1.5px solid transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dash-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.12);
+  border-color: #CBD5E1;
+}
+
+.dash-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.dash-card-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.3;
+}
+.dash-card-meta { font-size: 12px; color: var(--gray-600); }
+.dash-card-markets { font-size: 12px; color: #374151; }
+.dash-cloud-icon { font-size: 13px; color: var(--blue); font-weight: 700; }
+
+.dash-doc-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.dash-docs-ok  { font-size: 11px; color: #16A34A; font-weight: 600; margin-top: 2px; }
+.dash-docs-warn { font-size: 11px; color: #D97706; font-weight: 600; margin-top: 2px; }
+
+.dash-card-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--gray-100);
+}
+.btn-dash-action {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1.5px solid var(--gray-100);
+  background: white;
+  cursor: pointer;
+  font-family: var(--font);
+  font-weight: 600;
+  transition: all .15s;
+}
+.btn-dash-view     { background: var(--blue); color: white; border-color: var(--blue); }
+.btn-dash-view:hover { background: #1451A0; }
+.btn-dash-regen    { color: var(--blue); }
+.btn-dash-regen:hover { background: var(--blue-light); border-color: var(--blue); }
+.btn-dash-template { color: var(--gray-600); }
+.btn-dash-template:hover { border-color: #9CA3AF; color: #374151; }
+
+.dash-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 60px 20px;
+  color: var(--gray-600);
+  text-align: center;
+}
+.dash-empty p { font-size: 15px; }
+
+/* Results header with back button */
+.results-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+.results-header-left h2 { font-size: 20px; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btn-back-dash {
+  font-size: 13px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--gray-100);
+  background: white;
+  color: var(--gray-600);
+  cursor: pointer;
+  font-family: var(--font);
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.btn-back-dash:hover { border-color: var(--blue); color: var(--blue); }
+
+@media (max-width: 600px) {
+  .dash-grid { grid-template-columns: 1fr; }
+  .dash-header { flex-direction: column; }
+  .results-header-left { flex-wrap: wrap; gap: 8px; }
+}

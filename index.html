@@ -179,7 +179,7 @@
   </div>
   <div class="header-actions">
     <div id="user-badge" class="user-badge hidden"></div>
-    <button onclick="openWelcome()" class="btn-icon" title="Pantalla de inicio">
+    <button onclick="showDashboard()" class="btn-icon" title="Dashboard">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     </button>
     <button id="btn-history" class="btn-icon" title="Historial">
@@ -271,6 +271,24 @@
 </div>
 
 <main>
+  <!-- Dashboard -->
+  <section id="dashboard-section" class="hidden">
+    <div class="dash-header">
+      <div>
+        <h2 class="dash-title">Proyectos de Compliance</h2>
+        <p class="dash-subtitle">Vista general · <span id="dash-count">0</span> expedientes</p>
+      </div>
+      <button onclick="openNewExpediente()" class="btn-primary dash-new-btn">+ Nuevo expediente</button>
+    </div>
+    <div class="dash-filters">
+      <button class="dash-filter-btn active" data-filter="todos" onclick="setDashFilter('todos')">Todos</button>
+      <button class="dash-filter-btn" data-filter="borrador" onclick="setDashFilter('borrador')">Borrador</button>
+      <button class="dash-filter-btn" data-filter="en_revision" onclick="setDashFilter('en_revision')">En revisión</button>
+      <button class="dash-filter-btn" data-filter="aprobado" onclick="setDashFilter('aprobado')">Aprobado</button>
+    </div>
+    <div id="dash-grid" class="dash-grid"></div>
+  </section>
+
   <!-- Form Card -->
   <section id="form-section" class="card">
     <!-- Tab Navigation -->
@@ -517,7 +535,10 @@
   <!-- Results -->
   <section id="results-section" class="hidden">
     <div class="results-header">
-      <h2 id="results-title">Expedientes generados</h2>
+      <div class="results-header-left">
+        <button onclick="showDashboard()" class="btn-back-dash">← Dashboard</button>
+        <h2 id="results-title">Expedientes generados</h2>
+      </div>
       <div class="results-header-actions">
         <button id="btn-download-zip" class="btn-primary hidden">⬇ Descargar todos (ZIP)</button>
         <button id="btn-new" class="btn-secondary">+ Nuevo expediente</button>
