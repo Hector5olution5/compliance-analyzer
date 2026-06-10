@@ -356,6 +356,22 @@ Verificado directamente contra `Normas/UE/2025 0040 ENG...pdf` (124 pág., vía 
 
 Solo se añadieron refinamientos de precisión a `UE.envases` (PFAS→Art. 5(5) con exclusión de polimérico; ratio 50% explícito; DoC cubre Arts. 5–12). Sin correcciones de fondo.
 
+### CLP (Reg. 1272/2008) + productos decorativos/coleccionista + kit químico (2026-06-10)
+
+Verificado contra `Normas/UE/REGULATION (EC) No 1272:2008` (1355 pág.) y `241115_Revised Guidance doc n 20 decorative products...` (36 pág.).
+
+**Hueco detectado y rellenado:** la característica `kit_quimico` (kit químico/pintura/cosméticos) estaba reconocida y disparaba el SDS, pero **no generaba ningún bloque de riesgo ni referencia a CLP/EN 71-4/-5**. Añadido bloque de riesgo "kit químico" (`app.js`, nivel alto) + advertencia en el generador + `UE.quimica_base`.
+
+**CLP (Reg. 1272/2008) — hechos verificados:**
+- **Ámbito (Art. 1.5):** los juguetes NO están excluidos del CLP (solo se excluyen medicamentos, veterinarios, **cosméticos** [→ Reg. 1223/2009], productos sanitarios y alimentos). Por tanto las sustancias/mezclas de sets de química/experimentos deben clasificarse y etiquetarse.
+- **Contenido de etiqueta (Art. 17):** nombre/dirección/teléfono del proveedor; cantidad nominal; identificador del producto (Art. 18); pictogramas de peligro (Art. 19 / Anexo V); palabra de advertencia (Art. 20: **"Danger"/"Warning"**); frases H (Art. 21 / Anexo III); frases P (Art. 22 / Anexo IV); en idioma(s) del Estado miembro.
+
+**Normas de juguete químico añadidas:** EN 71-4 (sets de experimentos de química), EN 71-5 (juguetes químicos no experimentales), EN 71-7 (pinturas de dedos), EN 71-13 (olfativos/cosméticos/gustativos); compuestos orgánicos vía Dir. 2009/48/CE Apéndice C, métodos EN 71-10/-11.
+
+**Productos decorativos/coleccionista (Guidance Doc No 20, nov 2024):** el Toy Safety Directive (Art. 2 + Anexo I) **excluye** los productos para coleccionistas SOLO si el producto o su embalaje lleva indicación **visible y legible de que es para coleccionistas de 14 años o más**; también excluye objetos decorativos para festividades. El uso razonablemente previsible prevalece sobre el uso declarado. Añadido a `UE.juguetes` como nota de alcance.
+
+**Corrección extra (EN 71-1):** el bloque de riesgo "líquidos" citaba `EN 71-1 Cl. 4.19` — pero §4.19 es **fulminantes**; los juguetes con líquido son **§5.5** (mordedores con líquido §7.12). Corregido. (6.º error de cláusula EN 71-1 corregido.)
+
 ---
 
 ## Perú — RM 517-2008-MINSA / Reglamento Ley 28376 (2026-06-10)

@@ -80,6 +80,7 @@ const MARKETS = {
       'EN 71-2:2020 — Flammability (§4.1 prohibits celluloid, highly flammable solids and "flash effect" pilose surfaces; flame-spread ≤ 10 mm/s head-worn toys/masks §4.2.5; ≤ 30 mm/s disguise costumes/toys to enter/soft-filled §4.3–4.5; hair/beards flame persistence ≤ 2 s §4.2.2; "Keep away from fire" mark when 10–30 mm/s)',
       'EN 71-3:2019+A2:2024 — Migration of certain elements (19 elements; limits by material Category I dry/brittle/powder/pliable, II liquid/sticky, III scraped-off)',
       'EN 71-9 (withdrawn) — Organic chemical compounds; requirements now via Toy Safety Dir. Appendix C + REACH Annex XVII, methods EN 71-10/-11',
+      'Scope (Dir. 2009/48/EC Art. 2 + Annex I; Guidance Doc No 20, Nov 2024) — products for collectors are excluded from the Toy Safety Directive ONLY if the product or its packaging bears a visible and legible indication that it is intended for collectors aged 14 and over; decorative objects for festivities/celebrations are also excluded. Manufacturer is responsible for correct classification; reasonably foreseeable use prevails over declared intended use',
     ],
     electrica: [
       'Directive 2014/35/EU (LVD) — Low voltage',
@@ -87,7 +88,11 @@ const MARKETS = {
       'EN 62368-1 — Audio/video and IT equipment safety',
       'Regulation (EU) 2023/1542 — Batteries and accumulators',
     ],
-    quimica_base: ['REACH (EC) 1907/2006 — Restrictions Annex XVII (e.g. phthalates entries 51/52, lead, Cr VI) + SVHC Candidate List (Art. 59)'],
+    quimica_base: [
+      'REACH (EC) 1907/2006 — Restrictions Annex XVII (e.g. phthalates entries 51/52, lead, Cr VI) + SVHC Candidate List (Art. 59)',
+      'CLP Reg. (EC) 1272/2008 — Classification, labelling & packaging of hazardous substances/mixtures supplied with toys (chemistry/experimental sets): hazard pictograms (Annex V), signal word "Danger"/"Warning" (Art. 20), H- & P-statements, supplier ID (Art. 17). Toys NOT exempt (Art. 1(5) excludes only medicinal/veterinary/cosmetic/medical-device/food); cosmetic products → Reg. (EC) 1223/2009',
+      'Chemical toys: EN 71-4 (experimental sets for chemistry), EN 71-5 (chemical toys other than experimental sets), EN 71-7 (finger paints), EN 71-13 (olfactory/cosmetic/gustative); organic-compound migration limits via Toy Safety Dir. 2009/48/EC Annex II Appendix C, methods EN 71-10/-11',
+    ],
     quimica_elec: ['RoHS 2011/65/EU + 2015/863/EU — Restriction of hazardous substances in electrical equipment'],
     envases: [
       'Regulation (EU) 2025/40 (PPWR) — Packaging and Packaging Waste Regulation — repeals Directive 94/62/EC, in force 11 Feb 2025, applies from 12 Aug 2026',

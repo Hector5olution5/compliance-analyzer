@@ -2260,15 +2260,31 @@ function getRisks(formData, L) {
   if (c.includes('liquidos')) {
     risks.push({
       riesgo: t(
-        '[EN 71-1:2014+A1:2018 Cl. 4.19 / ASTM F963-23 Sec. 4.37] Ingestion or contact hazard from liquids or gels inside product — leakage risk from sealed liquid compartments, chemical burn or toxicity from contact',
-        '[EN 71-1 Cl. 4.19 / ASTM F963-23 §4.37] Peligro de ingestión o contacto con líquidos o geles contenidos en el producto — riesgo de derrame en compartimentos sellados, quemadura química o toxicidad por contacto',
-        '[EN 71-1 Cl. 4.19 / ABNT NBR NM 300-1] Perigo de ingestão ou contato com líquidos ou géis dentro do produto — risco de vazamento, queimadura química ou toxicidade por contato'),
+        '[EN 71-1:2014+A1:2018 Cl. 5.5 (liquid-containing toys) / §7.12 (liquid-filled teethers) / ASTM F963-23 §4.37] Ingestion or contact hazard from liquids or gels inside product — leakage risk from sealed liquid compartments, chemical burn or toxicity from contact',
+        '[EN 71-1 Cl. 5.5 (juguetes con líquido) / §7.12 (mordedores con líquido) / ASTM F963-23 §4.37] Peligro de ingestión o contacto con líquidos o geles contenidos en el producto — riesgo de derrame en compartimentos sellados, quemadura química o toxicidad por contacto',
+        '[EN 71-1 Cl. 5.5 / §7.12 / ABNT NBR NM 300-1] Perigo de ingestão ou contato com líquidos ou géis dentro do produto — risco de vazamento, queimadura química ou toxicidade por contato'),
       nivel_inicial: esNinos ? hi : med,
       medida_control: t(
         'Leak resistance test of sealed compartments (pressure and drop test). Toxicological assessment of liquid contents. Warning on label.',
         'Ensayo de resistencia a fugas en compartimentos sellados (prueba de presión y caída). Evaluación toxicológica del contenido líquido. Advertencia en etiqueta.',
         'Ensaio de resistência a vazamentos em compartimentos selados (teste de pressão e queda). Avaliação toxicológica do conteúdo líquido. Advertência no rótulo.'),
       nivel_residual: lo,
+    });
+  }
+
+  // ── 10b. Kit químico / pinturas / cosméticos ─────────────────────────────────
+  if (c.includes('kit_quimico')) {
+    risks.push({
+      riesgo: t(
+        '[EN 71-4 (experimental/chemistry sets) / EN 71-5 (chemical toys) / EN 71-7 (finger paints) / EN 71-13 (cosmetic/olfactory/gustative) / CLP Reg. (EC) 1272/2008 / Toy Safety Dir. 2009/48/EC Annex II Part III] Chemical hazard from substances and mixtures in chemistry sets, paints or cosmetic kits — poisoning, chemical burns, skin/eye irritation or sensitisation',
+        '[EN 71-4 (sets de experimentos/química) / EN 71-5 (juguetes químicos) / EN 71-7 (pinturas de dedos) / EN 71-13 (cosméticos/olfativos/gustativos) / CLP Reg. (CE) 1272/2008 / Dir. Seguridad Juguetes 2009/48/CE Anexo II Parte III] Peligro químico por sustancias y mezclas en sets de química, pinturas o kits de cosmética — intoxicación, quemaduras químicas, irritación o sensibilización de piel/ojos',
+        '[EN 71-4 / EN 71-5 / EN 71-7 / EN 71-13 / CLP Reg. (CE) 1272/2008 / Dir. 2009/48/CE Anexo II Parte III] Perigo químico por substâncias e misturas em kits de química, tintas ou kits de cosméticos — intoxicação, queimaduras químicas, irritação ou sensibilização de pele/olhos'),
+      nivel_inicial: hi,
+      medida_control: t(
+        'Hazardous substances/mixtures classified and labelled per CLP (Reg. 1272/2008): product identifier, hazard pictograms (Annex V), signal word "Danger"/"Warning", H- and P-statements, supplier details, in the language(s) of the country of sale (toys are NOT exempt from CLP; cosmetic products fall under Reg. (EC) 1223/2009). Chemistry/experimental sets per EN 71-4 (substance lists, age limits, mandatory warnings + adult supervision); chemical toys per EN 71-5; finger paints per EN 71-7 (colorant/preservative purity, bittering agent, element migration); cosmetic kits per EN 71-13. Safety Data Sheet (SDS) supplied. Toy Safety Dir. warnings: "Not suitable for children under [age]. For use under adult supervision." (USA: ASTM D-4236 / LHAMA art-material labelling + 16 CFR 1500.14.)',
+        'Sustancias/mezclas peligrosas clasificadas y etiquetadas según CLP (Reg. 1272/2008): identificador del producto, pictogramas de peligro (Anexo V), palabra de advertencia "Peligro"/"Atención", frases H y P, datos del proveedor, en el/los idioma(s) del país de venta (los juguetes NO están exentos de CLP; los cosméticos se rigen por el Reg. (CE) 1223/2009). Sets de química/experimentos según EN 71-4 (listas de sustancias, límites de edad, advertencias obligatorias + supervisión adulta); juguetes químicos según EN 71-5; pinturas de dedos según EN 71-7 (pureza de colorantes/conservantes, agente amargante, migración de elementos); kits de cosmética según EN 71-13. Ficha de Datos de Seguridad (SDS) suministrada. Advertencias de la Dir. de Juguetes: "No apto para menores de [edad]. Usar bajo supervisión de un adulto." (USA: etiquetado de materiales artísticos ASTM D-4236 / LHAMA + 16 CFR 1500.14.)',
+        'Substâncias/misturas perigosas classificadas e rotuladas conforme CLP (Reg. 1272/2008): identificador do produto, pictogramas de perigo (Anexo V), palavra-sinal "Perigo"/"Atenção", frases H e P, dados do fornecedor, no(s) idioma(s) do país de venda (brinquedos NÃO estão isentos do CLP; cosméticos seguem o Reg. (CE) 1223/2009). Kits de química/experimentos conforme EN 71-4; brinquedos químicos EN 71-5; tintas para dedos EN 71-7; kits de cosméticos EN 71-13. Ficha de Dados de Segurança (FDS) fornecida. Avisos da Diretiva de Brinquedos: "Não indicado para menores de [idade]. Usar sob supervisão de um adulto."'),
+      nivel_residual: med,
     });
   }
 
@@ -2497,6 +2513,12 @@ function getContextualWarnings(formData, cfg, L, aiData) {
     'Contains liquid or gel. In case of contact with eyes or skin, rinse thoroughly with water. Keep away from children.',
     'Contiene líquido o gel. En caso de contacto con ojos o piel, enjuagar abundantemente con agua. Mantener fuera del alcance de niños.',
     'Contém líquido ou gel. Em caso de contato com olhos ou pele, enxaguar com água. Manter fora do alcance de crianças.'
+  );
+
+  if (has('kit_quimico')) add(
+    `Contains chemicals. For use under adult supervision.${formData.edad ? ` Not suitable for children under ${formData.edad}.` : ''} Read the instructions and the CLP hazard labelling before use. Keep away from younger children.`,
+    `Contiene productos químicos. Usar bajo supervisión de un adulto.${formData.edad ? ` No apto para menores de ${formData.edad}.` : ''} Leer las instrucciones y el etiquetado de peligro CLP antes de usar. Mantener alejado de niños más pequeños.`,
+    `Contém produtos químicos. Usar sob supervisão de um adulto.${formData.edad ? ` Não indicado para menores de ${formData.edad}.` : ''} Ler as instruções e a rotulagem de perigo CLP antes de usar. Manter longe de crianças menores.`
   );
 
   // ── Peligros eléctricos / térmicos ──
