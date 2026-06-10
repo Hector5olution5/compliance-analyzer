@@ -399,7 +399,7 @@ También se corrigieron **2 citas EN 71-1 mal asignadas en app.js**: el riesgo e
 ## 📋 Normas a CONSEGUIR (excluye partes de EN 71)
 
 **🟢 Descargar GRATIS (prioridad alta):**
-- **UE (EUR-Lex):** Toy Safety Regulation **(UE) 2025/2509** (nuevo TSR, reemplaza Dir. 2009/48/CE) · Dir. **(UE) 2017/898** (BPA juguetes 0,04 mg/l) · Reg. **(UE) 2024/3190** (BPA en MOCA) · Dir. **84/500/CEE** (Pb/Cd cerámica) · Reg. **(CE) 1223/2009** (cosméticos) · Reg. **(UE) 2023/1542** (baterías).
+- **UE (EUR-Lex):** ~~Toy Safety Regulation (UE) 2025/2509~~ ✅ **YA DESCARGADO Y AUDITADO** (ver sección TSR abajo) · Dir. **(UE) 2017/898** (BPA juguetes 0,04 mg/l) · Reg. **(UE) 2024/3190** (BPA en MOCA) · Dir. **84/500/CEE** (Pb/Cd cerámica) · Reg. **(CE) 1223/2009** (cosméticos) · Reg. **(UE) 2023/1542** (baterías).
 - **USA (eCFR):** 16 CFR **1500** (FHSA), **1501** (partes pequeñas), **1303** (plomo pintura), **1307** (ftalatos), **1250** (adopta F963) · métodos CPSC-CH-E1001/E1002/E1003 (plomo), C1001 (ftalatos).
 - **México (DOF):** NOM-015-SCFI-2007 · NOM-050-SCFI-2004 · NOM-003-SCFI-2014.
 - **Brasil (ANVISA):** RDC 589/2021 · RDC 88/2016 (MOCA). **LATAM:** Colombia Res. 683/2012 · Argentina Res. SCT 163/2005.
@@ -413,6 +413,26 @@ También se corrigieron **2 citas EN 71-1 mal asignadas en app.js**: el riesgo e
 6. **AS/NZS ISO 8124 + AS/NZS 62115** — si se vende en Australia. **UL 696** (Electric Toys, USA).
 
 (Las partes de EN 71 —71-4/-5/-7/-8/-10/-11/-12/-13/-14, 71-20:2025— se excluyen de esta lista por indicación del usuario; valorar según gama de producto.)
+
+---
+
+## Toy Safety Regulation (UE) 2025/2509 — auditado contra el texto oficial (2026-06-10)
+
+Verificado contra `Normas/UE/OJ_L_202502509_ES_TXT (1).pdf` (82 pág., versión ES). La app ya lo mencionaba de pasada; ahora está incorporado con detalle.
+
+**Fechas (verificadas):**
+- **Aplicable a partir del 1 de agosto de 2030** (Art. final, línea 2963). Entra en vigor 20 días tras publicación en el DOUE.
+- **Deroga la Directiva 2009/48/CE con efecto 1 de agosto de 2030** (la Directiva sigue vigente hasta entonces).
+- **Excepción:** los artículos **28–44 y 49–55** (organismos notificados / vigilancia del mercado) aplican desde **1 de enero de 2026**.
+
+**Cambios clave (verificados):**
+- **Prohibiciones genéricas ampliadas** más allá de la Directiva: además de CMR, ahora cubre **alteradores endocrinos, sensibilizantes respiratorios, sustancias tóxicas para órgano diana específico (STOT) y sustancias PBT/vPvB**. (Los límites genéricos del CLP —1000 mg/kg CMR cat 1A/1B, 3000 mg/kg tóxicos reproducción, 100000 mg/kg STOT cat 1— se consideran insuficientes para niños.)
+- **PFAS:** se prohíbe el uso intencionado de PFAS en juguetes.
+- **Fragancias alergénicas:** prohibición del uso intencionado de determinadas fragancias alergénicas.
+- **BPA:** incluido en la prohibición genérica de CMR, con un límite de migración; bisfenoles evaluados como grupo.
+- **Pasaporte Digital del Producto (DPP):** sustituye a la Declaración UE de Conformidad; portador de datos (p. ej. QR) en el juguete/embalaje con la info de conformidad.
+
+Incorporado a `UE.juguetes` (nueva línea TSR), `UE.doc` (DPP sustituye DoC desde 2030), `UE.etiquetado_base` (marcado CE retenido + línea DPP). El marcado CE y la retención de 10 años se mantienen bajo el TSR.
 
 ---
 
