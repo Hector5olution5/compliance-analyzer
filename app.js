@@ -2134,7 +2134,7 @@ function getRisks(formData, L) {
       riesgo: t(
         '[EN 71-3:2019+A2:2024 Cat. III / ASTM F963-23 Sec. 4.3.5 / CPSIA] Migration of heavy metals in accessible parts — 19 regulated elements incl. Sb, As, Ba, B, Cd, Cr (III/VI), Co, Cu, Pb, Mn, Hg, Ni, Se, Sr, Sn, organic Sn, Al, Zn',
         '[EN 71-3:2019+A2:2024 Cat. III / ASTM F963-23 §4.3.5 / Codex] Migración de elementos pesados en partes accesibles — Sb, As, Ba, Cd, Cr, Pb, Hg, Se',
-        '[EN 71-3:2019+A2:2024 / ABNT NBR NM 300-3 / INMETRO 563/2016] Migração de elementos pesados nas partes acessíveis — Sb, As, Ba, Cd, Cr, Pb, Hg, Se'),
+        '[EN 71-3:2019+A2:2024 / ABNT NBR NM 300-3 / INMETRO 302/2021] Migração de elementos pesados nas partes acessíveis — Sb, As, Ba, Cd, Cr, Pb, Hg, Se'),
       nivel_inicial: med,
       medida_control: t(
         'Element migration test per EN 71-3 material categories — I (dry/brittle/powder/pliable), II (liquid/sticky), III (scraped-off coatings and surface materials). Pb migration limits: Cat I 2 / II 0,5 / III 23 mg/kg. Surface-coating total lead also ≤ 90 ppm (16 CFR 1303). Technical data sheets and declarations from pigment suppliers.',
@@ -2166,7 +2166,7 @@ function getRisks(formData, L) {
       riesgo: t(
         '[EN 71-1:2014+A1:2018 Cl. 4.7 & 4.8 / ASTM F963-23 §4.7 (edges), §4.8 (projections) & §4.9 (points) / ISO 8124-1 Cl. 5.8] Laceration or puncture hazard from accessible sharp points, edges and rigid projections (axle ends, levers, decorative features) — claws, teeth, fins or 3D design elements',
         '[EN 71-1 Cl. 4.7 & 4.8 / ASTM F963-23 §4.7 (bordes), §4.8 (salientes) & §4.9 (puntas) / ISO 8124-1 Cl. 5.8] Peligro de laceración o punción por puntas y bordes filosos accesibles y salientes rígidas (extremos de ejes, palancas, elementos decorativos) — garras, dientes, aletas u otros elementos del diseño 3D',
-        '[EN 71-1 Cl. 4.7 & 4.8 / ABNT NBR NM 300-1 / INMETRO 563/2016] Perigo de laceração ou perfuração por pontas e bordas cortantes acessíveis — garras, dentes, aletas ou elementos do design 3D'),
+        '[EN 71-1 Cl. 4.7 & 4.8 / ABNT NBR NM 300-1 / INMETRO 302/2021] Perigo de laceração ou perfuração por pontas e bordas cortantes acessíveis — garras, dentes, aletas ou elementos do design 3D'),
       nivel_inicial: esNinos ? hi : med,
       medida_control: t(
         'Sharp edges test (sharp edge tester, ASTM F963 §4.7 / 16 CFR 1500.49, Fig. 8) and sharp points test (sharp point tester, ASTM F963 §4.9 / 16 CFR 1500.48, Fig. 9) before and after use & abuse — applies to toys for children under 8 years. Projections (§4.8): protect rigid vertical projections (axle ends, levers) by turning back wire ends or smooth caps; corners excluded. Rounding of critical edges R > 0.5 mm; metal edges hemmed/rolled/curled or burr-free; bolt/threaded-rod ends capped; wood free of splinters. Functional sharp edges/points: prohibited under 48 months; cautionary label (§5.10) for ages 48–96 months. Mandatory warning on label for products intended for children.',
@@ -2182,7 +2182,7 @@ function getRisks(formData, L) {
       riesgo: t(
         '[EN 71-1:2014+A1:2018 Cl. 5.1 (small parts cylinder §8.2) / ASTM F963-23 §4.6 / 16 CFR Part 1501] Choking and aspiration hazard from small parts for children under 3 years — parts that fit entirely in small parts cylinder (Ø 31.7 mm × 57.1 mm)',
         '[EN 71-1 Cl. 5.1 (cilindro de partes pequeñas §8.2) / ASTM F963-23 §4.6 / 16 CFR Part 1501] Peligro de asfixia e ingestión por partes pequeñas en niños menores de 3 años — partes que caben íntegramente en el cilindro de partes pequeñas (Ø 31.7 mm × 57.1 mm)',
-        '[EN 71-1 Cl. 5.1 (cilindro §8.2) / ABNT NBR NM 300-1 / INMETRO 563/2016] Perigo de asfixia e ingestão de partes pequenas por crianças menores de 3 anos — partes que cabem no cilindro de partes pequenas (Ø 31,7 mm × 57,1 mm)'),
+        '[EN 71-1 Cl. 5.1 (cilindro §8.2) / ABNT NBR NM 300-1 / INMETRO 302/2021] Perigo de asfixia e ingestão de partes pequenas por crianças menores de 3 anos — partes que cabem no cilindro de partes pequenas (Ø 31,7 mm × 57,1 mm)'),
       nivel_inicial: esNinos ? hi : med,
       medida_control: t(
         'Small parts cylinder test (ASTM F963 §4.6 / EN 71-1 / 16 CFR 1501). Warning on label: "WARNING: CHOKING HAZARD — Small parts. Not for children under 3 years." For ages 3–6 yr with small parts, choking warning per 16 CFR 1500.19. Age restriction on packaging. Note: balloons, books, crayons, CDs, modeling clay and paint sets are exempt (16 CFR 1501.3).',
@@ -2294,7 +2294,7 @@ function getRisks(formData, L) {
       riesgo: t(
         '[EN 71-2:2020 / ASTM F963-23 Sec. 4.2 / ISO 8124-2] Flammability of materials — spread of flame rate and ignition time of plastic surfaces, fabric or hair/beard elements',
         '[EN 71-2:2020 / ASTM F963-23 §4.2 / ISO 8124-2] Inflamabilidad de materiales — tasa de propagación de llama y tiempo de ignición de superficies plásticas, textiles o elementos de cabello/barba del diseño',
-        '[EN 71-2:2020 / ABNT NBR 11136 / ISO 8124-2] Inflamabilidade dos materiais — taxa de propagação de chama e tempo de ignição de superfícies plásticas, têxteis ou elementos de cabelo/barba do design'),
+        '[EN 71-2:2020 / ABNT NBR NM 300-2:2004 / ISO 8124-2] Inflamabilidade dos materiais — taxa de propagação de chama e tempo de ignição de superfícies plásticas, têxteis ou elementos de cabelo/barba do design'),
       nivel_inicial: esNinos ? med : lo,
       medida_control: t(
         'Flammability test per EN 71-2:2020 / ASTM F963 §4.2. EN 71-2 prohibits celluloid (cellulose nitrate, except varnishes/glues/ping-pong balls), highly flammable solids and "flash effect" pilose surfaces in all toys (§4.1). Flame-spread limits: head-worn toys/masks ≤ 10 mm/s or self-extinguish (§4.2.5); disguise costumes, toys to enter and soft-filled toys ≤ 30 mm/s or self-extinguish (§4.3–4.5); hair/beards: flame persistence ≤ 2 s after removal (§4.2.2). If spread rate is between 10 and 30 mm/s, mark "Warning! Keep away from fire". (Note: UL 94 is a US electronics rating, NOT an EN 71-2 criterion.) Warning against exposure to naked flames.',

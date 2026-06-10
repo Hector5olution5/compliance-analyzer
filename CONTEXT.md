@@ -374,6 +374,20 @@ Verificado contra `Normas/UE/REGULATION (EC) No 1272:2008` (1355 pág.) y `24111
 
 ---
 
+## Brasil — RTAC002801 = Portaria INMETRO Nº 302/2021 (2026-06-10)
+
+⚠️ **El archivo `Normas/Brasil/RTAC002801.pdf` (89 pág.) es la Portaria INMETRO Nº 302, de 12/07/2021** — "Regulamento Técnico da Qualidade ... para Brinquedos – **Consolidado**" (en vigor 02/08/2021).
+
+**Corrección mayor:** la app citaba **"Portaria INMETRO 563/2016"** por todas partes (Brasil + LATAM + label reqs). **Verificado en el Art. 22 VIII: la 563/2016 quedó REVOGADA con efecto 01/01/2022.** La vigente es la **302/2021**. Corregido en todas las ocurrencias (compliance-data.js: bloque Brasil + LATAM + LABEL_REQUIREMENTS; app.js: 3 textos PT de riesgo + inflamabilidad).
+
+**Versiones de normas verificadas (Anexo I de la 302/2021):** ABNT NBR **NM 300-1:2011**, **NM 300-2:2004** (inflamabilidad), **NM 300-3:2011**, NM 300-4/-5/-6:2004. La app decía "NM 300:2004" para todas (las partes 1 y 3 son ediciones 2011). Corregido. La flammabilidad citaba **ABNT NBR 11136** (norma antigua, no usada por la 302/2021) → cambiado a **NM 300-2:2004**.
+
+**Añadido (paralelo a la UE):** exclusión de alcance — productos lúdicos para **colecionadores >14 anos** quedan fuera si la embalagem trae la advertência clara e indelével: *"Este produto não é um brinquedo. Produto destinado a colecionadores com mais de 14 (quatorze) anos"* (Art. 2º §2 II). Certificación compulsória + **Selo de Identificação da Conformidade** (Inmetro) vía OCP (Art. 7º).
+
+NOTA: las refs ANVISA de MOCA de Brasil (RDC 91/2001, 105/1999, 56/2012, 589/2021) son de **dominio alimentario distinto** — no están en este documento INMETRO de juguetes; se mantienen (verificadas en sesión previa).
+
+---
+
 ## Perú — RM 517-2008-MINSA / Reglamento Ley 28376 (2026-06-10)
 
 Leído el PDF oficial (`Normas/Perú/RM517-2008-MINSA.pdf`). Publica el proyecto de Reglamento de la **Ley N° 28376** (prohíbe juguetes y útiles de escritorio tóxicos/peligrosos). Reglamento operativo = **D.S. N° 008-2007-SA** (mod. **D.S. 012-2007-SA**), administrado por **MINSA/DIGESA**.

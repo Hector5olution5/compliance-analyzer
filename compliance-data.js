@@ -348,9 +348,9 @@ const MARKETS = {
       'Resolução RDC n. 88/2016 (ANVISA) — Boas práticas de fabricação para MOCA',
     ],
     juguetes: [
-      'ABNT NBR NM 300:2004 — Segurança de brinquedos (partes 1, 2 e 3)',
-      'Portaria INMETRO 563/2016 — Regulamento técnico de qualidade para brinquedos (obrigatório)',
-      'ABNT NBR 11136 — Brinquedos — requisitos de segurança',
+      'Portaria INMETRO n. 302, de 12/07/2021 — Regulamento Técnico da Qualidade para Brinquedos (Consolidado), em vigor 02/08/2021; revoga a Portaria 563/2016 (desde 01/01/2022). Certificação compulsória + Selo de Identificação da Conformidade (Inmetro)',
+      'ABNT NBR NM 300-1:2011 (propriedades mecânicas e físicas) / NM 300-2:2004 (inflamabilidade) / NM 300-3:2011 (migração de elementos) — referenciadas pela Portaria 302/2021',
+      'Escopo (Art. 1º/2º Portaria 302/2021): aplica-se a brinquedos para crianças até 14 anos. Excluídos os produtos lúdicos para colecionadores >14 anos se a embalagem traz a advertência clara e indelével: "Este produto não é um brinquedo. Produto destinado a colecionadores com mais de 14 (quatorze) anos"',
     ],
     electrica: [
       'ABNT NBR IEC 62368-1 — Segurança de equipamentos audiovisuais e de tecnologia',
@@ -377,11 +377,11 @@ const MARKETS = {
       abs: [
         { ensayo: 'Migração global (LMT) em simulantes alimentares', norma: 'Resolução RDC n. 105/1999 + RDC n. 589/2021 — LMT 10 mg/dm² ou 60 mg/kg', frecuencia: 'Por lote / mudança de fornecedor' },
         { ensayo: 'Migração específica de substâncias ABS (lista positiva ANVISA)', norma: 'Resolução RDC n. 56/2012 (ANVISA) — Lista positiva de substâncias plásticas', frecuencia: 'Por formulação' },
-        { ensayo: 'Metais pesados em partes acessíveis', norma: 'ABNT NBR NM 300:2004 Parte 3 / Portaria INMETRO 563/2016', frecuencia: 'Por formulação de pigmentos' },
+        { ensayo: 'Metais pesados em partes acessíveis', norma: 'ABNT NBR NM 300-3:2011 / Portaria INMETRO 302/2021', frecuencia: 'Por formulação de pigmentos' },
       ],
       pp: [{ ensayo: 'Migração global PP', norma: 'Resolução RDC n. 105/1999 (ANVISA)', frecuencia: 'A cada 2 anos' }],
     },
-    normas_seg: { mecanico: 'ABNT NBR NM 300-1 / Portaria INMETRO 563/2016', inflamabilidad: 'ABNT NBR 11136', elementos: 'ABNT NBR NM 300-3 / Portaria INMETRO 563/2016', bordes: 'ABNT NBR NM 300-1 / Portaria INMETRO 563/2016' },
+    normas_seg: { mecanico: 'ABNT NBR NM 300-1:2011 / Portaria INMETRO 302/2021', inflamabilidad: 'ABNT NBR NM 300-2:2004 / Portaria INMETRO 302/2021', elementos: 'ABNT NBR NM 300-3:2011 / Portaria INMETRO 302/2021', bordes: 'ABNT NBR NM 300-1:2011 / Portaria INMETRO 302/2021' },
   },
 
   Colombia: {
@@ -627,7 +627,7 @@ const MARKETS = {
       '🇵🇪 Perú: NTP 399.163 (INDECOPI) + Codex Alimentarius — EU Reg. 10/2011 aceptada como referencia técnica',
     ],
     juguetes: [
-      '🇧🇷 Brasil: ABNT NBR NM 300:2004 (partes 1, 2, 3) + Portaria INMETRO 563/2016 (obligatoria)',
+      '🇧🇷 Brasil: ABNT NBR NM 300-1:2011 / -2:2004 / -3:2011 + Portaria INMETRO 302/2021 (Consolidado, certificación obligatoria; revoca la 563/2016)',
       '🇨🇴 Colombia: NTC 4894:2008 — Seguridad de juguetes (equivalente ISO 8124)',
       '🇦🇷 Argentina: IRAM-NM 300 (partes 1 a 6) + Res. SCT 163/2005 / Res. MS 583/2008 (ftalatos)',
       '🇵🇪 Perú: NTP-ISO 8124 (partes 1, 2, 3) + Ley 28376 / D.S. 008-2007-SA (MINSA-DIGESA) — Anexo IV elementos tóxicos',
@@ -664,7 +664,7 @@ const MARKETS = {
       abs: [
         { ensayo: 'Migración global (LMT) en simulantes alimentarios', norma: '🇧🇷 RDC 589/2021 (ANVISA) | 🇨🇴 Res. 683/2012 (INVIMA) | 🇦🇷 GMC RES 32/2011 | 🇵🇪 NTP 399.163 — Límite 10 mg/dm²', frecuencia: 'Por lote / cambio de proveedor' },
         { ensayo: 'Migración específica de sustancias ABS (listas positivas regionales)', norma: '🇧🇷 RDC n. 56/2012 (ANVISA) | 🇦🇷 GMC RES 32/2011 | EU Reg. 10/2011 Anexo I (referencia)', frecuencia: 'Por formulación' },
-        { ensayo: 'Metales pesados en partes accesibles (Sb, As, Ba, Cd, Cr, Pb, Hg, Se)', norma: '🇧🇷 ABNT NBR NM 300-3 / INMETRO 563 | 🇨🇴 NTC 4894-3 | 🇦🇷 IRAM-NM 300-3 | 🇵🇪 NTP-ISO 8124-3', frecuencia: 'Por formulación de pigmentos' },
+        { ensayo: 'Metales pesados en partes accesibles (Sb, As, Ba, Cd, Cr, Pb, Hg, Se)', norma: '🇧🇷 ABNT NBR NM 300-3:2011 / INMETRO 302/2021 | 🇨🇴 NTC 4894-3 | 🇦🇷 IRAM-NM 300-3 | 🇵🇪 NTP-ISO 8124-3', frecuencia: 'Por formulación de pigmentos' },
       ],
       pp: [
         { ensayo: 'Migración global PP en simulantes', norma: '🇧🇷 RDC 105/1999 | 🇨🇴 Res. 683/2012 | 🇦🇷 GMC RES 32/2011 | 🇵🇪 NTP 399.163', frecuencia: 'Por lote' },
@@ -679,7 +679,7 @@ const MARKETS = {
         { ensayo: 'Migración de acetaldehído (PET para bebidas/alimentos)', norma: '🇧🇷 ANVISA / FDA 21 CFR 177.1630 | EU Reg. 10/2011 Anexo I (referencia)', frecuencia: 'Por formulación / proveedor' },
       ],
     },
-    normas_seg: { mecanico: '🇧🇷 ABNT NBR NM 300-1/INMETRO 563 | 🇨🇴 NTC 4894-1 | 🇦🇷 IRAM-NM 300-1 | 🇵🇪 NTP-ISO 8124-1', inflamabilidad: '🇧🇷 ABNT NBR 11136 | 🇦🇷 IRAM-NM 300-2 | 🇨🇴🇵🇪 ISO 8124-2', elementos: '🇧🇷 ABNT NBR NM 300-3/INMETRO 563 | 🇨🇴 NTC 4894-3 | 🇦🇷 IRAM-NM 300-3 | 🇵🇪 NTP-ISO 8124-3', bordes: 'ISO 8124-1 / normas nacionales equivalentes' },
+    normas_seg: { mecanico: '🇧🇷 ABNT NBR NM 300-1:2011/INMETRO 302/2021 | 🇨🇴 NTC 4894-1 | 🇦🇷 IRAM-NM 300-1 | 🇵🇪 NTP-ISO 8124-1', inflamabilidad: '🇧🇷 ABNT NBR NM 300-2:2004 | 🇦🇷 IRAM-NM 300-2 | 🇨🇴🇵🇪 ISO 8124-2', elementos: '🇧🇷 ABNT NBR NM 300-3:2011/INMETRO 302/2021 | 🇨🇴 NTC 4894-3 | 🇦🇷 IRAM-NM 300-3 | 🇵🇪 NTP-ISO 8124-3', bordes: 'ISO 8124-1 / normas nacionales equivalentes' },
   },
 
   Mexico: {
@@ -1094,7 +1094,7 @@ const LABEL_REQUIREMENTS = {
     { id:'importer',          label:'Importador brasileño (nombre + CNPJ)',                   ref:'CDC Art. 31',                            cond:'always'        },
     { id:'language',          label:'Instrucciones y advertencias en portugués',              ref:'CDC Art. 31',                            cond:'always'        },
     { id:'anvisa',            label:'Registro ANVISA (contacto alimentos)',                   ref:'RDC ANVISA 331/2019',                    cond:'food'          },
-    { id:'age_warning',       label:'Advertencia de edad (português)',                        ref:'Portaria INMETRO 563/2016',              cond:'children'      },
+    { id:'age_warning',       label:'Advertencia de edad (português)',                        ref:'Portaria INMETRO 302/2021',              cond:'children'      },
     { id:'battery_disposal',  label:'Instrucción reciclaje batería (CONAMA 401)',             ref:'CONAMA Res. 401/2008 / ABNT NBR 14725', cond:'battery'       },
     { id:'button_battery_warn',label:'Advertencia batería botón (riesgo de ingestión)',      ref:'INMETRO / ABNT',                        cond:'button_battery'},
     { id:'melamine_temp_limit',label:'Advertência de temperatura melamina (em português)',   ref:'ANVISA RDC 51/2010',                    cond:'melamine'      },
