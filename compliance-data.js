@@ -21,7 +21,7 @@ const DOCS_MASTER = [
   { code: 'TEST_PFAS_PACKAGING',    name: 'Reporte PFAS en envase de contacto alimentario (PPWR)', cat: 2, catName: 'Reportes de prueba', markets: ['UE'],                req: 'conditional', trigger: 'has_food_contact', hint: 'PPWR Reg. (UE) 2025/40 Art. 5 — restricción de PFAS en envases en contacto con alimentos (límites 25 ppb individual / 250 ppb suma / 50 ppm total). Aplica desde 12-ago-2026.' },
   { code: 'TEST_ELECTRICAL',        name: 'Reporte de seguridad eléctrica',                       cat: 2, catName: 'Reportes de prueba', markets: ['UE','USA','Australia'], req: 'conditional', trigger: 'has_electronics' },
   { code: 'TEST_MAGNETS',           name: 'Reporte de seguridad de imanes',                       cat: 2, catName: 'Reportes de prueba', markets: ['UE','USA','Australia'], req: 'conditional', trigger: 'has_magnets' },
-  { code: 'TEST_MICROBIOLOGICAL',   name: 'Reporte microbiológico (EN 71-20)',                    cat: 2, catName: 'Reportes de prueba', markets: ['UE'],                   req: 'conditional', trigger: 'has_liquid_media' },
+  { code: 'TEST_MICROBIOLOGICAL',   name: 'Reporte microbiológico — EN 71-20:2025 (medios acuosos accesibles)', cat: 2, catName: 'Reportes de prueba', markets: ['UE'],                   req: 'conditional', trigger: 'has_liquid_media' },
   { code: 'TEST_CHEMICAL_ORGANIC',  name: 'Reporte sustancias químicas orgánicas (EN 71-9)',      cat: 2, catName: 'Reportes de prueba', markets: ['UE'],                   req: 'conditional', trigger: 'has_chemical_kit' },
   { code: 'TEST_BATTERY',           name: 'Certificación de batería (IEC 62133 / UN 38.3)',       cat: 2, catName: 'Reportes de prueba', markets: ['UE','USA','Australia'], req: 'conditional', trigger: 'has_battery' },
 
@@ -83,9 +83,10 @@ const MARKETS = {
       'Scope (Dir. 2009/48/EC Art. 2 + Annex I; Guidance Doc No 20, Nov 2024) — products for collectors are excluded from the Toy Safety Directive ONLY if the product or its packaging bears a visible and legible indication that it is intended for collectors aged 14 and over; decorative objects for festivities/celebrations are also excluded. Manufacturer is responsible for correct classification; reasonably foreseeable use prevails over declared intended use',
     ],
     electrica: [
-      'Directive 2014/35/EU (LVD) — Low voltage',
+      'EN IEC 62115 — Electric toys: Safety (PRIMARY harmonised standard for electric/electronic toys under Toy Safety Dir. 2009/48/EC Annex II)',
+      'Directive 2014/35/EU (LVD) — Low voltage (toys ≤ a low-voltage threshold are covered by the Toy Safety Directive, not LVD; LVD applies above it)',
       'Directive 2014/30/EU (EMC) — Electromagnetic compatibility',
-      'EN 62368-1 — Audio/video and IT equipment safety',
+      'EN 62368-1 — Audio/video and IT equipment safety (only if the toy also qualifies as AV/IT equipment, e.g. a toy tablet)',
       'Regulation (EU) 2023/1542 — Batteries and accumulators',
     ],
     quimica_base: [
@@ -205,7 +206,8 @@ const MARKETS = {
       'CPSIA Sec. 103 — Tracking labels on children\'s products',
     ],
     electrica: [
-      'UL 62368-1 — Audio/video and IT equipment safety',
+      'UL 696 — Electric Toys (toy-specific electrical safety); battery-powered toys also per ASTM F963-23 §4.25',
+      'UL 62368-1 — Audio/video and IT equipment safety (only if the toy also qualifies as AV/IT equipment)',
       'FCC Part 15 (Class B) — Unintentional radio frequency devices',
       'UL 8750 — LED lighting equipment',
       'Reese\'s Law 2022 (16 CFR 1263 / UL 4200A) — Button cell battery safety in children\'s products',
@@ -287,9 +289,10 @@ const MARKETS = {
       'Consumer Protection Notice No. 9/2003 — Toys for children under 36 months',
     ],
     electrica: [
+      'AS/NZS 62115 — Electric toys: Safety (toy-specific electrical safety)',
       'EESS — Electrical Equipment Safety System (mandatory registration)',
       'RCM Mark — Regulatory Compliance Mark (mandatory for electrical products)',
-      'AS/NZS 62368.1:2018 — Audio/video and IT equipment safety',
+      'AS/NZS 62368.1:2018 — Audio/video and IT equipment safety (only if the toy also qualifies as AV/IT equipment)',
       'ACMA — Australian Communications and Media Authority (EMC declaration)',
     ],
     quimica_base: [
@@ -353,7 +356,8 @@ const MARKETS = {
       'Escopo (Art. 1º/2º Portaria 302/2021): aplica-se a brinquedos para crianças até 14 anos. Excluídos os produtos lúdicos para colecionadores >14 anos se a embalagem traz a advertência clara e indelével: "Este produto não é um brinquedo. Produto destinado a colecionadores com mais de 14 (quatorze) anos"',
     ],
     electrica: [
-      'ABNT NBR IEC 62368-1 — Segurança de equipamentos audiovisuais e de tecnologia',
+      'ABNT NBR IEC 62115 — Brinquedos elétricos: segurança (norma específica para brinquedos elétricos)',
+      'ABNT NBR IEC 62368-1 — Segurança de equipamentos audiovisuais e de tecnologia (apenas se o brinquedo também for equipamento AV/TI)',
       'Resolução ANATEL — Homologação de produtos de telecomunicações',
       'INMETRO — Certificação obrigatória para produtos elétricos',
     ],
@@ -401,7 +405,7 @@ const MARKETS = {
       'NTC 4894:2008 — Seguridad de juguetes (equivalente ISO 8124)',
       'Resolución SIC sobre juguetes — vigilancia y control de calidad',
     ],
-    electrica: ['RETIE — Reglamento Técnico de Instalaciones Eléctricas (Resolución 90708/2013)', 'NTC-IEC 62368-1 — Seguridad equipos audiovisuales'],
+    electrica: ['NTC-IEC 62115 — Juguetes eléctricos: seguridad (norma específica para juguetes eléctricos)', 'RETIE — Reglamento Técnico de Instalaciones Eléctricas (Resolución 90708/2013)', 'NTC-IEC 62368-1 — Seguridad equipos audiovisuales (solo si el juguete también es equipo AV/TI)'],
     quimica_base: ['Resolución 1111/2017 (MINSALUD) — Evaluación del riesgo químico', 'REACH (CE) 1907/2006 — Referencia técnica internacional para SVHC'],
     quimica_elec: [],
     etiquetado_base: [
@@ -442,7 +446,7 @@ const MARKETS = {
       'IRAM-NM 300 (partes 1 a 6) — Seguridad de juguetes (esquema de certificación obligatoria — Res. SCT 163/2005)',
       'Resolución MS 583/2008 y MS 2/2011 — Requisitos de seguridad y límites de ftalatos en juguetes y artículos de puericultura',
     ],
-    electrica: ['Resolución SIC 92/98 — Seguridad para productos eléctricos', 'IRAM-IEC 62368-1 — Seguridad de equipos de audio/video'],
+    electrica: ['IRAM-IEC 62115 — Juguetes eléctricos: seguridad (norma específica para juguetes eléctricos)', 'Resolución SIC 92/98 — Seguridad para productos eléctricos', 'IRAM-IEC 62368-1 — Seguridad de equipos de audio/video (solo si el juguete también es equipo AV/TI)'],
     quimica_base: ['Ley 24.051 — Residuos peligrosos (sustancias químicas)', 'REACH (CE) 1907/2006 — Referencia técnica internacional para SVHC'],
     quimica_elec: [],
     etiquetado_base: [
@@ -484,7 +488,7 @@ const MARKETS = {
       'NTP-ISO 8124 (partes 1, 2, 3) — Seguridad de juguetes (propiedades mecánicas, inflamabilidad y migración de elementos)',
       'Ensayos de elementos tóxicos: referencia ASTM F963 / EN 71-3 (Art. 21 del Reglamento); límites según Anexo IV',
     ],
-    electrica: ['NTP-IEC 62368-1 — Seguridad de equipos audiovisuales', 'Resolución MTC — Ministerio de Transportes y Comunicaciones'],
+    electrica: ['NTP-IEC 62115 — Juguetes eléctricos: seguridad (norma específica para juguetes eléctricos)', 'NTP-IEC 62368-1 — Seguridad de equipos audiovisuales (solo si el juguete también es equipo AV/TI)', 'Resolución MTC — Ministerio de Transportes y Comunicaciones'],
     quimica_base: [
       'Anexo IV (D.S. 008-2007-SA) — LMP en juguetes (mg/kg): As 25 · Sb 60 · Ba 1000 · Cd 75 · Cr 60 · Pb 90 · Hg 60 · Se 500',
       'Anexo IV — Ftalatos restringidos (DEHP, DBP, BBP, DINP, DIDP, DNOP) · benceno ≤ 5 mg/kg · tolueno ≤ 170 ppm · Ni ≤ 0,5 µg/cm²/semana (contacto prolongado con piel)',
@@ -549,10 +553,9 @@ const MARKETS = {
       '16 CFR Part 1501 — Small parts, children under 3 (USA)',
     ],
     electrica: [
-      'Directive 2014/35/EU (LVD) + EN 62368-1 — Low voltage (EU)',
-      'Directive 2014/30/EU (EMC) — Electromagnetic compatibility (EU)',
-      'UL 62368-1 + FCC Part 15 Class B — Electrical & EMC (USA)',
-      'EESS + RCM Mark + AS/NZS 62368.1 — Electrical safety (Australia)',
+      'Electric toys (toy-specific safety): EN IEC 62115 (EU) / AS/NZS 62115 (Australia) / UL 696 + ASTM F963-23 §4.25 (USA)',
+      'Directive 2014/35/EU (LVD) — Low voltage (EU); EN 62368-1 / UL 62368-1 / AS/NZS 62368.1 only if the toy also qualifies as AV/IT equipment',
+      'Directive 2014/30/EU (EMC) — Electromagnetic compatibility (EU); FCC Part 15 Class B (USA); EESS + RCM Mark (Australia)',
       'Regulation (EU) 2023/1542 / Reese\'s Law 2022 (16 CFR 1263 / UL 4200A) — Battery safety',
     ],
     quimica_base: [
@@ -633,10 +636,9 @@ const MARKETS = {
       '🇵🇪 Perú: NTP-ISO 8124 (partes 1, 2, 3) + Ley 28376 / D.S. 008-2007-SA (MINSA-DIGESA) — Anexo IV elementos tóxicos',
     ],
     electrica: [
-      '🇧🇷 Brasil: ABNT NBR IEC 62368-1 + Certificación obligatoria INMETRO',
-      '🇨🇴 Colombia: RETIE (Res. 90708/2013) + NTC-IEC 62368-1',
-      '🇦🇷 Argentina: Resolución SIC 92/98 + IRAM-IEC 62368-1',
-      '🇵🇪 Perú: NTP-IEC 62368-1 + Resolución MTC',
+      'Juguetes eléctricos (norma específica): IEC 62115 → 🇧🇷 ABNT NBR IEC 62115 | 🇨🇴 NTC-IEC 62115 | 🇦🇷 IRAM-IEC 62115 | 🇵🇪 NTP-IEC 62115',
+      '🇧🇷 Brasil: Certificación obligatoria INMETRO | 🇨🇴 Colombia: RETIE (Res. 90708/2013) | 🇦🇷 Argentina: Resolución SIC 92/98 | 🇵🇪 Perú: Resolución MTC',
+      'IEC 62368-1 (ABNT/NTC/IRAM/NTP) — solo si el juguete también es equipo AV/TI',
     ],
     quimica_base: [
       '🇧🇷 Brasil: RDC n. 56/2012 (ANVISA) — Lista positiva de sustancias plásticas MOCA',
@@ -789,7 +791,7 @@ const MARKETS = {
       'No existe RTCA armonizado de seguridad de juguetes en Centroamérica — se aplican regulaciones nacionales de cada país',
       'ISO 8124 (partes 1, 2, 3) / EN 71 — Referencias técnicas internacionales aplicadas',
     ],
-    electrica: ['Normativas nacionales de cada país de Centroamérica', 'IEC 62368-1 — Referencia técnica internacional'],
+    electrica: ['IEC 62115 — Juguetes eléctricos: seguridad (referencia técnica para juguetes eléctricos)', 'Normativas nacionales de cada país de Centroamérica', 'IEC 62368-1 — Referencia técnica internacional (solo si el juguete también es equipo AV/TI)'],
     quimica_base: ['RTCA 67.04.54:10 — Límites de contaminantes en alimentos', 'REACH (CE) 1907/2006 — Referencia técnica para SVHC'],
     quimica_elec: [],
     etiquetado_base: [

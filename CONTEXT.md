@@ -388,6 +388,34 @@ NOTA: las refs ANVISA de MOCA de Brasil (RDC 91/2001, 105/1999, 56/2012, 589/202
 
 ---
 
+## Seguridad eléctrica: EN IEC 62115 (no 62368-1) + EN 71-20 verificada (2026-06-10)
+
+**Corrección de fondo:** la app citaba **EN/IEC 62368-1** (equipos audio/video y TI) como norma eléctrica de juguetes en TODOS los mercados. La norma correcta de **seguridad de juguetes eléctricos** es **EN IEC 62115** (juguetes eléctricos), bajo el Toy Safety Dir. 2009/48/CE Anexo II. 62368-1 solo aplica si el juguete también es equipo AV/TI (p. ej. tablet de juguete). Corregido en `compliance-data.js` (campos `electrica` de UE, USA→UL 696, Australia→AS/NZS 62115, Brasil, Colombia, Argentina, Perú, CAM, Internacional, LATAM) y en `app.js` (riesgo eléctrico + medida_control). 
+
+También se corrigieron **2 citas EN 71-1 mal asignadas en app.js**: el riesgo eléctrico citaba `EN 71-1 Cl. 4.24` y la pila botón `Cl. 4.24.1` — pero §4.24 es **"Bola yoyó"** (EN 71-1 no cubre seguridad eléctrica). Cambiado a **EN IEC 62115** (que sí incluye requisitos de pila botón).
+
+**EN 71-20 — VERIFICADA, SÍ EXISTE** (vía búsqueda web): es **EN 71-20:2025 — Seguridad microbiológica de juguetes que contienen medios acuosos accesibles**, publicada por CEN en dic-2025 (reemplaza el protocolo NB CE n°2; se armonizará bajo 2009/48/CE). La referencia de la app era correcta; se le añadió año+título. La búsqueda también confirmó la nueva **Toy Safety Regulation (UE) 2025/2509** que la app ya cita.
+
+## 📋 Normas a CONSEGUIR (excluye partes de EN 71)
+
+**🟢 Descargar GRATIS (prioridad alta):**
+- **UE (EUR-Lex):** Toy Safety Regulation **(UE) 2025/2509** (nuevo TSR, reemplaza Dir. 2009/48/CE) · Dir. **(UE) 2017/898** (BPA juguetes 0,04 mg/l) · Reg. **(UE) 2024/3190** (BPA en MOCA) · Dir. **84/500/CEE** (Pb/Cd cerámica) · Reg. **(CE) 1223/2009** (cosméticos) · Reg. **(UE) 2023/1542** (baterías).
+- **USA (eCFR):** 16 CFR **1500** (FHSA), **1501** (partes pequeñas), **1303** (plomo pintura), **1307** (ftalatos), **1250** (adopta F963) · métodos CPSC-CH-E1001/E1002/E1003 (plomo), C1001 (ftalatos).
+- **México (DOF):** NOM-015-SCFI-2007 · NOM-050-SCFI-2004 · NOM-003-SCFI-2014.
+- **Brasil (ANVISA):** RDC 589/2021 · RDC 88/2016 (MOCA). **LATAM:** Colombia Res. 683/2012 · Argentina Res. SCT 163/2005.
+
+**🟡 COMPRAR (de pago), por prioridad:**
+1. **EN IEC 62115** — Juguetes eléctricos: seguridad (PRIORIDAD nº 1 si hay juguetes eléctricos/electrónicos; corrige el hueco citado arriba).
+2. **Serie ISO 8124 (partes 1–9)** — base internacional; cubre Australia, Perú y mercados sin norma propia (evita comprar cada espejo nacional).
+3. **Espejos nacionales** (solo si se necesita el texto exacto para certificar; replican ISO 8124): ABNT NBR NM 300-1:2011/-2:2004/-3:2011 (Brasil, ABNT) · NTC 4894 (Colombia, ICONTEC) · IRAM-NM 300 (Argentina) · NTP-ISO 8124 (Perú, INACAL).
+4. **EN 1811** (liberación de níquel) — partes metálicas en contacto prolongado con piel.
+5. **ASTM D-4236 / LHAMA** — materiales artísticos (crayones/pinturas) para USA.
+6. **AS/NZS ISO 8124 + AS/NZS 62115** — si se vende en Australia. **UL 696** (Electric Toys, USA).
+
+(Las partes de EN 71 —71-4/-5/-7/-8/-10/-11/-12/-13/-14, 71-20:2025— se excluyen de esta lista por indicación del usuario; valorar según gama de producto.)
+
+---
+
 ## Perú — RM 517-2008-MINSA / Reglamento Ley 28376 (2026-06-10)
 
 Leído el PDF oficial (`Normas/Perú/RM517-2008-MINSA.pdf`). Publica el proyecto de Reglamento de la **Ley N° 28376** (prohíbe juguetes y útiles de escritorio tóxicos/peligrosos). Reglamento operativo = **D.S. N° 008-2007-SA** (mod. **D.S. 012-2007-SA**), administrado por **MINSA/DIGESA**.
