@@ -169,7 +169,26 @@ Verificado contra eCFR / Cornell LII / CPSC. Correcciones:
 
 **Australia:** referencias OK (AS/NZS ISO 8124.1:2019/.2:2015/.3:2020, AS/NZS 62368.1:2018, EESS, RCM, ACMA, AICIS, Country of Origin Standard 2016). **Nuance:** Australia no tiene una norma MOCA dedicada; "FSANZ Standard 1.4.1" (Contaminants) + uso de EU/FDA como referencia es la práctica real (la app ya lo anota).
 
-**Pendiente:** auditar LATAM (Brasil/Colombia/Argentina/Perú), México (NOM) y CAM (RTCA).
+---
+
+## Auditoría normativa LATAM / México / CAM (2026-06-10)
+
+Verificado contra fuentes oficiales (ANVISA/gov.br, INACAL/Perú, argentina.gob.ar/ANMAT, COFEPRIS/DOF, inventario oficial RTCA osartec/ARSA, MINSALUD Colombia). Correcciones aplicadas en `compliance-data.js` y `app.js`:
+
+| Mercado | Antes (incorrecto) | Corregido |
+|---|---|---|
+| **Perú** | `NTP 399.165` (no es MOCA) | **NTP 399.163** (Envases y accesorios plásticos en contacto con alimentos, partes 1-16). 19 ocurrencias |
+| **Argentina** | `Resolución 909/2005 (IRAM)`, `Disposición ANMAT 4980/2005` (juguetes), `IRAM-ISO 8124` | **IRAM-NM 300** (partes 1-6) vía **Res. SCT 163/2005**; **Res. MS 583/2008 y 2/2011** (ftalatos). ANMAT 4980/2005 era de **publicidad** (¡no MOCA ni juguetes!) y fue **derogada jun-2025** por Disp. 4059/2025. Contacto alimentos AR → **CAA Cap. IV / MERCOSUR GMC RES 32/2011** |
+| **México** | `NOM-004-SSA1-2013` descrita como "envases de plástico para alimentos" | NOM-004-SSA1-2013 = **"Limitaciones y especificaciones sanitarias para el uso de los compuestos de plomo"** (¡no envases!). México **no tiene NOM específica de plásticos MOCA**; marco real = Ley General de Salud + Reglamento Control Sanitario; COFEPRIS acepta FDA 21 CFR 177 / EU 10/2011 |
+| **México** | `NOM-019-ANCE-2016 — electrodomésticos` (no existe) | **NOM-001-SCFI-2018** (Aparatos electrónicos: requisitos de seguridad). NOM-019 real = SCFI-1998, equipo de cómputo |
+| **CAM** | `RTCA 67.01.33:06` para MOCA (todo el bloque) | 67.01.33:06 = **Buenas Prácticas de Manufactura** (alimentos), no MOCA. **CAM no tiene RTCA armonizado de MOCA** → Codex / FDA 21 CFR 177 / EU 10/2011 |
+| **CAM** | `RTCA 65.01.53:08` y `RTCA 71.03.47:07` (juguetes) | **No existen** (serie 71.03 = higiénicos/cosméticos). **CAM no tiene RTCA armonizado de juguetes** → ISO 8124 / regulación nacional |
+| **CAM** | `RTCA 23.01.33:06` (país de origen) | No aplica (serie 23.xx = eficiencia energética) → Ley de Protección al Consumidor nacional |
+| **Colombia** | `Res. 834/2013` descrita como general + usada para ABS (plástico) | 834/2013 = **materiales celulósicos** (≤8 mg/dm²). Plásticos/ABS → **Res. 683/2012** |
+
+**Verificado correcto:** 🇧🇷 ANVISA **RDC 589/2021** (LMT 10 mg/dm² / 60 mg/kg ✓), RDC 105/1999, RDC 91/2001, RDC 56/2012, Portaria INMETRO 563/2016, ABNT NBR NM 300, CONAMA 401/2008 · 🇨🇴 NTC 4894, RETIE Res. 90708/2013 · 🇲🇽 NOM-015-SCFI-2007 (juguetes), NOM-050-SCFI-2004 (etiquetado), NOM-003-SCFI-2014, NOM-051/161-SEMARNAT/018-STPS · CAM RTCA 67.04.54 (contaminantes), 67.01.07:10 (etiquetado alimentos).
+
+**Nota:** se corrigió un bug de duplicación ("EU Reg. 10/2011 / EU Reg. 10/2011") introducido por el reemplazo global en CAM. Ambos archivos pasan `node --check`.
 
 ---
 
