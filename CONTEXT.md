@@ -225,6 +225,15 @@ Dictado por el usuario. Bordes filosos de metal/vidrio definidos en **16 CFR 150
 
 Incorporado a `USA.juguetes` y al texto de riesgo "puntas y bordes filosos" (`medida_control`, EN/ES) en `app.js`.
 
+### ASTM F963-23 §4.8 salientes y §4.9 puntas filosas (2026-06-10)
+
+⚠️ **Corrección de numeración:** en ASTM F963 **§4.8 = Salientes (Projections)** y **§4.9 = Puntas filosas (Accessible Points)**. La app citaba erróneamente "§4.7 & §4.8" tratando 4.8 como puntas. Corregido a §4.7 (bordes), §4.8 (salientes), §4.9 (puntas).
+
+- **§4.8 Salientes:** salientes rígidas en juguetes para **menores de 8 años** que puedan causar punción de piel al caer el niño (extremos de ejes, palancas de accionamiento, elementos decorativos). Proteger doblando el extremo del alambre o con tapa/cubierta lisa que aumente el área de contacto. **NO** protege ojos ni interior de boca (explícito en la norma). Solo se evalúan salientes **verticales o casi verticales**; **esquinas excluidas**. Ensayo antes y después de uso y abuso (8.5–8.10); juguetes de ensamble repetido se evalúan en piezas y ensamblados por separado. **§4.8.1 juguetes de baño:** guía de diseño en Anexo A4, pero **sin método objetivo → no usable para juzgar conformidad**.
+- **§4.9 Puntas filosas:** definidas por **16 CFR 1500.48** (probador de puntas, Fig. 9). Aplica a **menores de 8 años**. Causas: configuración del juguete, alambres/pasadores/clavos/grapas mal fijados, lámina mal cortada, rebabas en tornillos, madera astillada. **Puntas funcionales** (p. ej. aguja de kit de costura): **<48 meses** prohibidas; **48–96 meses** con etiqueta de precaución §5.10. **§4.9.3 madera:** superficies y bordes sin astillas (antes y después de 8.5–8.10).
+
+Incorporado a `USA.juguetes` (bullets §4.8 y §4.9) y al texto de riesgo "puntas y bordes filosos" en `app.js`.
+
 ---
 
 ## Perú — RM 517-2008-MINSA / Reglamento Ley 28376 (2026-06-10)
