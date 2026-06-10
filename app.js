@@ -2196,13 +2196,13 @@ function getRisks(formData, L) {
   if (c.includes('piezas_moviles')) {
     risks.push({
       riesgo: t(
-        '[EN 71-1:2014+A1:2018 Cl. 4.9 & 4.10 / ASTM F963-23 Sec. 4.9] Entrapment or crushing hazard from moving, folding or articulated mechanisms — fingers, hair or clothing entrapment in joints or movable parts',
-        '[EN 71-1 Cl. 4.9 & 4.10 / ASTM F963-23 §4.9] Peligro de atrapamiento o aplastamiento por mecanismos móviles, plegables o articulados — atrapamiento de dedos, cabello o ropa en juntas o partes móviles',
+        '[EN 71-1:2014+A1:2018 Cl. 4.9 & 4.10 / ASTM F963-23 §4.13 (folding mechanisms & hinges)] Entrapment or crushing hazard from moving, folding or articulated mechanisms — fingers, hair or clothing entrapment in joints or movable parts',
+        '[EN 71-1 Cl. 4.9 & 4.10 / ASTM F963-23 §4.13 (mecanismos plegables y bisagras)] Peligro de atrapamiento o aplastamiento por mecanismos móviles, plegables o articulados — atrapamiento de dedos, cabello o ropa en juntas o partes móviles',
         '[EN 71-1 Cl. 4.9 & 4.10 / ABNT NBR NM 300-1] Perigo de aprisionamento ou esmagamento por mecanismos móveis, dobráveis ou articulados — aprisionamento de dedos, cabelo ou roupa'),
       nivel_inicial: esNinos ? hi : med,
       medida_control: t(
-        'Entrapment opening tests (finger, hair and clothing). Minimum gap between moving parts: < 4 mm or > 12 mm to prevent finger entrapment. Mechanism torque tests.',
-        'Ensayos de aberturas de atrapamiento (dedos, cabello, ropa). Separación mínima entre partes móviles: < 4 mm o > 12 mm para evitar atrapamiento de dedos. Ensayos de par de torsión de mecanismos.',
+        'Entrapment opening tests (finger, hair and clothing). Minimum gap between moving parts: < 4 mm or > 12 mm to prevent finger entrapment. ASTM F963 §4.13: toys supporting a child\'s weight (toy strollers/chairs) need a locking device — single-action ≥ 10 lbf (45 N) to release, or double-action (two distinct actions); hinge-line clearance on moving parts > 0.2 kg: if the gap admits a 5 mm rod it must also admit a 13 mm rod at all positions. Mechanism torque tests.',
+        'Ensayos de aberturas de atrapamiento (dedos, cabello, ropa). Separación mínima entre partes móviles: < 4 mm o > 12 mm para evitar atrapamiento de dedos. ASTM F963 §4.13: juguetes que soportan el peso del niño (carriolas/sillas de juguete) requieren dispositivo de bloqueo — acción simple ≥ 10 lbf (45 N) para liberar, o doble acción (dos acciones distintas); claro en línea de bisagra de partes móviles > 0.2 kg: si el espacio admite una varilla de 5 mm debe admitir también una de 13 mm en todas las posiciones. Ensayos de par de torsión de mecanismos.',
         'Ensaios de aberturas de aprisionamento (dedos, cabelo, roupa). Separação mínima entre partes móveis: < 4 mm ou > 12 mm. Ensaios de torque dos mecanismos.'),
       nivel_residual: lo,
     });
@@ -2228,13 +2228,13 @@ function getRisks(formData, L) {
   if (c.includes('cuerdas')) {
     risks.push({
       riesgo: t(
-        '[EN 71-1:2014+A1:2018 Cl. 4.16 & 4.17 / ASTM F963-23 Sec. 4.17] Strangulation hazard from cords, strings or elastic bands — cords > 220 mm accessible to children under 36 months create strangulation risk',
-        '[EN 71-1 Cl. 4.16 & 4.17 / ASTM F963-23 §4.17] Peligro de estrangulamiento por cuerdas, cordones o elásticos — cuerdas de longitud > 220 mm accesibles a niños menores de 36 meses representan riesgo de estrangulamiento',
+        '[EN 71-1:2014+A1:2018 Cl. 4.16 & 4.17 / ASTM F963-23 §4.14 (cords, straps & elastics)] Strangulation hazard from cords, strings or elastic bands — cords > 220 mm (EN 71-1) accessible to children under 36 months create strangulation risk',
+        '[EN 71-1 Cl. 4.16 & 4.17 / ASTM F963-23 §4.14 (cuerdas, correas y elásticos)] Peligro de estrangulamiento por cuerdas, cordones o elásticos — cuerdas de longitud > 220 mm (EN 71-1) accesibles a niños menores de 36 meses representan riesgo de estrangulamiento',
         '[EN 71-1 Cl. 4.16 & 4.17 / ABNT NBR NM 300-1] Perigo de estrangulamento por cordas, cordões ou elásticos — cordas com comprimento > 220 mm acessíveis a crianças menores de 36 meses'),
       nivel_inicial: esNinos ? hi : med,
       medida_control: t(
-        'Cord and string length test. Maximum free cord length: 220 mm for products intended for children under 36 months. Tensile strength test of knots and cord attachment points.',
-        'Ensayo de longitud de cuerdas y cordones. Longitud libre máxima de cuerda: 220 mm para productos dirigidos a menores de 36 meses. Ensayo de resistencia a la tracción de nudos y puntos de anclaje.',
+        'Cord and string length test. EN 71-1: max free cord length 220 mm (under 36 months). ASTM F963 §4.14: cords/straps/elastics for children under 18 months shall be < 12 in (300 mm) under a 5 lb (2.25 kg) load; loops must not pass the head probe (Fig. 10) — if they admit the probe base, a breakaway feature releasing at < 5.0 lbf (22.2 N) is required. Pull toys (< 36 months) with cords > 300 mm: no beads/attachments that form loops. Toy bags (≤ 18 months) of impermeable material with opening perimeter > 14 in (360 mm): no drawstring. Tensile strength test of knots and attachment points.',
+        'Ensayo de longitud de cuerdas y cordones. EN 71-1: longitud libre máx. 220 mm (menores de 36 meses). ASTM F963 §4.14: cuerdas/correas/elásticos para menores de 18 meses deben ser < 12 in (300 mm) bajo carga de 5 lb (2.25 kg); los lazos no deben pasar la sonda de cabeza (Fig. 10) — si admiten la base de la sonda, se requiere mecanismo breakaway que libere a < 5.0 lbf (22.2 N). Juguetes de arrastre (< 36 meses) con cuerdas > 300 mm: sin cuentas/accesorios que formen lazos. Bolsas de juguete (≤ 18 meses) de material impermeable con perímetro de abertura > 14 in (360 mm): sin cordón de cierre. Ensayo de resistencia a la tracción de nudos y puntos de anclaje.',
         'Ensaio de comprimento de cordas e cordões. Comprimento livre máximo: 220 mm para produtos destinados a menores de 36 meses. Ensaio de resistência à tração dos nós e pontos de fixação.'),
       nivel_residual: lo,
     });

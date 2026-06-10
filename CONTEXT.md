@@ -234,6 +234,21 @@ Incorporado a `USA.juguetes` y al texto de riesgo "puntas y bordes filosos" (`me
 
 Incorporado a `USA.juguetes` (bullets §4.8 y §4.9) y al texto de riesgo "puntas y bordes filosos" en `app.js`.
 
+### ASTM F963-23 §4.10–§4.14 — requisitos mecánicos (2026-06-10)
+
+Dictado por el usuario. **Dos misattributions corregidas** en los textos de riesgo de `app.js`:
+- "Piezas móviles / atrapamiento" citaba `ASTM §4.9` (que en realidad son **puntas filosas**) → corregido a **§4.13** (mecanismos plegables y bisagras).
+- "Cuerdas" citaba `ASTM §4.17` (que en realidad son **ejes/ruedas**) → corregido a **§4.14** (cuerdas, correas y elásticos).
+
+Datos incorporados (a `USA.juguetes` y a los textos de riesgo EN/ES de atrapamiento y cuerdas):
+- **§4.10 Alambres/varillas:** extremos protegidos; alambre de refuerzo no debe fracturarse al doblar 60°; fuerza máx. (8.12) a 50 mm: **45 N (10 lbf) ≤18 meses**, **67 N (15 lbf) >18–96 meses**. Sombrillas de juguete: radios Ø ≥ 2 mm, extremos lisos.
+- **§4.11 Clavos/sujetadores:** sin punta/borde/ingestión/saliente; puntas no accesibles (ejes → §4.17).
+- **§4.12 Film plástico (asfixia):** espesor promedio **≥ 0.038 mm (0.00150 in)**, individual nunca **< 0.032 mm (0.00125 in)**; alternativa perforado ≥1% del área en 30×30 mm. Exentos: termoencogible que se destruye al abrir; bolsas con dimensión menor ≤ 100 mm.
+- **§4.13 Plegables/bisagras:** bloqueo automático en juguetes que soportan al niño — acción simple **≥ 45 N (10 lbf)** o doble acción; claro de bisagra (parte móvil > 0.2 kg): si admite varilla 5 mm debe admitir 13 mm en todas las posiciones.
+- **§4.14 Cuerdas/correas/elásticos:** **<18 meses → < 300 mm (12 in)** bajo 5 lb; lazos no pasan sonda de cabeza (Fig. 10) o requieren breakaway **< 22.2 N (5.0 lbf)**; arrastre <36 meses con cuerda >300 mm sin cuentas que formen lazos; autorretráctiles <18 meses no retraen >6 mm bajo 2 lb; bolsas de juguete ≤18 meses impermeables con perímetro >360 mm sin cordón; líneas de cometas >1.8 m resistencia >10⁸ Ω/cm. (Nota: EN 71-1 usa 220 mm / <36 meses — se conservan ambos valores.)
+
+Pendiente del bloque dictado: §4.15 (estabilidad de ride-on/asientos, ≤60 meses) — quedó a medias en el dictado (§4.15.2 sin completar).
+
 ---
 
 ## Perú — RM 517-2008-MINSA / Reglamento Ley 28376 (2026-06-10)
