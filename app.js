@@ -2329,8 +2329,8 @@ function getRisks(formData, L) {
         '[EN 71-1 Cl. 4.11 / ISO 8124-1 Cl. 5.14] Dano auditivo por brinquedos geradores de ruído — nível de som impulsivo ≥ 138 dB(C) a 50 cm ou contínuo ≥ 85 dB(A) causa dano auditivo permanente em crianças'),
       nivel_inicial: esNinos ? hi : med,
       medida_control: t(
-        'Sound level test per EN 71-1 Cl. 4.11 / ASTM F963 Sec. 4.5. Maximum limit: 85 dB(A) continuous / 138 dB(C) impulsive at 50 cm for ear-held toys; 96 dB(A) / 140 dB(C) at 25 cm for other toys. Volume limiter if limits are exceeded.',
-        'Ensayo de nivel de sonido según EN 71-1 Cl. 4.11 / ASTM F963 §4.5. Límite máximo: 85 dB(A) continuo / 138 dB(C) impulsivo a 50 cm para juguetes sostenidos en oído; 96 dB(A) / 140 dB(C) a 25 cm para otros. Limitador de volumen si se superan los límites.',
+        'Sound level test per EN 71-1 Cl. 4.11 / ASTM F963-23 §4.5.1 (methods 8.20). EN 71-1: 85 dB(A) continuous / 138 dB(C) impulsive at 50 cm for ear-held toys; 96 dB(A) / 140 dB(C) at 25 cm for others. ASTM F963-23 limits by toy type — close-to-the-ear: LAeq 65 / LCpeak 110 dB; hand-held, tabletop/floor/crib (stationary or self-propelled): LAeq 85 / LCpeak 115 dB; user-propelled push-pull: LAFmax 94 / LCpeak 115 dB; rattles: LCpeak 115 dB. Volume limiter if limits are exceeded.',
+        'Ensayo de nivel de sonido según EN 71-1 Cl. 4.11 / ASTM F963-23 §4.5.1 (métodos 8.20). EN 71-1: 85 dB(A) continuo / 138 dB(C) impulsivo a 50 cm para juguetes sostenidos en oído; 96 dB(A) / 140 dB(C) a 25 cm para otros. Límites ASTM F963-23 por tipo de juguete — cerca del oído: LAeq 65 / LCpeak 110 dB; de mano, mesa/piso/cuna (estacionario o autopropulsado): LAeq 85 / LCpeak 115 dB; empujar-jalar propulsado por el usuario: LAFmax 94 / LCpeak 115 dB; sonajeros: LCpeak 115 dB. Limitador de volumen si se superan los límites.',
         'Ensaio de nível de ruído conforme EN 71-1 Cl. 4.11 / ISO 8124-1. Limite máximo: 85 dB(A) contínuo / 138 dB(C) impulsivo a 50 cm. Limitador de volume se os limites forem excedidos.'),
       nivel_residual: lo,
     });

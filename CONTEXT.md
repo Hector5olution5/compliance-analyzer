@@ -181,7 +181,25 @@ El PDF de ASTM F963-23 (`Normas/USA/F0963-23.pdf`) tiene **DRC FileOpen** — no
 
 **Validación cruzada:** estas tablas coinciden EXACTO con las dos columnas del **Anexo IV de Perú** (juguete general / arcillas para modelar) → confirma que el reglamento peruano deriva de ASTM F963 y que ambos datos son correctos. Incorporado a `USA.juguetes`, `USA.normas_seg.elementos` e `Internacional` ensayos.
 
-**Pendiente (si se quiere):** §4.5 — límites de sonido (dB) por tipo de juguete; hoy el reporte usa los de EN 71-1 también para USA.
+### ASTM F963-23 §4.5 — sonido (acústica) (2026-06-10)
+
+El usuario dictó §4.5 y §4.5.1.1–4.5.1.6 desde su copia con licencia. El alcance §4.5 lista **6 exenciones** (sonido determinado por soplido/músculo del niño, xilófonos/campanas/tambores/juguetes de apretar, radios/MP3/CD y media removible, dispositivos externos TV/PC, audífonos, juguetes que reproducen/alteran la voz). Importante: **los sonajeros NO están exentos** → deben cumplir §4.5.1.3. Aplica hasta 14 años.
+
+Límites por tipo de juguete (ensayo per métodos 8.20):
+
+| §4.5.1.x | Tipo | LAeq / LAFmax | LCpeak |
+|---|---|---|---|
+| .1 | Close-to-the-ear (cerca del oído) | LAeq **65** dB | **110** dB |
+| .2 | Hand-held (excl. sonajeros) | LAeq **85** dB | **115** dB |
+| .3 | Rattles (sonajeros) | — | **115** dB |
+| .4 | Tabletop/floor/crib (estacionario o autopropulsado) | LAeq **85** dB | **115** dB |
+| .5 | Tabletop/floor/crib propulsado por el usuario (movimiento traslacional) | LAFmax **85** dB | **115** dB |
+| .6 | Push/pull (empujar-jalar): estac./autoprop. | LAeq **85** dB | **115** dB |
+| .6 | Push/pull propulsado por el usuario (traslacional) | LAFmax **94** dB | **115** dB |
+
+Sonidos por acción explosiva (p. ej. fulminantes/percussion caps) se rigen por §4.5.1.7 (valor aún no dictado). Incorporado al texto de riesgo "ruido" (`medida_control`, EN/ES) en `app.js` y a `USA.juguetes` en `compliance-data.js`. Antes el reporte solo usaba los límites de EN 71-1 (85 dB(A) / 138 dB(C)) también para USA.
+
+**Pendiente (menor):** §4.5.1.7 — límite LCpeak para sonidos de acción explosiva (fulminantes).
 
 ---
 
