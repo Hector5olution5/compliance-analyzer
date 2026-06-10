@@ -3734,6 +3734,7 @@ const LABEL_SEARCH_HINTS = {
   anmat:          { hint:'Look for "ANMAT", "Disp. ANMAT", ANMAT authorization number, Argentine food authority reference.', visual:false },
   iram:           { hint:'Look for "IRAM", "IRAM-ISO", IRAM certification number.', visual:true },
   digesa:         { hint:'Look for "DIGESA", "Registro Sanitario", DIGESA registration number, Peruvian health authority reference.', visual:false },
+  toy_auth:       { hint:'Look for a Peruvian toy "N° de Registro" and "Autorización Sanitaria" number (Ley 28376 / D.S. 008-2007-SA), DIGESA or Dirección Regional de Salud reference.', visual:false },
   rtca_toys:        { hint:'Look for "ISO 8124", toy safety declaration of conformity, or a national toy safety regulation reference (Central America has no harmonised RTCA for toys).', visual:false },
   battery_disposal: { hint:'Look for battery recycling text: "RBRC", "Call2Recycle", "do not dispose in household waste", "no tirar pilas a la basura", "Pilas: depositar en punto limpio", "CONAMA", disposal/collection point instruction, battery recycling symbol text.', visual:true },
   button_battery_warn: { hint:'Look for button battery/coin cell warning: "KEEP AWAY FROM CHILDREN", "coin cell", "button cell", "pila botón", "CR2032", "danger of swallowing", "ingestion", "batterie bouton", choking/ingestion hazard text specific to button batteries.', visual:false },

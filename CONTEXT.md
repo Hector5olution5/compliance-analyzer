@@ -168,7 +168,24 @@ Verificado contra los PDF oficiales:
 - **Bug corregido en app.js**: describía "categoría III (secos, quebradizos, en polvo)" — eso es **Cat I**; Cat III = materiales **raspados/recubrimientos**. Límite Pb citado (2 mg/kg) era el de Cat I.
 - **Importante**: las listas de **8 elementos** en contextos **ISO 8124-3 / NM 300-3 / NTC 4894-3** (Australia, LATAM, México) son **correctas** — ISO 8124-3 usa 8 elementos; solo EN 71-3 se amplió a 19. No se tocaron.
 
-**Pendiente posible:** profundizar con los textos de Reg. 10/2011, Directiva 2009/48/CE y RTAC002801 (Brasil) / RM 517-2008-MINSA (Perú) si se desea más detalle.
+**Pendiente posible:** profundizar con los textos de Reg. 10/2011, Directiva 2009/48/CE y RTAC002801 (Brasil) si se desea más detalle.
+
+---
+
+## Perú — RM 517-2008-MINSA / Reglamento Ley 28376 (2026-06-10)
+
+Leído el PDF oficial (`Normas/Perú/RM517-2008-MINSA.pdf`). Publica el proyecto de Reglamento de la **Ley N° 28376** (prohíbe juguetes y útiles de escritorio tóxicos/peligrosos). Reglamento operativo = **D.S. N° 008-2007-SA** (mod. **D.S. 012-2007-SA**), administrado por **MINSA/DIGESA**.
+
+**Corrección clave:** la app citaba *"Decreto Supremo PRODUCE"* para juguetes Perú → **falso**. Es Ley 28376 / D.S. 008-2007-SA (MINSA-DIGESA). Corregido en `Peru.juguetes` y en LATAM consolidado.
+
+**Datos añadidos a la app (verificados del texto):**
+- **Marco**: DIGESA (autoridad nacional) + Direcciones Regionales de Salud emiten **Registro (5 años)** + **Autorización Sanitaria (2 años)**. **SUNAT** exige Autorización Sanitaria para nacionalizar (Art. 7, 17-19, 22).
+- **Art. 21** — ensayos de elementos tóxicos referencian **ASTM F963-03 o EN 71 Parte 3** (informes válidos 3 años).
+- **Anexo IV — LMP (mg/kg)**: As 25 · Sb 60 · Ba 1000 · Cd 75 · Cr 60 · Pb 90 · Hg 60 · Se 500 (= 8 elementos clásicos ISO 8124-3, valida que las listas de 8 elementos de Perú están correctas). Ni ≤ 0,5 µg/cm²/sem (contacto prolongado piel); benceno ≤ 5 mg/kg; tolueno ≤ 170 ppm; ftalatos DEHP/DBP/BBP/DINP/DIDP/DNOP restringidos; creosota/alquitrán de hulla prohibidos.
+- **Art. 34 — rotulado** (castellano): importador+RUC, país origen, uso/montaje, advertencias, **leyenda de edad objetivo**, **N° Registro + Autorización Sanitaria**. Añadido `LABEL_REQUIREMENTS.Peru` id `toy_auth` (cond:toy) + hint OCR.
+- Anexo I = juguetes (por partida 9503...), Anexo II = excluidos, Anexo III = útiles escolares.
+
+**Nota:** la **NTP 399.163** (que corregimos antes) es la de MOCA (envases plásticos alimentos) — distinta de este régimen de juguetes. Ambas coexisten correctamente.
 
 ---
 
