@@ -2019,6 +2019,7 @@ async function callClaudeForMarket(formData, cfg, L) {
   const prioHi = prio.split('/')[0];
 
   const t = (es, en, pt) => isEn ? en : isPt ? pt : es;
+  const isUE = cfg.nombre === 'Union Europea';
 
   // Sanitize user inputs: truncate and wrap in XML tags so Claude treats them as data, not instructions
   const safeName = String(formData.nombre || '').slice(0, 200);
@@ -2043,7 +2044,7 @@ ${formData.capacidad ? t('CAPACITY: ','CAPACITY: ','CAPACIDADE: ') + formData.ca
 ${t('Generate ONLY valid JSON (no markdown):','Generate ONLY valid JSON (no markdown):','Gere APENAS JSON válido (sem markdown):')}
 {"descripcion_general":"${t('1 concise paragraph about the product using only declared materials','1 concise paragraph about the product using only declared materials','1 parágrafo conciso sobre o produto usando apenas materiais declarados')}${safeDesc ? t(' — improve the provided description',' — improve the provided description',' — melhore a descrição fornecida') : ''}","uso_previsto":"${t('1 clear sentence about the intended use','1 clear sentence about the intended use','1 frase clara sobre o uso pretendido')}","usos_indebidos":["${t('misuse 1','misuse 1','mau uso 1')}","${t('misuse 2','misuse 2','mau uso 2')}","${t('misuse 3','misuse 3','mau uso 3')}"],"advertencias_adicionales":["${t('product-specific warning derived from materials/characteristics — NOT generic microwave/dishwasher/sharp-edge warnings','product-specific warning derived from materials/characteristics — NOT generic microwave/dishwasher/sharp-edge warnings','aviso específico do produto derivado de materiais/características — NÃO incluir avisos genéricos sobre micro-ondas/lava-louças/bordas cortantes')}"],"no_conformidades":[{"situacion":"${t('specific non-conformity situation for this product','specific non-conformity situation for this product','situação de não conformidade específica para este produto')}","criticidad":"${prioHi}","accion":"${t('specific corrective action','specific corrective action','ação corretiva específica')}","responsable":"${t('responsible department','responsible department','departamento responsável')}","plazo":"${t('30 days','30 days','30 dias')}"}],"acciones_recomendadas":[{"prioridad":"${prioHi}","accion":"${t('specific action','specific action','ação específica')}","responsable":"${t('responsible department','responsible department','departamento responsável')}","plazo":"${t('30 days','30 days','30 dias')}"}]}
 
-${t('IMPORTANT for advertencias_adicionales: generate 1-3 warnings SPECIFIC to this product\'s materials, category and characteristics. Do NOT repeat warnings about: microwave, dishwasher, sharp edges. Focus on material-specific risks.','IMPORTANT for advertencias_adicionales: generate 1-3 warnings SPECIFIC to this product\'s materials, category and characteristics. Do NOT repeat warnings about: microwave, dishwasher, sharp edges. Focus on material-specific risks.','IMPORTANTE para advertencias_adicionales: gere 1-3 avisos ESPECÍFICOS para os materiais, categoria e características deste produto. NÃO repita avisos sobre: micro-ondas, lava-louças, bordas cortantes. Foque em riscos específicos do material.')}`;
+${t('IMPORTANT for advertencias_adicionales: generate 1-3 warnings SPECIFIC to this product\'s materials, category and characteristics. Do NOT repeat warnings about: microwave, dishwasher, sharp edges. Focus on material-specific risks.','IMPORTANT for advertencias_adicionales: generate 1-3 warnings SPECIFIC to this product\'s materials, category and characteristics. Do NOT repeat warnings about: microwave, dishwasher, sharp edges. Focus on material-specific risks.','IMPORTANTE para advertencias_adicionales: gere 1-3 avisos ESPECÍFICOS para os materiais, categoria e características deste produto. NÃO repita avisos sobre: micro-ondas, lava-louças, bordas cortantes. Foque em riscos específicos do material.')}${isUE ? '\n\n' + t('UE — ENVASE (PPWR Reg. (UE) 2025/40): incluye al menos 1 no_conformidad sobre el envase si aplica — restricción de PFAS en envase de contacto alimentario (Art. 5), etiqueta de composición de material para clasificación (Art. 12), reciclabilidad del envase (Art. 6) y Declaración de Conformidad del envase (Art. 39).','EU — PACKAGING (PPWR Reg. (EU) 2025/40): include at least 1 non-conformity about the packaging where relevant — PFAS restriction in food-contact packaging (Art. 5), material-composition sorting label (Art. 12), packaging recyclability (Art. 6) and packaging Declaration of Conformity (Art. 39).','UE — EMBALAGEM (PPWR Reg. (UE) 2025/40): inclua ao menos 1 não conformidade sobre a embalagem quando aplicável — restrição de PFAS em embalagem de contato com alimentos (Art. 5), rótulo de composição de material para triagem (Art. 12), reciclabilidade da embalagem (Art. 6) e Declaração de Conformidade da embalagem (Art. 39).') : ''}`;
 
   try {
     const text = await callClaude(prompt, { system: systemMsg, model: 'claude-sonnet-4-6', maxTokens: 1200 });
@@ -2799,6 +2800,7 @@ ${cfg.juguetes.map(n => `<div class="exp-bullet">${n}</div>`).join('')}
 ${tieneElec ? `<div class="exp-subsection">${L.s3_3}</div>${cfg.electrica.map(n => `<div class="exp-bullet">${n}</div>`).join('')}` : ''}
 <div class="exp-subsection">${L.s3_4}</div>
 ${[...cfg.quimica_base, ...(tieneElec ? cfg.quimica_elec : [])].map(n => `<div class="exp-bullet">${n}</div>`).join('')}
+${cfg.envases ? `<div class="exp-subsection">${L.s3_5}</div>${cfg.envases.map(n => `<div class="exp-bullet">${n}</div>`).join('')}` : ''}
 </div>
 
 <div class="exp-section"><div class="exp-section-title">4. ${L.s4}</div>
@@ -2965,6 +2967,7 @@ async function buildDocx(formData, mercadoKey, cfg, L, aiData) {
     sub(L.s3_2), ...cfg.juguetes.map(n => bullet(n)),
     ...(tieneElec ? [sub(L.s3_3), ...cfg.electrica.map(n => bullet(n))] : []),
     sub(L.s3_4), ...[...cfg.quimica_base,...(tieneElec?cfg.quimica_elec:[])].map(n => bullet(n)),
+    ...(cfg.envases ? [sub(L.s3_5), ...cfg.envases.map(n => bullet(n))] : []),
     // Section 4
     sec(4, L.s4), note(L.nota_riesgos),
     new Table({ rows: [new TableRow({ children: [hdrCell(L.riesgo,40),hdrCell(L.nivel_ini,12),hdrCell(L.medida,36),hdrCell(L.nivel_res,12)], tableHeader:true }), ...risks.map((r,i) => new TableRow({ children: [dataCell(r.riesgo,i%2?'F8F9FA':null,40), new TableCell({children:[new Paragraph({children:[new TextRun({text:r.nivel_inicial,font:'Calibri',size:20,bold:true,color:r.nivel_inicial.includes('ALT')||r.nivel_inicial==='HIGH'?'C0392B':r.nivel_inicial.includes('MED')||r.nivel_inicial==='MEDIUM'||r.nivel_inicial.includes('MÉD')?'B7770D':'2E7D32'})],spacing:{before:60,after:60}}),], shading:{type:ShadingType.SOLID,color:nivelBg(r.nivel_inicial)},borders}), dataCell(r.medida_control,i%2?'F8F9FA':null,36), dataCell(r.nivel_residual,GRN_BG,12)] }))], width:tableWidth }),
@@ -3696,6 +3699,9 @@ const LABEL_SEARCH_HINTS = {
   rohs_compliance:  { hint:'Look for "RoHS", "RoHS compliant", "RoHS2", "conforme RoHS", "free of hazardous substances", "restriction of hazardous substances", RoHS declaration.', visual:false },
   melamine_temp_limit: { hint:'Look for temperature limit text: "max 70°C", "max 120°C", "NOT microwave safe", "no apto para microondas", "no calentar", "no lavavajillas", "microwave safe", temperature restriction for melamine use.', visual:false },
   reach_pvc:        { hint:'Look for "REACH", "phthalate free", "sin ftalatos", "SVHC", "no contiene ftalatos", "free of restricted substances", "no phthalates", plasticizer-free declaration.', visual:false },
+  ppwr_material_label:    { hint:'Look for packaging material-composition / sorting label: material codes (e.g. "PP 5", "PAP 21", "C/PAP", resin identification codes), "How2Recycle", material identification for separate collection.', visual:true },
+  ppwr_sorting_pictogram: { hint:'Look for separate-collection / sorting pictogram, "Triman", "Tidyman", recycling arrows, "Separa", "Sortier", "dispose in", bin/sorting instruction symbols on packaging.', visual:true },
+  ppwr_pfas_foodcontact:  { hint:'Look for declaration that packaging is PFAS-free / "PFAS free", "sin PFAS", "free of per- and polyfluoroalkyl substances", "no intentionally added PFAS" on food-contact packaging.', visual:false },
   steam_warning:    { hint:'Look for steam/burn warning: "hot steam", "vapor caliente", "riesgo de quemaduras", "CAUTION: HOT STEAM", "burn hazard", "keep away from children" near steam reference, steam injury warning text.', visual:false },
   noise_warning:    { hint:'Look for noise/hearing damage warning: "dB", ">80 dB", "hearing damage", "daño auditivo", "protección auditiva", "loud noise", "hearing loss", "protect hearing", decibel warning.', visual:false },
   string_warning:   { hint:'Look for strangulation/cord warning: "cord", "cuerda", "strangulation", "estrangulamiento", "cuerdas largas", cord/string length warning, "STRANGULATION HAZARD", "keep cords away".', visual:false },
@@ -4000,7 +4006,9 @@ const DOC_MARKET_SHORT = { UE: 'UE', USA: 'USA', Australia: 'AU' };
 function getProductAttribs(formData) {
   const c = formData.caracteristicas || [];
   const edad = parseInt(formData.edad) || 0;
+  const comps = formData.componentes || [];
   return {
+    has_food_contact:     comps.some(x => x.contacto_alimento === 'Directo') || c.includes('food_direct'),
     has_electronics:      c.some(x => ['electronico','led','vapor'].includes(x)),
     has_battery:          c.some(x => ['bateria','bateria_boton'].includes(x)),
     has_magnets:          c.includes('imanes'),
