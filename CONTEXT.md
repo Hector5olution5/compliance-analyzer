@@ -1,6 +1,6 @@
 # Compliance Analyzer — Context
 
-_Actualizado: 2026-06-09 — PPWR (Reg. UE 2025/40) + búsqueda dashboard + checklist etiquetado_
+_Actualizado: 2026-06-10 — Auditoría regulatoria completa contra normas oficiales de `Normas/`: ASTM F963-23 (§4.3.5–4.40 + Sec.5), EN 71-1/-2/-3, Reg. 10/2011 + 1935/2004, PPWR 2025/40, CLP 1272/2008, guía decorativos, TSR (UE) 2025/2509, Brasil Portaria 302/2021. Correcciones clave: ~14 citas de cláusula/versión erróneas (ASTM ×5, EN 71-1 ×6, EN 71-19 fabricada, Portaria BR revocada 563→302), valores de sonido EN 71-1, eléctrica 62368-1→EN IEC 62115. Pendiente: comprar EN IEC 62115 + ISO 8124 (ver sección "Normas a CONSEGUIR")._
 
 ---
 
