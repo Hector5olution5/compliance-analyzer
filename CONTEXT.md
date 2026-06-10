@@ -288,6 +288,41 @@ Dictada completa por el usuario. Es la sección de **mayor valor práctico** par
 
 Incorporado: textos **exactos** de pila botón (§5.14.2) e imanes (§5.16) en el generador de advertencias `app.js` (EN/ES/PT); y `USA.etiquetado_base` con §5.3 formato + §5.11 (pelota/canica/globo literales) + §5.4–§5.10 + §5.14.1. **La cobertura de la app de globos/pelotas/canicas era inexistente — ahora está.**
 
+### ✅ Auditoría ASTM F963-23 CONCLUIDA (2026-06-10)
+
+Cubiertas §4.3.5, §4.5, §4.6, §4.7, §4.8, §4.9, §4.10–§4.14, §4.25, §4.38, §4.40 y toda la Sección 5. Corregidos **5 errores de numeración** (§4.8↔4.9 puntas/salientes, §4.9→4.13 atrapamiento, §4.17→4.14 cuerdas, §4.40→4.38 imanes, 16 CFR 1263→1262 imanes). PDF con DRM FileOpen → todo dictado por el usuario desde su copia con licencia. Único punto abierto (menor): §4.15 estabilidad de ride-on. **Dar por concluida.**
+
+---
+
+## Auditoría UE contra EN 71-1/-2/-3 (2026-06-10)
+
+A diferencia del ASTM, **los PDF de EN 71 SÍ son legibles** (UNE/AENOR, sin DRM — solo © UNE). Verificación directa contra `Normas/UE/`. Mismo criterio de copyright: solo hechos/números/cláusulas; carpeta git-ignored.
+
+**Versiones confirmadas (todas correctas en la app):**
+- UNE-EN 71-1:2015+A1 (v. corregida jun-2022) = **EN 71-1:2014+A1:2018** ✓
+- UNE-EN 71-2:2021 = **EN 71-2:2020** ✓ (sustituye 71-2:2011+A1:2014)
+- UNE-EN 71-3:2020+A2:2025 = **EN 71-3:2019+A2:2024** ✓ (A2 aprobada 2024-10-31)
+
+**EN 71-3 (metales) — VERIFICADO contra Tabla 2 oficial, sin cambios:** Cat. III Pb 23 / Cd 17 / Cr VI 0,053 / As 47 mg/kg → coinciden EXACTO con la app. (19 elementos; 3 categorías de material en Tabla 1: I seco/quebradizo/polvo/maleable, II líquido/pegajoso, III raspado.)
+
+**Errores corregidos en EN 71-1 (numeración de cláusula, igual patrón que ASTM):**
+| App citaba | §X real en EN 71-1 | Corregido a |
+|---|---|---|
+| Sonido "Cl. 4.11" | 4.11 = juguetes para boca | **§4.20 Acústica** |
+| Cuerdas "Cl. 4.16 & 4.17" | 4.16 pesados / 4.17 proyectiles | **§5.4 + §5.14** |
+| Partes pequeñas "Cl. 4.6" | 4.6 = materiales expandibles | **§5.1 (cilindro §8.2)** |
+| Etiqueta ruido "§4.5" | 4.5 = vidrio | **§4.20 / §7.14** |
+| Etiqueta imanes "§4.28" | no existe (imanes = 4.23) | **§4.23** |
+
+(Imanes "Cl. 4.23" y bordes/puntas "4.7 & 4.8" ya estaban correctos.)
+
+**Errores de VALORES corregidos:**
+- **Sonido §4.20 (¡crítico!):** la app decía "85 dB(A) / **138 dB(C)** a 50 cm; 96/140 a 25 cm" — esos picos C **no existen** en EN 71-1. Valores reales (Tablas 2/3, a 50 cm): LpA por categoría 1/2/3 — cerca del oído 60/65/70, de mano y mesa/piso 80/85/90, sonajeros/apretar/percusión 85, fulminantes 90 dB; LpCpeak 110 (mayoría) / 125 (fulminantes) / 130 (percusión) / 135 (auriculares).
+- **Cuerdas §5.4:** la app decía "220 mm para <36 meses" (impreciso). Real: **<18 m ≤ 220 mm**, **18–<36 m ≤ 300 mm**, perímetro de lazo ≤ 380 mm, cuerda de arrastre ≤ 800 mm, sección ≥ 1,5 mm, autorretráctil no retrae >6 mm.
+- **Inflamabilidad EN 71-2:** la app decía solo "30 mm/s" + "UL 94 V-0" (¡UL 94 NO es criterio de EN 71-2, es clasificación US de electrónica!). Real: prohíbe celuloide/sólidos altamente inflamables/superficies con "efecto relámpago" (§4.1); ≤ **10 mm/s** juguetes/máscaras de cabeza (§4.2.5); ≤ **30 mm/s** disfraces/juguetes para penetrar/blandos rellenos (§4.3–4.5); persistencia de llama ≤ **2 s** en pelo/barbas (§4.2.2); marca "Mantener lejos del fuego" si 10–30 mm/s.
+
+Incorporado a textos de riesgo (sonido, cuerdas, partes pequeñas, inflamabilidad) en `app.js` EN/ES/PT, a `UE.juguetes` (EN 71-1/-2 enriquecidos) y a `LABEL_REQUIREMENTS.UE` (refs corregidas).
+
 ---
 
 ## Perú — RM 517-2008-MINSA / Reglamento Ley 28376 (2026-06-10)
