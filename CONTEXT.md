@@ -272,6 +272,22 @@ Incorporado al texto de riesgo "pilas/batería" (`medida_control`, EN/ES) y a `U
 
 Incorporado: cita de imanes corregida en `app.js` (riesgo) y bullets §4.38 y §4.40 en `USA.juguetes`.
 
+### ASTM F963-23 Sección 5 — Etiquetado y advertencias (2026-06-10)
+
+Dictada completa por el usuario. Es la sección de **mayor valor práctico** para la app (su output son etiquetas). Los textos de advertencia son los **literales obligatorios** (provienen de 16 CFR 1500.19 / 1263 — lenguaje regulatorio federal, no contenido creativo de ASTM).
+
+- **§5.1** FHSA + tracking label CPSA §14(a)(5) (origen CPSIA §103). Nota CPSC: el país de origen solo NO basta para "place of manufacture" → debe incluir al menos ciudad o estado/provincia.
+- **§5.2 Age grading:** si el juguete no está etiquetado por edad de forma clara o lo está incorrectamente → se le aplican los requisitos **más estrictos** (p. ej. tracción 67 N en vez de 45 N; edad tope 14 años en §4.15).
+- **§5.3 Formato:** símbolo de alerta (¡! en triángulo) + palabra clave **WARNING** (muerte/lesión grave) o **CAUTION** (lesión menor), sans serif; WARNING **≥ 3.2 mm (1/8 in)**, texto del peligro **≥ 1.6 mm (1/16 in)**; en el panel principal, inglés mínimo, color contrastante; debe resistir uso y abuso (8.5–8.10). §5.4–5.7, 5.11, 5.14 exigen WARNING.
+- **§5.4–§5.7 enredo/estrangulamiento:** acuáticos ("not a lifesaving device"), cuna/corral (0–5 meses, "remove toy when baby begins to push up..."), móviles, carriola/cochecito ("do not attach to crib or playpen").
+- **§5.8** ensamble por adulto · **§5.9** protección simulada (cascos de juguete: "not a safety protective device") · **§5.10** bordes/puntas funcionales 48–96 meses.
+- **§5.11 (textos LITERALES, 16 CFR 1500.19):** partes pequeñas 3–<6 ("CHOKING HAZARD—Small parts. Not for children under 3 yrs."); pelota pequeña; canica; **globo de látex** (<8 años, "can choke or suffocate on uninflated or broken balloons..."). Tamaños tipográficos por área del panel (§5.11.1.3). §5.11.7 paneles pequeños ≤15 in² con 3+ idiomas → "SAFETY WARNING" / "WARNING—Choking Hazard" con flecha al panel completo.
+- **§5.14.2 pila botón/moneda (≥1.5 V, >15 mm, cabe en cilindro):** texto exacto en instrucciones ("can cause internal chemical burns in as little as two hours and lead to death...") + empaque ("Hazardous if swallowed—see instructions").
+- **§5.14.1 ride-on a batería:** WARNING con supervisión adulta + "RISK OF FIRE. Do not bypass. Replace only with __".
+- **§5.16 imanes:** texto exacto para sets experimentales ("Swallowed magnets can stick together across intestines causing serious infections and death...").
+
+Incorporado: textos **exactos** de pila botón (§5.14.2) e imanes (§5.16) en el generador de advertencias `app.js` (EN/ES/PT); y `USA.etiquetado_base` con §5.3 formato + §5.11 (pelota/canica/globo literales) + §5.4–§5.10 + §5.14.1. **La cobertura de la app de globos/pelotas/canicas era inexistente — ahora está.**
+
 ---
 
 ## Perú — RM 517-2008-MINSA / Reglamento Ley 28376 (2026-06-10)

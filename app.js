@@ -2442,15 +2442,15 @@ function getContextualWarnings(formData, cfg, L, aiData) {
 
   // ── Peligros más críticos primero ──
   if (has('bateria_boton')) add(
-    'Contains button/coin cell battery. Keep away from children. If swallowed, seek immediate medical attention.',
-    'Contiene pila botón. Mantener fuera del alcance de niños. En caso de ingestión, acudir de inmediato a urgencias médicas.',
-    'Contém pilha tipo moeda. Manter fora do alcance das crianças. Em caso de ingestão, buscar atendimento médico imediatamente.'
+    'WARNING: This product contains a Button or Coin Cell Battery. A swallowed Button or Coin Cell Battery can cause internal chemical burns in as little as two hours and lead to death. Dispose of used batteries immediately. Keep new and used batteries away from children. If you think batteries might have been swallowed or placed inside any part of the body, seek immediate medical attention. (ASTM F963-23 §5.14.2 / 16 CFR 1263 — exact required wording; package: "Contains button or coin cell battery. Hazardous if swallowed—see instructions.")',
+    'ADVERTENCIA: Este producto contiene una pila de botón o tipo moneda. La ingestión de una pila de botón o tipo moneda puede causar quemaduras químicas internas en tan solo dos horas y provocar la muerte. Deseche las pilas usadas de inmediato. Mantenga las pilas nuevas y usadas fuera del alcance de los niños. Si cree que pudieron ingerirse o introducirse en cualquier parte del cuerpo, busque atención médica de inmediato. (Texto exacto requerido por ASTM F963-23 §5.14.2 / 16 CFR 1263; empaque: "Contiene pila de botón o tipo moneda. Peligrosa si se ingiere — ver instrucciones.")',
+    'ADVERTÊNCIA: Este produto contém uma pilha tipo botão ou moeda. A ingestão de uma pilha tipo botão ou moeda pode causar queimaduras químicas internas em apenas duas horas e levar à morte. Descarte as pilhas usadas imediatamente. Mantenha pilhas novas e usadas fora do alcance das crianças. Se achar que foram engolidas ou inseridas em qualquer parte do corpo, busque atendimento médico imediato. (Texto exigido por ASTM F963-23 §5.14.2 / 16 CFR 1263)'
   );
 
   if (has('imanes')) add(
-    'Contains strong magnets. If two or more magnets are swallowed, seek immediate medical attention — risk of serious internal injury.',
-    'Contiene imanes de alta potencia. Si se ingieren dos o más piezas, acudir de inmediato a urgencias — riesgo de lesión interna grave.',
-    'Contém imãs de alta potência. Se duas ou mais peças forem ingeridas, buscar atendimento médico imediato — risco de lesão interna grave.'
+    'WARNING: This product contains (a) small magnet(s). Swallowed magnets can stick together across intestines causing serious infections and death. Seek immediate medical attention if magnet(s) are swallowed or inhaled. (ASTM F963-23 §5.16 — exact required wording for magnetic/electrical experimental sets)',
+    'ADVERTENCIA: Este producto contiene imán(es) pequeño(s). Los imanes ingeridos pueden adherirse entre sí a través de los intestinos, causando infecciones graves y la muerte. Busque atención médica de inmediato si se ingieren o inhalan imanes. (Texto exacto requerido por ASTM F963-23 §5.16 para sets experimentales magnéticos/eléctricos)',
+    'ADVERTÊNCIA: Este produto contém ímã(s) pequeno(s). Ímãs engolidos podem se atrair através dos intestinos causando infecções graves e morte. Busque atendimento médico imediato se ímãs forem engolidos ou inalados. (Texto exigido por ASTM F963-23 §5.16)'
   );
 
   if (has('proyectiles')) add(
