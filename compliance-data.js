@@ -71,6 +71,8 @@ const MARKETS = {
     moca_base: [
       'Regulation (EC) 1935/2004 — General framework for materials in contact with food',
       'Regulation (EC) 2023/2006 — Good manufacturing practices for FCM',
+      'Regulation (EU) 10/2011 — Plastic FCM: Union List of authorised substances (Annex I), restrictions (Annex II), food simulants (Annex III); OML 10 mg/dm² (Art. 12) and substance-specific SML (Art. 11)',
+      'FCM Declaration of Compliance (Reg. (EU) 10/2011 Art. 15 + Annex IV) — written declaration at all marketing stages except retail; states operator/manufacturer identity, material identity, date, confirmation of compliance with Reg. 10/2011 & 1935/2004, restricted-substance info (Annexes I/II) and use specs (food type, time/temperature, surface-to-volume ratio); renewed when composition or production changes',
     ],
     juguetes: [
       'Directive 2009/48/EC — Safety of toys (being replaced by Toy Safety Regulation (EU) 2025/2509)',
@@ -97,7 +99,7 @@ const MARKETS = {
       'EU declaration of conformity (Art. 39, model Annex VIII) + conformity assessment and technical documentation (Art. 38 / Annex VII)',
     ],
     etiquetado_base: [
-      'FCM symbol (fork + glass) on all parts with direct food contact',
+      'FCM labelling (Reg. (EC) 1935/2004 Art. 15) on parts with direct food contact: the words "for food contact", a specific use indication (e.g. coffee machine, soup spoon) OR the fork-and-glass symbol (Annex II) — not required for articles clearly intended for food contact by their nature (Art. 15.2); plus special-use instructions if needed; must be conspicuous, legible and indelible',
       'Name and address of manufacturer or EU importer',
       'CE marking mandatory (Directive 2009/48/EC + LVD if applicable)',
       'Product reference and batch/lot number',
@@ -111,8 +113,8 @@ const MARKETS = {
     retencion: '10 years (Art. 21 Directive 2009/48/EC)',
     ensayos_moca: {
       abs: [
-        { ensayo: 'Overall migration (OML) — simulants D1, D2, E per intended use', norma: 'Reg. (EU) 10/2011, Art. 12 — Limit 10 mg/dm² or 60 mg/kg', frecuencia: 'Per batch / change of resin supplier' },
-        { ensayo: 'Specific migration of ABS additives and monomers (SML)', norma: 'Reg. (EU) 10/2011, Annexes I and II — Individual limits per substance', frecuencia: 'Per formulation / change of composition' },
+        { ensayo: 'Overall migration (OML) — food simulants A/B/C/D1/D2/E per intended use (Annex III); contact time/temp per worst foreseeable use (Annex V tables)', norma: 'Reg. (EU) 10/2011, Art. 12 — Limit 10 mg/dm² (60 mg/kg for articles intended for infants/young children, Art. 12.2; 6 dm²/kg coefficient for containers <500 ml / >10 L, sheets & films, Art. 17)', frecuencia: 'Per batch / change of resin supplier' },
+        { ensayo: 'Specific migration of ABS additives and monomers (SML)', norma: 'Reg. (EU) 10/2011, Art. 11 + Annexes I and II — substance-specific SML; generic 60 mg/kg where no SML is set; CMR substances and non-listed substances behind functional barrier ≤ 0.01 mg/kg (Art. 13/14)', frecuencia: 'Per formulation / change of composition' },
         { ensayo: 'Migration of 19 elements in accessible parts (Al, Sb, As, Ba, B, Cd, Cr III, Cr VI, Co, Cu, Pb, Mn, Hg, Ni, Se, Sr, Sn, organic Sn, Zn)', norma: 'EN 71-3:2019+A2:2024 — Cat. III limits e.g. Pb 23 / Cd 17 / Cr VI 0,053 / As 47 mg/kg (Cat. I/II stricter) / EN 13130 series', frecuencia: 'Per production batch' },
         { ensayo: 'Organoleptic test — odour and taste verification', norma: 'Reg. (EC) 1935/2004, Art. 3 — Must not alter food organoleptically', frecuencia: 'Per formulation' },
       ],
@@ -144,7 +146,7 @@ const MARKETS = {
         { ensayo: 'Restricted phthalates (DEHP, DBP, BBP, DINP)', norma: 'REACH Reg. (EC) 1907/2006, Annex XVII — max 0.1% each', frecuencia: 'Per plastic formulation' },
       ],
       policarbonato: [
-        { ensayo: 'BPA (bisphenol A) content — must be non-detectable', norma: 'Reg. (EU) 2024/3190 — BPA prohibited in FCM (repeals 2018/213 SML 0.05); EN 71-19:2024 for BPA migration from toys', frecuencia: 'Per batch / formulation change' },
+        { ensayo: 'BPA (bisphenol A) content — must be non-detectable', norma: 'Reg. (EU) 2024/3190 — BPA prohibited in FCM (repeals Reg. 2018/213 which set SML 0.05 mg/kg); for toys, BPA migration limit 0.04 mg/l (Toy Safety Dir. 2009/48/EC Annex II App. C, as amended by Dir. (EU) 2017/898)', frecuencia: 'Per batch / formulation change' },
         { ensayo: 'PC overall migration (OML)', norma: 'Reg. (EU) 10/2011, Art. 12 — Limit 10 mg/dm²', frecuencia: 'Per batch' },
       ],
       vidrio: [

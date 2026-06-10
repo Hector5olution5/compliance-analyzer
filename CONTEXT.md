@@ -323,6 +323,24 @@ A diferencia del ASTM, **los PDF de EN 71 SÍ son legibles** (UNE/AENOR, sin DRM
 
 Incorporado a textos de riesgo (sonido, cuerdas, partes pequeñas, inflamabilidad) en `app.js` EN/ES/PT, a `UE.juguetes` (EN 71-1/-2 enriquecidos) y a `LABEL_REQUIREMENTS.UE` (refs corregidas).
 
+### MOCA/plásticos UE contra Reg. (UE) 10/2011 + etiquetado Reg. 1935/2004 (2026-06-10)
+
+Verificado directamente contra los PDF (`Normas/UE/CELEX_32011R0010_ES_TXT.pdf` 89 pág. y `REGULATION (EC) No 1935:2004`). Ambos legibles.
+
+**Verificado CORRECTO (sin cambios):**
+- **OML Art. 12:** 10 mg/dm² (general); **60 mg/kg** para artículos de lactantes/niños de corta edad (Dir. 2006/141 y 2006/125). Art. 17: coeficiente 6 dm²/kg para envases <500 ml / >10 L, láminas y películas.
+- **SML Art. 11:** específico (Anexo I) o genérico **60 mg/kg** si no hay límite.
+- **VCM:** "no detectable" → límite de detección **0,01 mg/kg** (Art. 11.3 / nota Anexo I). PET acetaldehído SML 6 mg/kg ✓.
+- **Simulantes (Anexo III):** A (10% etanol), B (3% ác. acético), C (20% etanol), D1 (50% etanol), D2 (aceite vegetal), E (Tenax/seco) ✓.
+- **Etiquetado FCM (Reg. 1935/2004 Art. 15):** "for food contact" / indicación de uso / símbolo tenedor-vaso (Anexo II); **exención Art. 15.2** para artículos obviamente de contacto alimentario; conspicuo/legible/indeleble; idioma del comprador (Art. 15.4).
+
+**Corregido:**
+- ⚠️ **"EN 71-19:2024" era una cita FABRICADA** (no existe esa parte de EN 71). El ensayo de BPA ahora referencia: **Reg. (UE) 2024/3190** (prohíbe BPA en MOCA, deroga Reg. 2018/213 que fijaba SML 0,05 mg/kg) + límite de migración BPA en juguetes **0,04 mg/l** (Dir. 2009/48/CE Anexo II Ap. C, mod. por Dir. (UE) 2017/898).
+
+**Añadido:**
+- **Declaración de Conformidad MOCA (Reg. 10/2011 Art. 15 + Anexo IV)** a `UE.moca_base` — documentación escrita en todas las fases salvo venta al por menor; distinta de la DoC del juguete. Contenido Anexo IV (9 puntos): identidad operador/fabricante, identidad del material, fecha, confirmación de conformidad con Reg. 10/2011 y 1935/2004, info de sustancias restringidas (Anexos I/II), especificaciones de uso (tipo de alimento, tiempo/temperatura, relación superficie/volumen); se renueva al cambiar composición/producción.
+- Condiciones de ensayo de migración (Anexo V, Cuadros 1 y 2: tiempo y temperatura según peores condiciones previsibles de uso) y precisión del OML/SML/CMR a las líneas de ensayo de `UE.ensayos_moca`.
+
 ---
 
 ## Perú — RM 517-2008-MINSA / Reglamento Ley 28376 (2026-06-10)
