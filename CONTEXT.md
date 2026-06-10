@@ -156,6 +156,23 @@ Verificado contra EUR-Lex / Comisión Europea / SGS / Eurofins. Correcciones apl
 
 ---
 
+## Auditoría normativa USA / Australia (2026-06-10)
+
+Verificado contra eCFR / Cornell LII / CPSC. Correcciones:
+
+| Mercado | Antes | Corregido |
+|---|---|---|
+| **USA** | "CPSC Recess Act 2022" (pilas botón) | **Reese's Law 2022** (16 CFR 1263 / UL 4200A) — nombre correcto. 7 ocurrencias (app.js + data) |
+| **USA** | `21 CFR 177.2800` para acero inox/metal | 177.2800 es **"Textiles and textile fibers"** — incorrecto. FDA no tiene reg. específica de migración para acero; ref. NSF/ANSI 51, AISI 304/316 |
+
+**Verificado correcto USA:** ASTM F963-23 (**16 CFR Part 1250** ✓) · 16 CFR 1303 (plomo pintura 90 ppm) / 1307 (ftalatos) / 1501 (partes pequeñas) · CPSIA Sec. 101 (plomo 100 ppm) / Sec. 103 (tracking) · 21 CFR 177.1010/1520/1640/2600/1630/1210/1580 · ASTM C738/C927 (vidrio Pb/Cd) · 19 CFR 134 · Prop 65.
+
+**Australia:** referencias OK (AS/NZS ISO 8124.1:2019/.2:2015/.3:2020, AS/NZS 62368.1:2018, EESS, RCM, ACMA, AICIS, Country of Origin Standard 2016). **Nuance:** Australia no tiene una norma MOCA dedicada; "FSANZ Standard 1.4.1" (Contaminants) + uso de EU/FDA como referencia es la práctica real (la app ya lo anota).
+
+**Pendiente:** auditar LATAM (Brasil/Colombia/Argentina/Perú), México (NOM) y CAM (RTCA).
+
+---
+
 ## Bugs corregidos en esta sesión (2026-06-01)
 
 | Commit | Bug | Causa | Fix |

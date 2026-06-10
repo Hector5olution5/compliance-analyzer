@@ -2308,13 +2308,13 @@ function getRisks(formData, L) {
   if (c.includes('bateria_boton')) {
     risks.push({
       riesgo: t(
-        '[EN 71-1:2014+A1:2018 Cl. 4.24.1 / CPSC Recess Act 2022 / EU Regulation 2023/1542] CRITICAL — Ingestion of button/coin cell batteries causes severe chemical burns to esophagus within 2 hours due to electrolysis (caustic burn). Life-threatening risk.',
-        '[EN 71-1 Cl. 4.24.1 / CPSC Recess Act 2022 / UE Reg. 2023/1542] CRÍTICO — La ingestión de pilas botón/moneda provoca quemaduras químicas severas en esófago en menos de 2 horas por electrólisis (quemadura cáustica). Riesgo para la vida.',
-        '[EN 71-1 Cl. 4.24.1 / CPSC Recess Act 2022 / UE Reg. 2023/1542] CRÍTICO — A ingestão de pilhas botão/moeda causa queimaduras químicas graves no esôfago em menos de 2 horas por eletrólise. Risco de vida.'),
+        '[EN 71-1:2014+A1:2018 Cl. 4.24.1 / Reese\'s Law 2022 (16 CFR 1263 / UL 4200A) / EU Regulation 2023/1542] CRITICAL — Ingestion of button/coin cell batteries causes severe chemical burns to esophagus within 2 hours due to electrolysis (caustic burn). Life-threatening risk.',
+        '[EN 71-1 Cl. 4.24.1 / Reese\'s Law 2022 (16 CFR 1263 / UL 4200A) / UE Reg. 2023/1542] CRÍTICO — La ingestión de pilas botón/moneda provoca quemaduras químicas severas en esófago en menos de 2 horas por electrólisis (quemadura cáustica). Riesgo para la vida.',
+        '[EN 71-1 Cl. 4.24.1 / Reese\'s Law 2022 (16 CFR 1263 / UL 4200A) / UE Reg. 2023/1542] CRÍTICO — A ingestão de pilhas botão/moeda causa queimaduras químicas graves no esôfago em menos de 2 horas por eletrólise. Risco de vida.'),
       nivel_inicial: hi,
       medida_control: t(
-        'Mandatory child-resistant battery compartment (screwdriver or coin required to open). Warning label with international button battery safety symbol. Compliance with CPSC Recess Act 2022 (USA) and EU Reg. 2023/1542 (EU). Test compartment opening force.',
-        'Compartimento de batería obligatoriamente resistente a niños (requiere destornillador o moneda para abrirse). Etiqueta de advertencia con símbolo internacional de seguridad de pilas botón. Cumplimiento con CPSC Recess Act 2022 (USA) y UE Reg. 2023/1542 (UE). Ensayo de fuerza de apertura del compartimento.',
+        'Mandatory child-resistant battery compartment (screwdriver or coin required to open). Warning label with international button battery safety symbol. Compliance with Reese\'s Law 2022 (16 CFR 1263 / UL 4200A) (USA) and EU Reg. 2023/1542 (EU). Test compartment opening force.',
+        'Compartimento de batería obligatoriamente resistente a niños (requiere destornillador o moneda para abrirse). Etiqueta de advertencia con símbolo internacional de seguridad de pilas botón. Cumplimiento con Reese\'s Law 2022 (16 CFR 1263 / UL 4200A) (USA) y UE Reg. 2023/1542 (UE). Ensayo de fuerza de apertura del compartimento.',
         'Compartimento de bateria obrigatoriamente resistente a crianças (requer chave de fenda para abrir). Rótulo de advertência com símbolo de segurança de pilha botão. Conformidade com Reg. UE 2023/1542. Ensaio de força de abertura do compartimento.'),
       nivel_residual: med,
     });
