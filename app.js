@@ -2185,8 +2185,8 @@ function getRisks(formData, L) {
         '[EN 71-1 Cl. 4.6 / ABNT NBR NM 300-1 / INMETRO 563/2016] Perigo de asfixia e ingestão de partes pequenas por crianças menores de 3 anos — partes que cabem no cilindro de partes pequenas (Ø 31,7 mm × 57,1 mm)'),
       nivel_inicial: esNinos ? hi : med,
       medida_control: t(
-        'Small parts cylinder test (ASTM F963 / EN 71-1). Warning on label: "WARNING: CHOKING HAZARD — Small parts. Not for children under 3 years." Age restriction on packaging.',
-        'Ensayo de cilindro de partes pequeñas (ASTM F963 / EN 71-1). Advertencia en etiqueta: "ADVERTENCIA: PELIGRO DE ASFIXIA — Partes pequeñas. No apto para menores de 3 años." Restricción de edad en empaque.',
+        'Small parts cylinder test (ASTM F963 §4.6 / EN 71-1 / 16 CFR 1501). Warning on label: "WARNING: CHOKING HAZARD — Small parts. Not for children under 3 years." For ages 3–6 yr with small parts, choking warning per 16 CFR 1500.19. Age restriction on packaging. Note: balloons, books, crayons, CDs, modeling clay and paint sets are exempt (16 CFR 1501.3).',
+        'Ensayo de cilindro de partes pequeñas (ASTM F963 §4.6 / EN 71-1 / 16 CFR 1501). Advertencia en etiqueta: "ADVERTENCIA: PELIGRO DE ASFIXIA — Partes pequeñas. No apto para menores de 3 años." Para edades 3–6 años con partes pequeñas, advertencia de asfixia por 16 CFR 1500.19. Restricción de edad en empaque. Nota: globos, libros, crayones, CD, plastilina y pinturas están exentos (16 CFR 1501.3).',
         'Ensaio do cilindro de partes pequenas. Advertência no rótulo: "ATENÇÃO: RISCO DE ASFIXIA — Partes pequenas. Não indicado para crianças menores de 3 anos."'),
       nivel_residual: lo,
     });

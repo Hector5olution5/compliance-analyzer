@@ -200,6 +200,19 @@ Límites por tipo de juguete (ensayo per métodos 8.20):
 
 Incorporado al texto de riesgo "ruido" (`medida_control`, EN/ES) en `app.js` y a `USA.juguetes` en `compliance-data.js`. Antes el reporte solo usaba los límites de EN 71-1 (85 dB(A) / 138 dB(C)) también para USA. **§4.5 queda cubierta al 100%.**
 
+### ASTM F963-23 §4.6 — partes pequeñas (asfixia) (2026-06-10)
+
+Dictado por el usuario. Dos tramos de edad:
+- **< 36 meses** → 16 CFR 1501: ninguna parte (ni componentes liberados/fragmentos: rebabas, astillas de plástico, espuma, virutas) debe caber íntegra **sin comprimir** en el cilindro de partes pequeñas (Fig. 3, Ø 31.7 mm × prof. máx. 57.1 mm). Excluidos del concepto "fragmento": papel, tela, hilo, pelusa, elástico, cordón. Aplica antes y después de los ensayos de uso y abuso (Sección 8).
+- **3–6 años (36–72 meses)** → 16 CFR 1500.19: si incluye partes pequeñas, requiere advertencia de asfixia (etiquetado §5.11.2). Excepción: troquelados de papel y similares.
+
+**Artículos exentos (§4.6.1.2 / 16 CFR 1501.3):** globos, libros y artículos de papel, materiales de escritura (crayones, gises, lápices, plumas), discos/CD, plastilina y similares, pinturas de dedos/acuarelas y sets de pintura.
+
+**§4.6.1.3:** juguetes para ensamblar por adulto con partes pequeñas peligrosas en estado desarmado → etiquetar per §5.8.
+**§4.6.2 (boca):** juguetes activados por boca (silbatos/matracas) no deben liberar objetos que quepan en el cilindro (ensayo 8.13.1). Lanzaproyectiles soplados (§4.6.2.2) requieren mecanismo permanente anti-retroceso y boquilla no removible — **aplica a TODAS las edades** (Nota 14). **§4.6.2.3:** objetos dentro de juguetes inflables no deben liberarse al inflar/desinflar.
+
+Incorporado a `USA.juguetes` y reforzado el texto de riesgo "partes pequeñas" (`medida_control`, EN/ES) en `app.js` con el tramo 3–6 años y la lista de exentos.
+
 ---
 
 ## Perú — RM 517-2008-MINSA / Reglamento Ley 28376 (2026-06-10)

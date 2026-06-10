@@ -181,7 +181,8 @@ const MARKETS = {
       'ASTM F963-23 §4.5.1 — Sound limits by toy type: close-to-the-ear LAeq 65 / LCpeak 110 dB · hand-held, tabletop/floor/crib LAeq 85 / LCpeak 115 dB · user-propelled push-pull LAFmax 94 / LCpeak 115 dB · rattles LCpeak 115 dB · explosive action (percussion caps) LCpeak 125 dB',
       '16 CFR Part 1303 — Ban on lead-containing paint (max 90 ppm)',
       '16 CFR Part 1307 — Prohibition of phthalates in children\'s toys',
-      '16 CFR Part 1501 — Small parts identification for children under 3 years',
+      'ASTM F963-23 §4.6 / 16 CFR 1501 — Partes pequeñas (asfixia): para menores de 36 meses ninguna parte (ni componentes liberados/fragmentos) debe caber íntegra en el cilindro (Ø 31.7 mm × prof. máx. 57.1 mm, Fig. 3). Para 3–6 años (36–72 meses) con partes pequeñas: advertencia de asfixia por 16 CFR 1500.19 (etiquetado §5.11.2). Exentos (16 CFR 1501.3): globos, libros/papel, crayones/gises/lápices/plumas, CD/discos, plastilina, pinturas de dedos/acuarelas',
+      'ASTM F963-23 §4.6.2 — Juguetes activados por boca (silbatos/matracas) no deben liberar objetos que quepan en el cilindro; lanzaproyectiles soplados requieren mecanismo permanente anti-retroceso del proyectil y boquilla no removible — aplica a TODAS las edades (Nota 14)',
       'CPSIA Sec. 103 — Tracking labels on children\'s products',
     ],
     electrica: [
