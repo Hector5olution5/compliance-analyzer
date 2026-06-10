@@ -341,6 +341,21 @@ Verificado directamente contra los PDF (`Normas/UE/CELEX_32011R0010_ES_TXT.pdf` 
 - **Declaración de Conformidad MOCA (Reg. 10/2011 Art. 15 + Anexo IV)** a `UE.moca_base` — documentación escrita en todas las fases salvo venta al por menor; distinta de la DoC del juguete. Contenido Anexo IV (9 puntos): identidad operador/fabricante, identidad del material, fecha, confirmación de conformidad con Reg. 10/2011 y 1935/2004, info de sustancias restringidas (Anexos I/II), especificaciones de uso (tipo de alimento, tiempo/temperatura, relación superficie/volumen); se renueva al cambiar composición/producción.
 - Condiciones de ensayo de migración (Anexo V, Cuadros 1 y 2: tiempo y temperatura según peores condiciones previsibles de uso) y precisión del OML/SML/CMR a las líneas de ensayo de `UE.ensayos_moca`.
 
+### PPWR — Reg. (UE) 2025/40 verificado contra el texto oficial (2026-06-10)
+
+Verificado directamente contra `Normas/UE/2025 0040 ENG...pdf` (124 pág., vía pdftotext). **Resultado excepcional: el bloque `UE.envases` NO tenía ningún error** — todos los artículos, fechas y valores coinciden (a diferencia de EN 71/ASTM/MOCA). Confirmado:
+- **Art. 5(4)** metales pesados (Pb+Cd+Hg+Cr VI) **≤ 100 mg/kg** ✓
+- **Art. 5(5)** PFAS desde **12 ago 2026**: **25 ppb** cualquier PFAS / **250 ppb** suma (polimérico excluido de ambos) / **50 ppm** total incl. polimérico ✓
+- **Art. 6** reciclabilidad: grados A/B/C (Tabla 3 Anexo II) no comercializables salvo A/B/C desde **1 ene 2030**; solo **A o B desde 1 ene 2038** ✓
+- **Art. 7** contenido reciclado mínimo desde **1 ene 2030** (más metas 2040) ✓
+- **Art. 10** minimización (peso/volumen al mínimo) desde **1 ene 2030**; Anexo IV criterios; sin dobles fondos/paredes ✓
+- **Art. 24** "excessive packaging": ratio máx. de espacio vacío **50%** en grouped/transport/e-commerce ✓
+- **Art. 12** etiqueta armonizada de composición de material (sorting del consumidor) desde **12 ago 2028** ✓
+- **Art. 38** evaluación de conformidad + **Annex VII** documentación técnica; **Art. 39** DoC (modelo **Annex VIII**, cubre Arts. 5–12) ✓
+- Deroga Dir. 94/62/CE; en vigor 11 feb 2025 (20 días tras OJ 22.1.2025); **aplica desde 12 ago 2026** ✓
+
+Solo se añadieron refinamientos de precisión a `UE.envases` (PFAS→Art. 5(5) con exclusión de polimérico; ratio 50% explícito; DoC cubre Arts. 5–12). Sin correcciones de fondo.
+
 ---
 
 ## Perú — RM 517-2008-MINSA / Reglamento Ley 28376 (2026-06-10)

@@ -91,12 +91,12 @@ const MARKETS = {
     quimica_elec: ['RoHS 2011/65/EU + 2015/863/EU — Restriction of hazardous substances in electrical equipment'],
     envases: [
       'Regulation (EU) 2025/40 (PPWR) — Packaging and Packaging Waste Regulation — repeals Directive 94/62/EC, in force 11 Feb 2025, applies from 12 Aug 2026',
-      'PFAS restriction in food-contact packaging (Art. 5) — limits 25 ppb any single PFAS / 250 ppb sum / 50 ppm total PFAS — from 12 Aug 2026 (no grandfathering)',
-      'Sum of heavy metals (Pb + Cd + Hg + Cr VI) in packaging ≤ 100 mg/kg (Art. 5(4))',
+      'PFAS restriction in food-contact packaging (Art. 5(5)) — from 12 Aug 2026: ≤ 25 ppb any single PFAS / ≤ 250 ppb sum of PFAS (polymeric PFAS excluded from these two) / ≤ 50 ppm total PFAS incl. polymeric (no grandfathering)',
+      'Sum of heavy metals (Pb + Cd + Hg + Cr VI) in packaging ≤ 100 mg/kg (Art. 5(4)) — without prejudice to REACH Annex XVII and Reg. (EC) 1935/2004',
       'Recyclability — design for recycling; grades A/B/C from 1 Jan 2030, only A/B permitted from 2038 (Art. 6 / Annex II)',
       'Minimum recycled content in plastic packaging — targets phased in from 1 Jan 2030 (Art. 7)',
-      'Packaging minimisation — weight/volume reduced to the minimum necessary from 1 Jan 2030 (Art. 10); empty-space ratio for grouped/transport/e-commerce packaging (Art. 24)',
-      'EU declaration of conformity (Art. 39, model Annex VIII) + conformity assessment and technical documentation (Art. 38 / Annex VII)',
+      'Packaging minimisation — weight/volume reduced to the minimum necessary from 1 Jan 2030 (Art. 10, Annex IV performance criteria; no false bottoms/double walls/unnecessary layers); max empty-space ratio 50% for grouped/transport/e-commerce packaging (Art. 24); sales packaging empty space minimised from 12 Feb 2028',
+      'EU declaration of conformity (Art. 39, model Annex VIII; covers compliance with Arts. 5–12) + conformity assessment (Art. 38) and technical documentation (Annex VII)',
     ],
     etiquetado_base: [
       'FCM labelling (Reg. (EC) 1935/2004 Art. 15) on parts with direct food contact: the words "for food contact", a specific use indication (e.g. coffee machine, soup spoon) OR the fork-and-glass symbol (Annex II) — not required for articles clearly intended for food contact by their nature (Art. 15.2); plus special-use instructions if needed; must be conspicuous, legible and indelible',
