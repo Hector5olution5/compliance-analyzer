@@ -178,7 +178,7 @@ const MARKETS = {
       'CPSIA 2008 — Consumer Product Safety Improvement Act',
       'ASTM F963-23 (16 CFR Part 1250) — Standard Consumer Safety Specification for Toy Safety',
       'ASTM F963-23 §4.3.5 Table 1 — Max soluble migrated elements (ppm): Sb 60 · As 25 · Ba 1000 · Cd 75 · Cr 60 · Pb 90 · Hg 60 · Se 500 (general surfaces/substrates). Table 2 (modeling clay): Ba 250 · Cd 50 · Cr 25 · Hg 25',
-      'ASTM F963-23 §4.5.1 — Sound limits by toy type: close-to-the-ear LAeq 65 / LCpeak 110 dB · hand-held, tabletop/floor/crib LAeq 85 / LCpeak 115 dB · user-propelled push-pull LAFmax 94 / LCpeak 115 dB · rattles LCpeak 115 dB',
+      'ASTM F963-23 §4.5.1 — Sound limits by toy type: close-to-the-ear LAeq 65 / LCpeak 110 dB · hand-held, tabletop/floor/crib LAeq 85 / LCpeak 115 dB · user-propelled push-pull LAFmax 94 / LCpeak 115 dB · rattles LCpeak 115 dB · explosive action (percussion caps) LCpeak 125 dB',
       '16 CFR Part 1303 — Ban on lead-containing paint (max 90 ppm)',
       '16 CFR Part 1307 — Prohibition of phthalates in children\'s toys',
       '16 CFR Part 1501 — Small parts identification for children under 3 years',

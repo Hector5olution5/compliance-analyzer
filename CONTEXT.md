@@ -196,10 +196,9 @@ Límites por tipo de juguete (ensayo per métodos 8.20):
 | .5 | Tabletop/floor/crib propulsado por el usuario (movimiento traslacional) | LAFmax **85** dB | **115** dB |
 | .6 | Push/pull (empujar-jalar): estac./autoprop. | LAeq **85** dB | **115** dB |
 | .6 | Push/pull propulsado por el usuario (traslacional) | LAFmax **94** dB | **115** dB |
+| .7 | Acción explosiva (fulminantes / percussion caps) | — | **125** dB |
 
-Sonidos por acción explosiva (p. ej. fulminantes/percussion caps) se rigen por §4.5.1.7 (valor aún no dictado). Incorporado al texto de riesgo "ruido" (`medida_control`, EN/ES) en `app.js` y a `USA.juguetes` en `compliance-data.js`. Antes el reporte solo usaba los límites de EN 71-1 (85 dB(A) / 138 dB(C)) también para USA.
-
-**Pendiente (menor):** §4.5.1.7 — límite LCpeak para sonidos de acción explosiva (fulminantes).
+Incorporado al texto de riesgo "ruido" (`medida_control`, EN/ES) en `app.js` y a `USA.juguetes` en `compliance-data.js`. Antes el reporte solo usaba los límites de EN 71-1 (85 dB(A) / 138 dB(C)) también para USA. **§4.5 queda cubierta al 100%.**
 
 ---
 
