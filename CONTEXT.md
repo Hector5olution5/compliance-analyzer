@@ -138,6 +138,24 @@ Correcciones aplicadas (commit posterior): los refs originales citaban "Anexo II
 
 ---
 
+## Auditoría normativa UE — REACH / EN 71 / Reg. 10/2011 (2026-06-10)
+
+Verificado contra EUR-Lex / Comisión Europea / SGS / Eurofins. Correcciones aplicadas:
+
+| Tema | Antes | Corregido |
+|---|---|---|
+| **BPA** | Reg. (UE) 2018/213 — SML 0.05 mg/kg | **Reg. (UE) 2024/3190** prohíbe BPA en MOCA (deroga 2018/213; en vigor 20-ene-2025, transición a 20-jul-2026). Policarbonato no permitido para contacto alimentario. Actualizado UE + Internacional + nota AU |
+| **SML estireno** | Annex I — SML 0.045 mg/kg (inventado) | Estireno **sin SML**; solo límite organoléptico Art. 3 Reg. 1935/2004 |
+| **EN 71-9** | citado como vigente ("EN 71-9:2021") | **Retirado**; años 2021/2022 inventados eliminados. Ftalatos → REACH Anexo XVII (51/52); métodos EN 71-11 |
+| **EN 71-1** | 2014+A1:2018 | Nota: EN 71-1:2026 publicado ene-2026 (verificar listado DOUE antes de cambiar la referencia armonizada) |
+| **Dir. 2009/48/CE** | — | Nota: reemplazada por Reglamento Seguridad de Juguetes (UE) 2025/2509 |
+| **Dir. 84/500/CEE** | "Glass in contact with food" | Es de **cerámica**; el vidrio se evalúa bajo el marco 1935/2004 (tests Pb/Cd aplicados a vidrio decorado por analogía) |
+| **REACH** | "Restriction of SVHC, Annex XVII" (mezcla) | Restricciones Anexo XVII + Lista de Candidatas SVHC (Art. 59) por separado |
+
+**Verificado correcto (sin cambios):** OML 10 mg/dm² o 60 mg/kg (Art. 12) · acetaldehído 6 mg/kg · VCM <0.01 mg/kg · ftalatos máx. 0.1% · EN 71-2:2020 · EN 71-3:2019+A1:2021 · 1935/2004 (Art. 3/15) · 2023/2006 GMP · cilindro Ø31.7×57.1 mm · cuerdas >220 mm.
+
+---
+
 ## Bugs corregidos en esta sesión (2026-06-01)
 
 | Commit | Bug | Causa | Fix |

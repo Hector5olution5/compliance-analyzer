@@ -2148,9 +2148,9 @@ function getRisks(formData, L) {
   if (tienePlastico && (esJuguete || esNinos)) {
     risks.push({
       riesgo: t(
-        '[EN 71-9:2021 / EN 71-11:2022 / 16 CFR Part 1307 (CPSIA)] Presence of restricted organic substances and phthalates in plastic materials — DEHP, DBP, BBP, DINP, DIDP (max 0.1% each)',
-        '[EN 71-9:2021 / EN 71-11:2022 / 16 CFR Part 1307 (CPSIA)] Presencia de sustancias orgánicas restringidas y ftalatos en materiales plásticos — DEHP, DBP, BBP, DINP, DIDP (máx. 0.1% c/u)',
-        '[EN 71-9 / EN 71-11 / ANVISA RDC 56/2012] Presença de substâncias orgânicas restritas e ftalatos em materiais plásticos — DEHP, DBP, BBP, DINP (máx. 0,1% cada)'),
+        '[REACH Annex XVII entries 51/52 / EN 71-11 test methods / 16 CFR Part 1307 (CPSIA)] Presence of restricted organic substances and phthalates in plastic materials — DEHP, DBP, BBP, DINP, DIDP (max 0.1% each)',
+        '[REACH Annex XVII entries 51/52 / EN 71-11 test methods / 16 CFR Part 1307 (CPSIA)] Presencia de sustancias orgánicas restringidas y ftalatos en materiales plásticos — DEHP, DBP, BBP, DINP, DIDP (máx. 0.1% c/u)',
+        '[REACH Anexo XVII (51/52) / EN 71-11 / ANVISA RDC 56/2012] Presença de substâncias orgânicas restritas e ftalatos em materiais plásticos — DEHP, DBP, BBP, DINP (máx. 0,1% cada)'),
       nivel_inicial: med,
       medida_control: t(
         'GC-MS analysis for phthalates and restricted organic compounds. Use of phthalate-free formulations. Supplier declaration and material certificate.',
