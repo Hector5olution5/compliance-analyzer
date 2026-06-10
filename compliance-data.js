@@ -76,7 +76,7 @@ const MARKETS = {
       'Directive 2009/48/EC — Safety of toys (being replaced by Toy Safety Regulation (EU) 2025/2509)',
       'EN 71-1:2014+A1:2018 — Physical and mechanical properties (harmonised reference; EN 71-1:2026 published Jan 2026 — verify OJ listing before citing)',
       'EN 71-2:2020 — Flammability',
-      'EN 71-3:2019+A1:2021 — Migration of certain elements',
+      'EN 71-3:2019+A2:2024 — Migration of certain elements (19 elements; limits by material Category I dry/brittle/powder/pliable, II liquid/sticky, III scraped-off)',
       'EN 71-9 (withdrawn) — Organic chemical compounds; requirements now via Toy Safety Dir. Appendix C + REACH Annex XVII, methods EN 71-10/-11',
     ],
     electrica: [
@@ -113,7 +113,7 @@ const MARKETS = {
       abs: [
         { ensayo: 'Overall migration (OML) — simulants D1, D2, E per intended use', norma: 'Reg. (EU) 10/2011, Art. 12 — Limit 10 mg/dm² or 60 mg/kg', frecuencia: 'Per batch / change of resin supplier' },
         { ensayo: 'Specific migration of ABS additives and monomers (SML)', norma: 'Reg. (EU) 10/2011, Annexes I and II — Individual limits per substance', frecuencia: 'Per formulation / change of composition' },
-        { ensayo: 'Migration of heavy metals in accessible parts (Pb, Cd, Cr VI, Ba, Co, Ni)', norma: 'EN 71-3:2019+A1:2021 / EN 13130 series', frecuencia: 'Per production batch' },
+        { ensayo: 'Migration of 19 elements in accessible parts (Al, Sb, As, Ba, B, Cd, Cr III, Cr VI, Co, Cu, Pb, Mn, Hg, Ni, Se, Sr, Sn, organic Sn, Zn)', norma: 'EN 71-3:2019+A2:2024 — Cat. III limits e.g. Pb 23 / Cd 17 / Cr VI 0,053 / As 47 mg/kg (Cat. I/II stricter) / EN 13130 series', frecuencia: 'Per production batch' },
         { ensayo: 'Organoleptic test — odour and taste verification', norma: 'Reg. (EC) 1935/2004, Art. 3 — Must not alter food organoleptically', frecuencia: 'Per formulation' },
       ],
       pp: [
@@ -157,7 +157,7 @@ const MARKETS = {
         { ensayo: 'Aluminium migration in food simulants', norma: 'CoE CM/Res(2013)9 — Aluminium alloys in food contact | EU Reg. 10/2011 reference', frecuencia: 'Per supplier / alloy change' },
       ],
     },
-    normas_seg: { mecanico: 'EN 71-1:2014+A1:2018', inflamabilidad: 'EN 71-2:2020', elementos: 'EN 71-3:2019+A1:2021', bordes: 'EN 71-1:2014+A1:2018' },
+    normas_seg: { mecanico: 'EN 71-1:2014+A1:2018', inflamabilidad: 'EN 71-2:2020', elementos: 'EN 71-3:2019+A2:2024', bordes: 'EN 71-1:2014+A1:2018' },
   },
 
   USA: {
@@ -555,7 +555,7 @@ const MARKETS = {
         { ensayo: 'Total lead in substrate (children\'s product)', norma: 'CPSIA Sec. 101 / CPSC-CH-E1002-08 — Max 100 ppm (USA)', frecuencia: 'Per production batch' },
         { ensayo: 'Lead in surface coatings / paint', norma: '16 CFR 1303 / EN 71-3 — Max 90 ppm paint / migration limits EU', frecuencia: 'Per paint formulation' },
         { ensayo: 'Restricted phthalates (DEHP, DBP, BBP, DINP, DPENP, DHEXP, DCHP, DIBP)', norma: '16 CFR Part 1307 — Max 0.1% per phthalate (USA/EU)', frecuencia: 'Per plastic formulation' },
-        { ensayo: 'Heavy metals migration in accessible parts (Pb, Cd, Cr, Ba, Sb, As, Hg, Se)', norma: 'EN 71-3:2019+A1:2021 (EU) / AS/NZS ISO 8124.3 (AU) / ASTM F963-23 (USA)', frecuencia: 'Per pigment formulation' },
+        { ensayo: 'Heavy metals migration in accessible parts (EU: 19 elements incl. Al, B, Co, Cu, Mn, Ni, Sr, Sn, organic Sn; AU/8124.3: 8 elements Sb, As, Ba, Cd, Cr, Pb, Hg, Se)', norma: 'EN 71-3:2019+A2:2024 (EU) / AS/NZS ISO 8124.3 (AU) / ASTM F963-23 (USA)', frecuencia: 'Per pigment formulation' },
         { ensayo: 'Organoleptic test — odour and taste', norma: 'Reg. (EC) 1935/2004 Art. 3', frecuencia: 'Per formulation' },
       ],
       pp: [
@@ -565,7 +565,7 @@ const MARKETS = {
       silicona: [{ ensayo: 'Food-grade silicone migration in food simulants', norma: 'EU Reg. 10/2011 / 21 CFR 177.2600 / FSANZ', frecuencia: 'Per supplier / formulation' }],
       acero: [{ ensayo: 'Nickel (Ni) and chromium (Cr) migration', norma: 'EN 1811:2023 / NSF/ANSI 51 (no specific 21 CFR limit) / FSANZ', frecuencia: 'Per supplier' }],
     },
-    normas_seg: { mecanico: 'EN 71-1:2014+A1:2018 / ASTM F963-23 / AS/NZS ISO 8124.1', inflamabilidad: 'EN 71-2:2020 / ASTM F963-23 Sec. 4.2 / AS/NZS ISO 8124.2', elementos: 'EN 71-3:2019+A1:2021 / ASTM F963-23 / AS/NZS ISO 8124.3', bordes: 'EN 71-1 / ASTM F963-23 / AS/NZS ISO 8124.1' },
+    normas_seg: { mecanico: 'EN 71-1:2014+A1:2018 / ASTM F963-23 / AS/NZS ISO 8124.1', inflamabilidad: 'EN 71-2:2020 / ASTM F963-23 Sec. 4.2 / AS/NZS ISO 8124.2', elementos: 'EN 71-3:2019+A2:2024 / ASTM F963-23 / AS/NZS ISO 8124.3', bordes: 'EN 71-1 / ASTM F963-23 / AS/NZS ISO 8124.1' },
   },
 
   LATAM: {

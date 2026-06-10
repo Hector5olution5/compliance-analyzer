@@ -156,6 +156,22 @@ Verificado contra EUR-Lex / Comisión Europea / SGS / Eurofins. Correcciones apl
 
 ---
 
+## Verificación contra normas oficiales adquiridas — EN 71 (2026-06-10)
+
+El usuario (PING SOLUTIONS) colocó en `Normas/` (carpeta **git-ignored** por copyright) las normas oficiales adquiridas: UNE-EN 71-1/2/3, Reg. 10/2011 (EN+ES), Directiva 2009/48/CE, Reg. 1272/2008, Reg. 1935/2004, Guidance doc 20, Reese's Law, 16 CFR 1263, UL 4200A, + RTAC002801 (Brasil), RM517-2008-MINSA (Perú).
+
+Verificado contra los PDF oficiales:
+- **EN 71-1**: versión EU = **EN 71-1:2014+A1:2018** (UNE adopción 2015+A1:2019) → app ya correcta ✅
+- **EN 71-2**: versión EU = **EN 71-2:2020** (UNE 2021) → app ya correcta ✅
+- **EN 71-3**: app citaba `+A1:2021` (obsoleta). Vigente = **EN 71-3:2019+A2:2024** (A2 aprobada 2024-10-31, anula A1:2021). **Corregido** (8 ocurrencias).
+- **EN 71-3 — 19 elementos** (la app listaba solo 8): Al, Sb, As, Ba, B, Cd, Cr(III), Cr(VI), Co, Cu, Pb, Mn, Hg, Ni, Se, Sr, Sn, estaño orgánico, Zn. Límites por **Categoría I (seco/quebradizo/polvo/maleable) / II (líquido/pegajoso) / III (raspado)** en mg/kg (Tabla 2). Ej. Pb: Cat I 2,0 / II 0,5 / III 23. Cr(VI): 0,02 / 0,005 / 0,053. Cd: 1,3 / 0,3 / 17.
+- **Bug corregido en app.js**: describía "categoría III (secos, quebradizos, en polvo)" — eso es **Cat I**; Cat III = materiales **raspados/recubrimientos**. Límite Pb citado (2 mg/kg) era el de Cat I.
+- **Importante**: las listas de **8 elementos** en contextos **ISO 8124-3 / NM 300-3 / NTC 4894-3** (Australia, LATAM, México) son **correctas** — ISO 8124-3 usa 8 elementos; solo EN 71-3 se amplió a 19. No se tocaron.
+
+**Pendiente posible:** profundizar con los textos de Reg. 10/2011, Directiva 2009/48/CE y RTAC002801 (Brasil) / RM 517-2008-MINSA (Perú) si se desea más detalle.
+
+---
+
 ## Auditoría normativa USA / Australia (2026-06-10)
 
 Verificado contra eCFR / Cornell LII / CPSC. Correcciones:
