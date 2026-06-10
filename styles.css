@@ -704,6 +704,9 @@ textarea { resize: vertical; }
 }
 
 /* ── Preview Styles ── */
+.exp-market-banner { margin: 32px 0 12px; padding: 10px 16px; background: var(--navy); color: #fff; font-weight: 700; font-size: 15px; letter-spacing: .5px; border-radius: 6px; }
+.exp-market-banner:first-child { margin-top: 0; }
+.exp-market-sep { margin: 40px 0; border: none; border-top: 2px dashed var(--gray-100); }
 .exp-cover { text-align: center; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2px solid var(--gray-100); }
 .exp-title { font-size: 22px; font-weight: 800; color: var(--navy); text-transform: uppercase; letter-spacing: .5px; }
 .exp-subtitle { font-size: 16px; font-weight: 700; color: var(--blue); margin-top: 6px; }

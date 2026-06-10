@@ -1931,7 +1931,11 @@ function updateProgress(done, total, currentKey) {
 }
 
 // ── Generate For Market ───────────────────────────────────────────────────────
+// "Internacional" se desglosa en un solo archivo con 3 secciones: UE, USA y Australia
+const INTL_SUBMARKETS = ['UE', 'USA', 'Australia'];
+
 async function generateForMarket(formData, mercadoKey) {
+  if (mercadoKey === 'Internacional') return generateInternationalReport(formData);
   const cfg = MARKETS[mercadoKey];
   const L = LABELS[cfg.idioma];
   const aiData = await callClaudeForMarket(formData, cfg, L);
@@ -1945,6 +1949,31 @@ async function generateForMarket(formData, mercadoKey) {
     docxError = e.message;
   }
   return { blob, html, aiData, docxError };
+}
+
+// Genera UE + USA + Australia y los combina en un solo expediente (3 secciones).
+// El texto generado por IA (descripción, usos, no-conformidades) es a nivel producto
+// e idéntico para los 3 mercados (todos en inglés) → 1 sola llamada, reutilizada.
+// Las diferencias regulatorias por mercado (Sec. 3/5/7) salen de los datos, sin IA.
+async function generateInternationalReport(formData) {
+  const baseCfg = MARKETS.Internacional;
+  const aiData = await callClaudeForMarket(formData, baseCfg, LABELS[baseCfg.idioma]);
+  const parts = INTL_SUBMARKETS.map(key => ({
+    mercadoKey: key, cfg: MARKETS[key], L: LABELS[MARKETS[key].idioma], aiData,
+  }));
+  const banner = cfg => `<div class="exp-market-banner">${cfg.flag} ${(cfg.idioma === 'en' && cfg.nombre_en) ? cfg.nombre_en : cfg.nombre}</div>`;
+  const html = parts
+    .map(pt => banner(pt.cfg) + buildHTMLPreview(formData, pt.mercadoKey, pt.cfg, pt.L, pt.aiData))
+    .join('\n<hr class="exp-market-sep">\n');
+  let blob = null;
+  let docxError = null;
+  try {
+    blob = await buildDocxCombined(formData, parts);
+  } catch (e) {
+    console.warn('Word generation failed (Internacional):', e.message);
+    docxError = e.message;
+  }
+  return { blob, html, aiData: parts[0].aiData, docxError };
 }
 
 // ── Claude API ────────────────────────────────────────────────────────────────
@@ -2888,12 +2917,9 @@ function loadDocxFromCDN() {
   });
 }
 
-async function buildDocx(formData, mercadoKey, cfg, L, aiData) {
-  if (typeof docx === 'undefined') {
-    await loadDocxFromCDN();
-  }
-  const { Document, Paragraph, TextRun, Table, TableRow, TableCell,
-          AlignmentType, WidthType, ShadingType, BorderStyle, Packer } = docx;
+function buildDocxSection(formData, mercadoKey, cfg, L, aiData) {
+  const { Paragraph, TextRun, Table, TableRow, TableCell,
+          AlignmentType, WidthType, ShadingType, BorderStyle } = docx;
 
   const risks = getRisks(formData, L);
   const ensayosMoca = getEnsayosMoca(formData, cfg);
@@ -2904,6 +2930,8 @@ async function buildDocx(formData, mercadoKey, cfg, L, aiData) {
   const docsChecklist = DOCS_CHECKLIST[cfg.idioma].map(([doc, inc]) => [doc.replace('{DOC}', cfg.doc), inc]);
   const fecha = formData.fecha;
   const version = formData.version;
+  const pd = L.por_definir;
+  const mktName = (cfg.idioma === 'en' && cfg.nombre_en) ? cfg.nombre_en : cfg.nombre;
 
   const BLUE = '185FA5'; const NAVY = '0D1B2A'; const GRAY = '888888'; const WHITE = 'FFFFFF';
   const RED_BG = 'FCEBEB'; const AMB_BG = 'FAEEDA'; const GRN_BG = 'EAF3DE'; const HDR_BG = '0D1B2A';
@@ -2999,8 +3027,22 @@ async function buildDocx(formData, mercadoKey, cfg, L, aiData) {
     ...[L.firma_nombre,L.firma_cargo,L.firma_empresa,`${L.firma_fecha} ${fecha}`,L.firma_firma].map(f=>new Paragraph({children:[new TextRun({text:f,font:'Calibri',size:20,bold:true}),new TextRun({text:'  ___________________________',font:'Calibri',size:20,color:GRAY})],spacing:{before:100,after:40}})),
   ];
 
-  const document = new Document({ sections: [{ properties: { page: { margin: { top: 1134, bottom: 1134, left: 1800, right: 1800 } } }, children }] });
-  return Packer.toBlob(document);
+  return { properties: { page: { margin: { top: 1134, bottom: 1134, left: 1800, right: 1800 } } }, children };
+}
+
+async function buildDocx(formData, mercadoKey, cfg, L, aiData) {
+  if (typeof docx === 'undefined') await loadDocxFromCDN();
+  const { Document, Packer } = docx;
+  const section = buildDocxSection(formData, mercadoKey, cfg, L, aiData);
+  return Packer.toBlob(new Document({ sections: [section] }));
+}
+
+// Combine several markets into a single .docx file — one section (page break) per market
+async function buildDocxCombined(formData, parts) {
+  if (typeof docx === 'undefined') await loadDocxFromCDN();
+  const { Document, Packer } = docx;
+  const sections = parts.map(pt => buildDocxSection(formData, pt.mercadoKey, pt.cfg, pt.L, pt.aiData));
+  return Packer.toBlob(new Document({ sections }));
 }
 
 // ── Render Results ────────────────────────────────────────────────────────────
