@@ -249,6 +249,20 @@ Datos incorporados (a `USA.juguetes` y a los textos de riesgo EN/ES de atrapamie
 
 Pendiente del bloque dictado: §4.15 (estabilidad de ride-on/asientos, ≤60 meses) — quedó a medias en el dictado (§4.15.2 sin completar).
 
+### ASTM F963-23 §4.25 — juguetes a pilas/baterías (2026-06-10)
+
+Dictado por el usuario. Aplica a recargables y no recargables; ensayo con pilas alcalinas frescas según ANSI C18.1 / IEC 60086-2.
+- **§4.25.1** marcado de polaridad **(+/−)** en compartimento; tamaño/voltaje en instrucciones (pilas botón/moneda exentas del marcado si no es práctico → va en instrucciones).
+- **§4.25.2** máx. **24 V nominal CC** entre dos puntos eléctricos accesibles.
+- **§4.25.3** pilas no recargables no deben poder cargarse (excepto circuitos con 1-2 pilas no recargables como única fuente; circuitos solo de pila botón exentos).
+- **§4.25.4 accesibilidad:** para **<3 años** y para pilas que **quepan en el cilindro de partes pequeñas** (Fig. 3) → no accesibles **sin herramienta doméstica común**; sujetador debe quedar unido (8.5–8.10). Alternativa: tornillo especial (Torx/Hex) con herramienta incluida + instrucciones §6.9.
+- **§4.25.5** no mezclar tipos/capacidades de pila en un mismo circuito.
+- **§4.25.6** temperatura superficial de pila **≤ 71 °C** (uso normal; + abuso para ≤96 meses; motor en bloqueo per 8.17).
+- **§4.25.9 ride-on a batería (≥8 A):** conmutadores/conectores **UL 94 V-0** o hilo incandescente **750 °C**; protección de circuito reemplazable **NRTL** (29 CFR 1910); cableado de motor con protección de cortocircuito; cargadores certificados UL/CSA.
+- **§4.25.10 secundarias Li-ion/Li-po:** celdas con atestación a **ANSI C18.2M Parte 2 / UL 1642 / IEC 62133**; baterías a ANSI C18.2M / **UL 2054** / IEC 62133; protección de cortocircuito **incorporada en la batería**; carga/descarga superficie accesible **≤ 60 °C plástico / 50 °C metal-vidrio-cerámica**, inaccesible Li-ion **≤ 71 °C**; sin explosión/fuego; subida de temp. en uso normal ≤ 25 °C metal / 30 °C cerámica-vidrio / 35 °C madera-plástico (§4.25.10.6).
+
+Incorporado al texto de riesgo "pilas/batería" (`medida_control`, EN/ES) y a `USA.juguetes` (bullets §4.25, §4.25.9, §4.25.10). La pila botón (Reese's Law / 16 CFR 1263 / UL 4200A) ya estaba cubierta en bloque de riesgo aparte.
+
 ---
 
 ## Perú — RM 517-2008-MINSA / Reglamento Ley 28376 (2026-06-10)
