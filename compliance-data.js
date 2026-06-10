@@ -177,6 +177,7 @@ const MARKETS = {
     juguetes: [
       'CPSIA 2008 — Consumer Product Safety Improvement Act',
       'ASTM F963-23 (16 CFR Part 1250) — Standard Consumer Safety Specification for Toy Safety',
+      'ASTM F963-23 §4.3.5 Table 1 — Max soluble migrated elements (ppm): Sb 60 · As 25 · Ba 1000 · Cd 75 · Cr 60 · Pb 90 · Hg 60 · Se 500 (general surfaces/substrates). Table 2 (modeling clay): Ba 250 · Cd 50 · Cr 25 · Hg 25',
       '16 CFR Part 1303 — Ban on lead-containing paint (max 90 ppm)',
       '16 CFR Part 1307 — Prohibition of phthalates in children\'s toys',
       '16 CFR Part 1501 — Small parts identification for children under 3 years',
@@ -234,7 +235,7 @@ const MARKETS = {
       vidrio: [{ ensayo: 'Lead (Pb) and cadmium (Cd) leaching from glass / decorated surfaces', norma: 'FDA / ASTM C738 & C927 — Lead and cadmium extracted from glazed ceramics and glass', frecuencia: 'Per supplier / decoration change' }],
       aluminio: [{ ensayo: 'Aluminium migration in food simulants', norma: '21 CFR 177 series / FDA CFSAN guidance — Aluminium in food contact materials', frecuencia: 'Per supplier / alloy change' }],
     },
-    normas_seg: { mecanico: 'ASTM F963-23', inflamabilidad: 'ASTM F963-23 Sec. 4.2', elementos: 'ASTM F963-23 / CPSC-CH-E1003-09', bordes: 'ASTM F963-23' },
+    normas_seg: { mecanico: 'ASTM F963-23', inflamabilidad: 'ASTM F963-23 Sec. 4.2', elementos: 'ASTM F963-23 §4.3.5 Table 1 (Pb 90 / Cd 75 / Cr 60 / Ba 1000 / Sb 60 / As 25 / Hg 60 / Se 500 ppm) / CPSC-CH-E1003-09', bordes: 'ASTM F963-23' },
   },
 
   Australia: {
@@ -561,7 +562,7 @@ const MARKETS = {
         { ensayo: 'Total lead in substrate (children\'s product)', norma: 'CPSIA Sec. 101 / CPSC-CH-E1002-08 — Max 100 ppm (USA)', frecuencia: 'Per production batch' },
         { ensayo: 'Lead in surface coatings / paint', norma: '16 CFR 1303 / EN 71-3 — Max 90 ppm paint / migration limits EU', frecuencia: 'Per paint formulation' },
         { ensayo: 'Restricted phthalates (DEHP, DBP, BBP, DINP, DPENP, DHEXP, DCHP, DIBP)', norma: '16 CFR Part 1307 — Max 0.1% per phthalate (USA/EU)', frecuencia: 'Per plastic formulation' },
-        { ensayo: 'Heavy metals migration in accessible parts (EU: 19 elements incl. Al, B, Co, Cu, Mn, Ni, Sr, Sn, organic Sn; AU/8124.3: 8 elements Sb, As, Ba, Cd, Cr, Pb, Hg, Se)', norma: 'EN 71-3:2019+A2:2024 (EU) / AS/NZS ISO 8124.3 (AU) / ASTM F963-23 (USA)', frecuencia: 'Per pigment formulation' },
+        { ensayo: 'Heavy metals migration in accessible parts (EU: 19 elements incl. Al, B, Co, Cu, Mn, Ni, Sr, Sn, organic Sn; AU/8124.3 & USA: 8 elements Sb, As, Ba, Cd, Cr, Pb, Hg, Se)', norma: 'EN 71-3:2019+A2:2024 (EU) / AS/NZS ISO 8124.3 (AU) / ASTM F963-23 §4.3.5 Table 1 (USA): Pb 90 / Cd 75 / Cr 60 / Ba 1000 / Sb 60 / As 25 / Hg 60 / Se 500 ppm', frecuencia: 'Per pigment formulation' },
         { ensayo: 'Organoleptic test — odour and taste', norma: 'Reg. (EC) 1935/2004 Art. 3', frecuencia: 'Per formulation' },
       ],
       pp: [

@@ -172,6 +172,19 @@ Verificado contra los PDF oficiales:
 
 ---
 
+## ASTM F963-23 — límites de elementos solubles (2026-06-10)
+
+El PDF de ASTM F963-23 (`Normas/USA/F0963-23.pdf`) tiene **DRC FileOpen** — no abrible/legible fuera de Adobe Reader DC; **no se debe burlar**. El usuario dictó las dos tablas de §4.3.5 desde su copia con licencia:
+
+- **Table 1 (general — recubrimientos y sustratos)** — máx. elemento soluble migrado (ppm): Sb 60 · As 25 · Ba 1000 · Cd 75 · Cr 60 · Pb 90 · Hg 60 · Se 500.
+- **Table 2 (arcillas para modelar)**: Sb 60 · As 25 · Ba **250** · Cd **50** · Cr **25** · Pb 90 · Hg **25** · Se 500.
+
+**Validación cruzada:** estas tablas coinciden EXACTO con las dos columnas del **Anexo IV de Perú** (juguete general / arcillas para modelar) → confirma que el reglamento peruano deriva de ASTM F963 y que ambos datos son correctos. Incorporado a `USA.juguetes`, `USA.normas_seg.elementos` e `Internacional` ensayos.
+
+**Pendiente (si se quiere):** §4.5 — límites de sonido (dB) por tipo de juguete; hoy el reporte usa los de EN 71-1 también para USA.
+
+---
+
 ## Perú — RM 517-2008-MINSA / Reglamento Ley 28376 (2026-06-10)
 
 Leído el PDF oficial (`Normas/Perú/RM517-2008-MINSA.pdf`). Publica el proyecto de Reglamento de la **Ley N° 28376** (prohíbe juguetes y útiles de escritorio tóxicos/peligrosos). Reglamento operativo = **D.S. N° 008-2007-SA** (mod. **D.S. 012-2007-SA**), administrado por **MINSA/DIGESA**.
