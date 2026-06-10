@@ -2212,9 +2212,9 @@ function getRisks(formData, L) {
   if (c.includes('imanes')) {
     risks.push({
       riesgo: t(
-        '[EN 71-1:2014+A1:2018 Cl. 4.23 / ASTM F963-23 Sec. 4.40 / CPSC Guidance 2022] Serious internal injury hazard from ingestion of high-powered magnets — multiple magnets can attract through intestinal wall, causing necrosis, perforation or death',
-        '[EN 71-1 Cl. 4.23 / ASTM F963-23 §4.40 / CPSC 2022] Peligro de lesión interna grave por ingestión de imanes de alta potencia — múltiples imanes pueden atraerse a través de la pared intestinal causando necrosis, perforación o la muerte',
-        '[EN 71-1 Cl. 4.23 / ASTM F963-23 §4.40] Perigo de lesão interna grave por ingestão de imãs de alta potência — múltiplos imãs podem se atrair através da parede intestinal causando necrose ou perfuração'),
+        '[EN 71-1:2014+A1:2018 Cl. 4.23 / ASTM F963-23 §4.38 (Magnets) / 16 CFR 1262 (2022)] Serious internal injury hazard from ingestion of high-powered magnets — multiple magnets can attract through intestinal wall, causing necrosis, perforation or death',
+        '[EN 71-1 Cl. 4.23 / ASTM F963-23 §4.38 (Imanes) / 16 CFR 1262 (2022)] Peligro de lesión interna grave por ingestión de imanes de alta potencia — múltiples imanes pueden atraerse a través de la pared intestinal causando necrosis, perforación o la muerte',
+        '[EN 71-1 Cl. 4.23 / ASTM F963-23 §4.38 (Ímãs)] Perigo de lesão interna grave por ingestão de imãs de alta potência — múltiplos imãs podem se atrair através da parede intestinal causando necrose ou perfuração'),
       nivel_inicial: hi,
       medida_control: t(
         'Magnetic flux index (MFI) test: MFI must be ≤ 50 kG²·mm² (EN 71-1) for accessible magnets. Secure encapsulation of magnets so they cannot be accessed. Warning on label. Age restriction ≥ 3 years.',

@@ -263,6 +263,15 @@ Dictado por el usuario. Aplica a recargables y no recargables; ensayo con pilas 
 
 Incorporado al texto de riesgo "pilas/batería" (`medida_control`, EN/ES) y a `USA.juguetes` (bullets §4.25, §4.25.9, §4.25.10). La pila botón (Reese's Law / 16 CFR 1263 / UL 4200A) ya estaba cubierta en bloque de riesgo aparte.
 
+### ASTM F963-23 §4.38 imanes y §4.40 materiales expansibles (2026-06-10)
+
+⚠️ **Corrección de numeración:** la app citaba `ASTM §4.40` en el riesgo de **imanes** — pero **§4.40 = Materiales Expansibles**; los **imanes son §4.38**. Corregido a §4.38 (y referencia federal **16 CFR 1262**, regla de imanes de toy magnets de 2022, no 16 CFR 1263 que es la de pila botón).
+
+- **§4.38 Imanes:** peligro grave por ingestión de imanes potentes (se atraen a través de la pared intestinal → necrosis/perforación/muerte). Imanes accesibles que quepan en el cilindro de partes pequeñas no deben superar el MFI límite; encapsulado seguro o restricción de edad. (El criterio numérico MFI ≤ 50 kG²·mm² del texto de riesgo viene de EN 71-1; 16 CFR 1262 usa un umbral equivalente.)
+- **§4.40 Materiales expansibles:** juguetes/componentes removibles que quepan enteros en el cilindro de partes pequeñas (Fig. 3) **tal como se reciben** y sean de material expansible deben pasar completos por el calibre de la **Fig. 30** (ensayo **8.30.8**). Aplica también a (§4.40.1.1) componentes pequeños en cubierta que se disuelve/abre/rompe para revelar el expansible, y (§4.40.1.2) componentes recibidos expandidos que pueden contraerse y volver a expandirse → **water beads / bolitas de agua**.
+
+Incorporado: cita de imanes corregida en `app.js` (riesgo) y bullets §4.38 y §4.40 en `USA.juguetes`.
+
 ---
 
 ## Perú — RM 517-2008-MINSA / Reglamento Ley 28376 (2026-06-10)
