@@ -125,7 +125,16 @@ Envases y residuos de envases para el mercado UE. Reflejado en las 4 áreas:
 | Trigger | Nuevo `has_food_contact` en `getProductAttribs` (lee `componentes[].contacto_alimento === 'Directo'` o char `food_direct`) |
 | Prompt Claude | Nota PPWR solo para UE (`isUE = cfg.nombre === 'Union Europea'`) → genera ≥1 no-conformidad de envase cuando aplica |
 
-**Fechas clave (verificar contra texto oficial):** aplicación general 12-ago-2026 · etiquetado armonizado de material 12-ago-2028 · grados de reciclabilidad 1-ene-2030. Marcadas como "verificar fecha" en los hints.
+**Verificado contra EUR-Lex / Comisión Europea (2026-06):** Reg. (UE) 2025/40, en vigor 11-feb-2025, aplica 12-ago-2026 (deroga Dir. 94/62/CE).
+- PFAS contacto alimentario: **Art. 5** (no Anexo II) — límites 25 ppb individual / 250 ppb suma / 50 ppm total — desde 12-ago-2026, sin grandfathering
+- Metales pesados ≤100 mg/kg: **Art. 5(4)**
+- Reciclabilidad: **Art. 6 + Anexo II** — grados A/B/C desde 1-ene-2030, solo A/B desde 2038
+- Contenido reciclado: **Art. 7** desde 1-ene-2030
+- Minimización: **Art. 10** (1-ene-2030) · ratio espacio vacío: **Art. 24**
+- Etiquetado armonizado: **Art. 12** — mandatorio ~12-ago-2028
+- DoC: **Art. 39 (modelo Anexo VIII)** · evaluación de conformidad + doc. técnica: **Art. 38 / Anexo VII**
+
+Correcciones aplicadas (commit posterior): los refs originales citaban "Anexo II" erróneamente para PFAS/metales y mezclaban Art. 10/24 y Art. 39/Anexo VII.
 
 ---
 
