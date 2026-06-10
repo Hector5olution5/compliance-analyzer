@@ -33,7 +33,7 @@ const DOCS_MASTER = [
   { code: 'REG_US_TESTING_PLAN',  name: 'Plan de pruebas periódicas (16 CFR 1107)',               cat: 3, catName: 'Documentos regulatorios', markets: ['USA'],          req: 'required' },
   { code: 'REG_US_LAB_POLICY',    name: 'Política de no influencia indebida (16 CFR 1107.26)',    cat: 3, catName: 'Documentos regulatorios', markets: ['USA'],          req: 'required' },
   { code: 'REG_AU_DOC',           name: 'Declaración de Conformidad Australia',                   cat: 3, catName: 'Documentos regulatorios', markets: ['Australia'],    req: 'required' },
-  { code: 'REG_EU_CYBERSECURITY', name: 'Evaluación de ciberseguridad (TSR 2025/2509)',           cat: 3, catName: 'Documentos regulatorios', markets: ['UE'],           req: 'conditional', trigger: 'has_internet' },
+  { code: 'REG_EU_CYBERSECURITY', name: '📅 Desde 2030 — Evaluación de ciberseguridad (TSR 2025/2509)', cat: 3, catName: 'Documentos regulatorios', markets: ['UE'],           req: 'conditional', trigger: 'has_internet' },
   { code: 'REG_US_FCC',           name: 'Certificación FCC ID',                                   cat: 3, catName: 'Documentos regulatorios', markets: ['USA'],          req: 'conditional', trigger: 'has_connectivity' },
   { code: 'REG_EU_RED',           name: 'Certificado CE Radio Equipment Directive (RED)',         cat: 3, catName: 'Documentos regulatorios', markets: ['UE'],           req: 'conditional', trigger: 'has_connectivity' },
   { code: 'REG_EU_TYPE',          name: 'Certificado de examen de tipo UE (Módulo B)',            cat: 3, catName: 'Documentos regulatorios', markets: ['UE'],           req: 'optional' },
@@ -76,7 +76,7 @@ const MARKETS = {
     ],
     juguetes: [
       'Directive 2009/48/EC — Safety of toys (in force until 1 Aug 2030)',
-      'Regulation (EU) 2025/2509 (Toy Safety Regulation, TSR) — repeals Directive 2009/48/EC; applies from 1 Aug 2030 (institutional Arts. 28–44 & 49–55 from 1 Jan 2026). Key changes: generic ban extended to CMR + endocrine disruptors + respiratory sensitisers + STOT + PBT/vPvB substances; intentional PFAS use banned; certain allergenic fragrances restricted; BPA included in the CMR ban (with a migration limit); Digital Product Passport (DPP) replaces the EU Declaration of Conformity',
+      '📅 Desde 2030 — Regulation (EU) 2025/2509 (Toy Safety Regulation, TSR) — repeals Directive 2009/48/EC; applies from 1 Aug 2030 (institutional Arts. 28–44 & 49–55 already from 1 Jan 2026). Key changes: generic ban extended to CMR + endocrine disruptors + respiratory sensitisers + STOT + PBT/vPvB substances; intentional PFAS use banned; certain allergenic fragrances restricted; BPA included in the CMR ban (with a migration limit); Digital Product Passport (DPP) replaces the EU Declaration of Conformity',
       'EN 71-1:2014+A1:2018 — Physical and mechanical properties (harmonised reference; EN 71-1:2026 published Jan 2026 — verify OJ listing before citing). Key limits: small-parts cylinder Ø 31.7 mm × 57.1 mm (§5.1/§8.2); entanglement cords <18 mo ≤ 220 mm, 18–<36 mo ≤ 300 mm, loop perimeter ≤ 380 mm, pull-toy cords ≤ 800 mm (§5.4); acoustics §4.20 — LpA by category (close-to-ear 60/65/70, hand-held & tabletop/floor 80/85/90, rattles/squeeze/percussion 85 dB) and LpCpeak 110 dB general / 125 cap-firing / 130 percussion / 135 headphones',
       'EN 71-2:2020 — Flammability (§4.1 prohibits celluloid, highly flammable solids and "flash effect" pilose surfaces; flame-spread ≤ 10 mm/s head-worn toys/masks §4.2.5; ≤ 30 mm/s disguise costumes/toys to enter/soft-filled §4.3–4.5; hair/beards flame persistence ≤ 2 s §4.2.2; "Keep away from fire" mark when 10–30 mm/s)',
       'EN 71-3:2019+A2:2024 — Migration of certain elements (19 elements; limits by material Category I dry/brittle/powder/pliable, II liquid/sticky, III scraped-off)',
@@ -108,8 +108,8 @@ const MARKETS = {
     etiquetado_base: [
       'FCM labelling (Reg. (EC) 1935/2004 Art. 15) on parts with direct food contact: the words "for food contact", a specific use indication (e.g. coffee machine, soup spoon) OR the fork-and-glass symbol (Annex II) — not required for articles clearly intended for food contact by their nature (Art. 15.2); plus special-use instructions if needed; must be conspicuous, legible and indelible',
       'Name and address of manufacturer or EU importer',
-      'CE marking mandatory (Directive 2009/48/EC + LVD if applicable; retained under Reg. (EU) 2025/2509 from 1 Aug 2030)',
-      'Digital Product Passport (DPP) — mandatory under Reg. (EU) 2025/2509 (TSR) from 1 Aug 2030; data carrier (e.g. QR) on the toy/packaging linking to conformity info; replaces the paper EU Declaration of Conformity',
+      'CE marking mandatory (Directive 2009/48/EC + LVD if applicable; 📅 retained under Reg. (EU) 2025/2509 from 2030)',
+      '📅 Desde 2030 — Digital Product Passport (DPP) mandatory under Reg. (EU) 2025/2509 (TSR); data carrier (e.g. QR) on the toy/packaging linking to conformity info; replaces the paper EU Declaration of Conformity',
       'Product reference and batch/lot number',
       'Country of manufacture',
       'Warnings in the language of the country of sale (EN, ES, FR, DE, IT, etc.)',
@@ -117,7 +117,7 @@ const MARKETS = {
       'Harmonised packaging material-composition label for consumer sorting (PPWR Reg. (EU) 2025/40 Art. 12 — mandatory from 12 Aug 2028)',
       'Separate collection / sorting pictogram on packaging (PPWR Reg. (EU) 2025/40 Art. 12)',
     ],
-    doc: 'EU Declaration of Conformity (DoC) — until 1 Aug 2030; from then the Digital Product Passport (DPP) under Reg. (EU) 2025/2509 replaces the DoC',
+    doc: 'EU Declaration of Conformity (DoC) — 📅 desde 2030 sustituida por el Digital Product Passport (DPP), Reg. (UE) 2025/2509',
     retencion: '10 years (Art. 21 Directive 2009/48/EC; maintained under Reg. (EU) 2025/2509)',
     ensayos_moca: {
       abs: [
