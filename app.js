@@ -2169,8 +2169,8 @@ function getRisks(formData, L) {
         '[EN 71-1 Cl. 4.7 & 4.8 / ABNT NBR NM 300-1 / INMETRO 563/2016] Perigo de laceração ou perfuração por pontas e bordas cortantes acessíveis — garras, dentes, aletas ou elementos do design 3D'),
       nivel_inicial: esNinos ? hi : med,
       medida_control: t(
-        'Sharp points test (sharp point tester — BS 5665) and sharp edges test (sharp edge tester). Rounding of critical edges R > 0.5 mm. Mandatory warning on label for products intended for children.',
-        'Ensayo de puntas filosas (probador de puntas agudas) y ensayo de bordes filosos (probador de bordes). Redondeado de aristas críticas R > 0.5 mm. Advertencia obligatoria en etiqueta para productos dirigidos a niños.',
+        'Sharp points test (sharp point tester — BS 5665) and sharp edges test (sharp edge tester, ASTM F963 §4.7 / 16 CFR 1500.49, Fig. 8) before and after use & abuse — applies to toys for children under 8 years. Rounding of critical edges R > 0.5 mm; metal edges hemmed/rolled/curled or burr-free; bolt/threaded-rod ends capped. Functional sharp edges: prohibited under 48 months; cautionary label (§5.10) for ages 48–96 months. Mandatory warning on label for products intended for children.',
+        'Ensayo de puntas filosas (probador de puntas agudas) y ensayo de bordes filosos (probador de bordes, ASTM F963 §4.7 / 16 CFR 1500.49, Fig. 8) antes y después de uso y abuso — aplica a juguetes para menores de 8 años. Redondeado de aristas críticas R > 0.5 mm; bordes metálicos doblados/enrollados/rebordeados o sin rebabas; extremos de pernos/varillas roscadas con tapas. Bordes filosos funcionales: prohibidos en menores de 48 meses; etiqueta de precaución (§5.10) para edades 48–96 meses. Advertencia obligatoria en etiqueta para productos dirigidos a niños.',
         'Ensaio de pontas cortantes (testador de pontas) e ensaio de bordas cortantes. Arredondamento de arestas críticas R > 0,5 mm. Advertência obrigatória no rótulo.'),
       nivel_residual: lo,
     });

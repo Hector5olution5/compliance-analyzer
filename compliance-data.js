@@ -183,6 +183,7 @@ const MARKETS = {
       '16 CFR Part 1307 — Prohibition of phthalates in children\'s toys',
       'ASTM F963-23 §4.6 / 16 CFR 1501 — Partes pequeñas (asfixia): para menores de 36 meses ninguna parte (ni componentes liberados/fragmentos) debe caber íntegra en el cilindro (Ø 31.7 mm × prof. máx. 57.1 mm, Fig. 3). Para 3–6 años (36–72 meses) con partes pequeñas: advertencia de asfixia por 16 CFR 1500.19 (etiquetado §5.11.2). Exentos (16 CFR 1501.3): globos, libros/papel, crayones/gises/lápices/plumas, CD/discos, plastilina, pinturas de dedos/acuarelas',
       'ASTM F963-23 §4.6.2 — Juguetes activados por boca (silbatos/matracas) no deben liberar objetos que quepan en el cilindro; lanzaproyectiles soplados requieren mecanismo permanente anti-retroceso del proyectil y boquilla no removible — aplica a TODAS las edades (Nota 14)',
+      'ASTM F963-23 §4.7 / 16 CFR 1500.49 — Bordes filosos accesibles (metal/vidrio): prohibidos en juguetes para menores de 8 años (ensayo con probador de bordes, Fig. 8, antes y después de uso y abuso). Bordes metálicos sin rebabas o doblados/enrollados/rebordeados/cubiertos; piezas moldeadas sin rebabas/flash; extremos de pernos/varillas roscadas con tapas (ensayos de compresión/tensión/torque 8.8–8.10). Bordes filosos funcionales: prohibidos en <48 meses; etiqueta de precaución §5.10 para 48–96 meses',
       'CPSIA Sec. 103 — Tracking labels on children\'s products',
     ],
     electrica: [

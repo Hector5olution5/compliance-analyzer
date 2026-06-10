@@ -213,6 +213,18 @@ Dictado por el usuario. Dos tramos de edad:
 
 Incorporado a `USA.juguetes` y reforzado el texto de riesgo "partes pequeñas" (`medida_control`, EN/ES) en `app.js` con el tramo 3–6 años y la lista de exentos.
 
+### ASTM F963-23 §4.7 — bordes accesibles (filosos) (2026-06-10)
+
+Dictado por el usuario. Bordes filosos de metal/vidrio definidos en **16 CFR 1500.49**; ensayo con probador de bordes (Fig. 8) antes y/o después de uso y abuso (8.5–8.10).
+- **Alcance:** juguetes para **menores de 8 años**.
+- **Bordes funcionales (necesarios para la función):** **<48 meses** → prohibidos (no debe haber bordes filosos funcionales accesibles); **48–96 meses (4–8 años)** → permitidos con etiqueta de precaución §5.10.
+- **§4.7.3 metal:** bordes/huecos/ranuras sin rebabas ni "feathering", o doblados/enrollados/rebordeados (hemmed/rolled/curled) o cubiertos con dispositivo/acabado fijo permanente (no debe desprenderse tras 8.5–8.10).
+- **§4.7.4 moldeados:** sin bordes peligrosos por rebabas/flash en aristas, esquinas o líneas de partición del molde.
+- **§4.7.5 pernos/varillas roscadas expuestos:** roscas sin bordes/rebabas peligrosas, o extremos con tapas lisas; las tapas se someten a ensayos de **compresión (8.10), tensión (8.9) y torque (8.8)**.
+- **§4.7 (general):** juguetes a ensamblar por adulto con bordes filosos en estado desarmado → etiquetar §5.8.
+
+Incorporado a `USA.juguetes` y al texto de riesgo "puntas y bordes filosos" (`medida_control`, EN/ES) en `app.js`.
+
 ---
 
 ## Perú — RM 517-2008-MINSA / Reglamento Ley 28376 (2026-06-10)
